@@ -211,7 +211,11 @@ body.touch .album-photo img { max-height: 42vh; }
 .r-legendary { border-color: #d4a017 !important; background: #fff8dc; }
 .gear-lists { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .gear-title { font-size: 22px; margin-bottom: 6px; }
-.gear-item { font-family: var(--font); display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left; font-size: 16px; padding: 8px 10px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
+.gear-item { font-family: var(--font); display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font-size: 16px; padding: 6px 10px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
+.gear-img { width: 64px; height: 64px; object-fit: contain; flex: none; }
+.gear-item.locked .gear-img { filter: brightness(0) opacity(0.25); }
+.gear-name { flex: 1; }
+.gacha-img { width: 160px; height: 160px; object-fit: contain; display: block; margin: 0 auto 6px; }
 .gear-item.locked { opacity: 0.5; cursor: default; background: #f1ebdc; }
 .gear-item.equipped { background: var(--blue); color: #fff; }
 .gear-tag { font-size: 13px; opacity: 0.8; }
@@ -267,3 +271,34 @@ body.touch .quests { top: 56px; left: 14px; font-size: clamp(11px, 1.8vw, 14px);
 .levels-menu button[data-menu="gear"] { background: var(--orange); color: #fff; }
 .levels-menu button.hidden { display: none; }
 body.touch .levels-menu button { font-size: 14px; padding: 5px 9px; }
+
+/* 攝影知識 */
+.know { position: fixed; inset: 0; background: var(--cream); z-index: 11; display: flex; flex-direction: column; padding: 20px 24px; }
+.know.hidden { display: none; }
+.know-sub { font-size: 16px; opacity: 0.7; }
+.know-body { display: grid; grid-template-columns: 220px 1fr; gap: 20px; flex: 1; min-height: 0; }
+.know-nav { overflow: auto; border-right: 2px dashed rgba(74,74,74,0.3); padding-right: 10px; }
+.know-group { font-size: 14px; opacity: 0.6; margin: 12px 0 4px; }
+.know-nav button { display: block; width: 100%; text-align: left; font-family: var(--font); font-size: 17px; padding: 6px 10px; margin-bottom: 4px; background: transparent; border: 2px solid transparent; border-radius: 6px; color: var(--pencil); cursor: pointer; }
+.know-nav button.active { background: #fff; border-color: var(--pencil); }
+.know-article { overflow: auto; background: #fffdf7; border: 2px solid var(--pencil); border-radius: 6px; padding: 18px 28px 28px; font-size: 17px; line-height: 1.7; background-image: repeating-linear-gradient(transparent 0 28px, rgba(29,111,184,0.08) 28px 29px); }
+.know-level { font-size: 14px; opacity: 0.6; }
+.know-article h2 { font-size: 30px; margin: 4px 0 10px; }
+.know-article h3 { font-size: 21px; margin: 18px 0 6px; color: var(--blue); }
+.know-article p { margin: 6px 0 10px; }
+.know-article ul { padding-left: 22px; }
+.fig { margin: 12px 0 16px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; padding: 10px; transform: rotate(-0.3deg); box-shadow: 3px 3px 0 rgba(74,74,74,0.15); }
+.fig svg { width: 100%; height: auto; display: block; }
+.fig figcaption { font-size: 14px; opacity: 0.8; margin-top: 6px; line-height: 1.5; }
+.ktable { border-collapse: collapse; margin: 8px 0 12px; font-size: 15px; width: 100%; background: #fff; }
+.ktable th, .ktable td { border: 1.5px solid var(--pencil); padding: 5px 10px; text-align: left; vertical-align: top; }
+.ktable th { background: var(--cream); }
+.know-pager { display: flex; justify-content: space-between; margin-top: 20px; }
+.know-pager button { font-family: var(--font); font-size: 16px; background: var(--orange); color: #fff; border: 2px solid var(--pencil); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+body.touch .know { padding: 10px 12px; }
+body.touch .know-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 8px; }
+body.touch .know-nav { display: flex; gap: 6px; overflow-x: auto; border-right: none; border-bottom: 2px dashed rgba(74,74,74,0.3); padding: 0 0 6px; white-space: nowrap; }
+body.touch .know-group { display: none; }
+body.touch .know-nav button { width: auto; font-size: 14px; padding: 4px 8px; margin: 0; }
+body.touch .know-article { padding: 12px 14px 20px; font-size: 15px; }
+body.touch .know-article h2 { font-size: 24px; }

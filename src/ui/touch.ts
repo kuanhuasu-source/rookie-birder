@@ -37,6 +37,7 @@ export class TouchControls {
         <button data-key="KeyX">收工 / 選關</button>
         <button data-key="KeyK">賞鳥圖鑑</button>
         <button data-key="KeyU">裝備與扭蛋</button>
+        <button data-key="KeyI">攝影知識</button>
         <button data-key="KeyV">減少畫面晃動</button>
         <button data-key="KeyT">重上第零課</button>
         <button data-key="KeyH">顯示 / 隱藏數據</button>

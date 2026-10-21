@@ -8,17 +8,17 @@ export class LevelView {
   open = false
   private picked: LevelDef | null = null
 
-  constructor(private questsDone: () => Set<string>, private onStart: (level: LevelDef, hide: HideDef) => void, private onMenu: (what: 'guide' | 'gear' | 'tutorial') => void) {
+  constructor(private questsDone: () => Set<string>, private onStart: (level: LevelDef, hide: HideDef) => void, private onMenu: (what: 'guide' | 'gear' | 'tutorial' | 'knowledge') => void) {
     this.root = document.createElement('div')
     this.root.className = 'levels hidden'
     this.root.innerHTML = `
       <div class="album-bar"><span class="tape"></span><strong class="levels-title">小白打鳥</strong><span class="levels-sub"></span>
-        <div class="levels-menu"><button data-menu="guide">賞鳥圖鑑</button><button data-menu="gear">裝備與扭蛋</button><button data-menu="tutorial">重上第零課</button><button class="levels-back hidden">回上一頁</button></div>
+        <div class="levels-menu"><button data-menu="guide">賞鳥圖鑑</button><button data-menu="gear">裝備與扭蛋</button><button data-menu="knowledge">攝影知識</button><button data-menu="tutorial">重上第零課</button><button class="levels-back hidden">回上一頁</button></div>
       </div>
       <div class="levels-body"></div>`
     document.body.appendChild(this.root)
     this.root.querySelector('.levels-back')!.addEventListener('click', () => { this.picked = null; this.render() })
-    for (const b of this.root.querySelectorAll<HTMLElement>('[data-menu]')) b.addEventListener('click', () => this.onMenu(b.dataset.menu as 'guide' | 'gear' | 'tutorial'))
+    for (const b of this.root.querySelectorAll<HTMLElement>('[data-menu]')) b.addEventListener('click', () => this.onMenu(b.dataset.menu as 'guide' | 'gear' | 'tutorial' | 'knowledge'))
   }
 
   show(): void { this.open = true; this.picked = null; this.root.classList.remove('hidden'); this.render() }

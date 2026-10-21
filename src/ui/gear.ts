@@ -2,6 +2,9 @@ import { gear } from '../data/gear'
 import type { SaveData } from '../progress/save'
 import { pull, pool, rarityOf, RARITY_LABEL, PULL_COST, PITY_RARE_AT, type GearKind } from '../progress/gacha'
 
+/** 器材貼紙圖的路徑（由 scripts/gen_gear.py 產生）。 */
+export function gearImage(id: string): string { return `${import.meta.env.BASE_URL}gear/${id}.png` }
+
 /** 裝備與扭蛋：紙做的扭蛋機與貼紙式的器材清單。 */
 export class GearView {
   root: HTMLElement
@@ -35,7 +38,7 @@ export class GearView {
     const box = this.root.querySelector('.gacha-result') as HTMLElement
     box.classList.remove('hidden')
     if (!r) { box.innerHTML = `<div class="gacha-card">代幣不夠，去拍幾張好照片吧</div>`; return }
-    box.innerHTML = `<div class="gacha-card r-${r.item.rarity}"><div class="gacha-rarity">${RARITY_LABEL[r.item.rarity]}${r.pityTriggered ? ' · 保底' : ''}</div><div class="gacha-name">${r.item.name}</div><div class="gacha-sub">${r.isNew ? '新裝備！到右邊換上' : `已經有了，退回 ${r.refund} 代幣`}</div></div>`
+    box.innerHTML = `<div class="gacha-card r-${r.item.rarity}"><img class="gacha-img" src="${gearImage(r.item.id)}" alt=""><div class="gacha-rarity">${RARITY_LABEL[r.item.rarity]}${r.pityTriggered ? ' · 保底' : ''}</div><div class="gacha-name">${r.item.name}</div><div class="gacha-sub">${r.isNew ? '新裝備！到右邊換上' : `已經有了，退回 ${r.refund} 代幣`}</div></div>`
     this.onEquip()
     this.refresh()
   }
@@ -56,7 +59,7 @@ export class GearView {
         const eq = save.equipped[k.kind] === it.id
         const r = rarityOf(it.id)
         const name = owned ? it.name : (poolIds.has(it.id) ? '？？？' : it.name)
-        return `<button class="gear-item r-${r} ${owned ? 'owned' : 'locked'} ${eq ? 'equipped' : ''}" data-kind="${k.kind}" data-id="${it.id}" ${owned ? '' : 'disabled'}>${name}<span class="gear-tag">${eq ? '使用中' : owned ? '換上' : RARITY_LABEL[r]}</span></button>`
+        return `<button class="gear-item r-${r} ${owned ? 'owned' : 'locked'} ${eq ? 'equipped' : ''}" data-kind="${k.kind}" data-id="${it.id}" ${owned ? '' : 'disabled'}><img class="gear-img" src="${gearImage(it.id)}" alt=""><span class="gear-name">${name}</span><span class="gear-tag">${eq ? '使用中' : owned ? '換上' : RARITY_LABEL[r]}</span></button>`
       }).join('')}</div>`).join('')
     for (const b of lists.querySelectorAll<HTMLButtonElement>('.gear-item.owned')) {
       b.addEventListener('click', () => {

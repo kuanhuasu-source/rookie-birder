@@ -16,6 +16,7 @@ import { GuideView } from './ui/guide'
 import { GearView } from './ui/gear'
 import { LevelView } from './ui/levels'
 import { SummaryView } from './ui/summary'
+import { KnowledgeView } from './ui/knowledge'
 import { LEVELS, LEVEL_BY_ID } from './levels/data'
 import { LevelSession } from './levels/session'
 import type { LevelDef, HideDef } from './levels/types'
@@ -129,10 +130,13 @@ let currentLevel: LevelDef = LEVELS[0]
 let currentHide: HideDef = world.hides[0]
 const questsDone = new Set<string>()
 for (const id of save.questsDone) questsDone.add(id)
+let knowReturn = false
+const knowledge = new KnowledgeView(() => { if (knowReturn) { knowReturn = false; levelView.show() } })
 const levelView = new LevelView(() => questsDone, (l, h) => startLevel(l, h), (what) => {
   levelView.hide()
   if (what === 'guide') { void guide.show(); guideReturn = true }
   else if (what === 'gear') { gearView.show(); gearReturn = true }
+  else if (what === 'knowledge') { knowledge.show(); knowReturn = true }
   else startTutorial()
 })
 // 從主畫面打開圖鑑或裝備，關閉後回主畫面
@@ -142,7 +146,7 @@ const summaryView = new SummaryView(() => startLevel(currentLevel, currentHide),
 const guide = new GuideView(() => save, () => { if (guideReturn) { guideReturn = false; levelView.show() } })
 const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => { if (gearReturn) { gearReturn = false; levelView.show() } })
 /** 任一全螢幕頁打開時暫停拍攝輸入。 */
-function overlayOpen(): boolean { return album.open || guide.open || gearView.open || levelView.open || summaryView.open }
+function overlayOpen(): boolean { return album.open || guide.open || gearView.open || levelView.open || summaryView.open || knowledge.open }
 function applyEquipped(): void {
   if (cam.lens.id !== save.equipped.lens || cam.body.id !== save.equipped.body || cam.support.id !== save.equipped.support) setGear(save.equipped.lens, save.equipped.body, save.equipped.support)
 }
@@ -233,6 +237,7 @@ function handleKey(code: string): void {
     if (album.open) { if (code === 'Escape' || code === 'KeyG') album.hide(); return }
     if (guide.open) { if (code === 'Escape' || code === 'KeyK') guide.hide(); return }
     if (gearView.open) { if (code === 'Escape' || code === 'KeyU') gearView.hide(); return }
+    if (knowledge.open) { if (code === 'Escape' || code === 'KeyI') knowledge.hide(); return }
     if (levelView.open || summaryView.open) return
     if (tutorial.active && code === 'Escape') { endTutorial(); return }
     if (code === 'KeyT') { startTutorial(); return }
@@ -252,6 +257,7 @@ function handleKey(code: string): void {
       case 'KeyK': document.exitPointerLock(); void guide.show(); break
       case 'KeyU': document.exitPointerLock(); gearView.show(); break
       case 'KeyX': if (!tutorial.active) endLevel(); break
+      case 'KeyI': document.exitPointerLock(); knowledge.show(); break
       case 'Digit1': time = 'dawn'; setLighting(); break
       case 'Digit2': time = 'morning'; setLighting(); break
       case 'Digit3': time = 'noon'; setLighting(); break
@@ -538,7 +544,7 @@ else levelView.show()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
-  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, save, birds, dove, activeBird, shooting: () => shooting,
+  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, knowledge, save, birds, dove, activeBird, shooting: () => shooting,
   world: () => world, spawner: () => spawner, session: () => session, startLevel, endLevel, levels: LEVELS, levelById: LEVEL_BY_ID,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },
