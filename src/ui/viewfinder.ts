@@ -15,10 +15,12 @@ export interface HudExtra {
   flash: boolean
   coins: number
   toast: string
+  reduceShake: boolean
 }
 
 const HELP = `滑鼠 轉雲台   滾輪 變焦   對焦環：W/S 或方向鍵、Shift+滾輪、右鍵拖曳
 Q/E 光圈   A/D 快門   Z/C ISO   Tab 放下相機看全景
+Shift 穩住（手震減半、雲台變慢）   V 減少畫面晃動（不影響照片）
 左鍵 快門（按住連拍）   G 相簿   T 重上第零課
 H 隱藏說明   N 讓鳥現在出現   B 讓鳥起飛   1-4 時段   5-6 天氣   7-9 換器材`
 
@@ -101,7 +103,7 @@ export class Viewfinder {
     this.shots.textContent = `剩 ${extra.cardLeft} 張 · 緩衝 ${extra.buffer}/${extra.bufferMax}`
     this.blackout.classList.toggle('on', extra.blackout)
     this.flash.classList.toggle('on', extra.flash)
-    this.coins.textContent = `代幣 ${extra.coins}`
+    this.coins.textContent = `代幣 ${extra.coins}${extra.reduceShake ? ' · 減晃' : ''}`
     this.toast.classList.toggle('hidden', !extra.toast)
     this.toast.textContent = extra.toast
     const o = extra.overStops

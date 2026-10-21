@@ -114,6 +114,10 @@ let shutterDown = false
 let halfPress = false
 let flashT = 0
 let coins = 0
+const REDUCE_KEY = 'rookie-birder.reduceShake'
+let reduceShake = false
+try { reduceShake = localStorage.getItem(REDUCE_KEY) === '1' } catch { /* 私密視窗 */ }
+let bracing = false
 let toast = ''
 let toastT = 0
 
@@ -150,6 +154,7 @@ const input = new Input(canvas, {
       case 'KeyC': if (allowed('iso')) cam.stepIso(1); break
       case 'Tab': if (allowed('overview')) overview = !overview; break
       case 'KeyH': helpVisible = !helpVisible; break
+      case 'KeyV': reduceShake = !reduceShake; try { localStorage.setItem(REDUCE_KEY, reduceShake ? '1' : '0') } catch { /* 私密視窗 */ } break
       case 'KeyB': if (!tutorial.active) bird.forceTakeoff(); break
       case 'KeyN': if (!tutorial.active) spawner.spawnNow(); break
       case 'KeyG': if (allowed('album')) { document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show() } break
@@ -300,7 +305,10 @@ startLoop((dt) => {
   const s = cam.settings
   camera.fov = overview ? 60 : verticalFovDeg(s.focalMm, cam.sensor)
   camera.updateProjectionMatrix()
-  rig.shake.sigma = overview ? 0 : effectiveSigma(cam.support.shakeMul, cam.lens.isStops)
+  // 穩住：按住 Shift，手震減半、雲台變慢（模擬撐著、蹲低）
+  bracing = (input.held.has('ShiftLeft') || input.held.has('ShiftRight')) && !album.open
+  rig.sensitivity = bracing ? 0.5 : 1
+  rig.shake.sigma = overview ? 0 : effectiveSigma(cam.support.shakeMul, cam.lens.isStops) * (bracing ? 0.5 : 1)
   rig.update(dt)
   trueQuat.copy(camera.quaternion)
   // 鍵盤對焦環：按住持續轉
@@ -327,8 +335,10 @@ startLoop((dt) => {
   const shots = shooting.update(dt, shutterDown && !album.open)
   for (let i = 0; i < shots; i++) takePhoto(metrics)
 
-  // 觀景窗延遲
-  lag.push(trueQuat.clone())
+  // 觀景窗延遲；「減少晃動」只影響畫面，照片仍用真實姿態
+  if (reduceShake) rig.applyTo(camera, 0.3)
+  lag.push(camera.quaternion.clone())
+  camera.quaternion.copy(trueQuat)
   const lagFrames = overview ? 0 : cam.body.evfLagFrames
   while (lag.length > lagFrames + 1) lag.shift()
   camera.quaternion.copy(lag[0])
@@ -352,6 +362,7 @@ startLoop((dt) => {
 
   if (shooting.cardLeft <= 0) hint = '記憶卡滿了，按 G 看相簿'
   else if (callFlashT > 0) hint = '♪ 咕—咕—咕（有鳥要來了）'
+  else if (bracing) hint = '穩住中：手震減半，雲台變慢'
   else if (halfPress) hint = cam.body.afTier === 0 ? '這台機身只有手動對焦' : '半按快門'
   else if (!document.pointerLockElement && !album.open) hint = '點一下畫面開始（滑鼠鎖定）'
   else hint = ''
@@ -374,6 +385,7 @@ startLoop((dt) => {
     flash: flashT > 0,
     coins,
     toast: toastT > 0 ? toast : '',
+    reduceShake,
   })
   chalk.update(tutorial, { x: m.eyeX, y: m.eyeY, facing: bird.facing, visible: m.birdInFrame }, {
     aperture: allowed('aperture'), shutter: allowed('shutter'), iso: allowed('iso'),

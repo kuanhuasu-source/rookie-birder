@@ -57,7 +57,7 @@ export class ShakeModel {
     this.yaw += this.omegaYaw * dt
     this.pitch += this.omegaPitch * dt
     // 弱彈簧：讓偏移在幾秒內回到零，不然會一直漂
-    const k = 1 - Math.exp(-dt * 0.8)
+    const k = 1 - Math.exp(-dt * 1.4)
     this.yaw -= this.yaw * k
     this.pitch -= this.pitch * k
   }

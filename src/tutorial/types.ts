@@ -31,7 +31,7 @@ export interface TutorialCtx {
 export interface TutorialStep {
   id: string
   title: string
-  hint: [string, string?]
+  hint: string[]
   stuckHint?: string
   unlocked: Control[]
   overlays: Overlay[]

@@ -10,6 +10,8 @@ export class Rig {
   panOmega = 0
   panOmegaYaw = 0
   panOmegaPitch = 0
+  /** 滑鼠靈敏度倍率，穩住時變慢 */
+  sensitivity = 1
   private pendingYaw = 0
   private pendingPitch = 0
   private readonly euler = new THREE.Euler(0, 0, 0, 'YXZ')
@@ -20,8 +22,8 @@ export class Rig {
   addMouse(dx: number, dy: number, viewportH: number): void {
     const fovRad = (this.camera.fov * Math.PI) / 180
     const radPerPx = fovRad / viewportH
-    this.pendingYaw -= dx * radPerPx
-    this.pendingPitch -= dy * radPerPx
+    this.pendingYaw -= dx * radPerPx * this.sensitivity
+    this.pendingPitch -= dy * radPerPx * this.sensitivity
   }
 
   update(dt: number): void {
@@ -35,7 +37,12 @@ export class Rig {
     this.pendingPitch = 0
 
     this.shake.update(dt)
-    this.euler.set(this.pitch + this.shake.pitch, this.yaw + this.shake.yaw, 0)
-    this.camera.quaternion.setFromEuler(this.euler)
+    this.applyTo(this.camera, 1)
+  }
+
+  /** 把姿態寫進相機；shakeScale 小於 1 用來做「減少晃動」的觀景窗畫面。 */
+  applyTo(camera: THREE.PerspectiveCamera, shakeScale: number): void {
+    this.euler.set(this.pitch + this.shake.pitch * shakeScale, this.yaw + this.shake.yaw * shakeScale, 0)
+    camera.quaternion.setFromEuler(this.euler)
   }
 }
