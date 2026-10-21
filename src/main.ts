@@ -20,6 +20,10 @@ import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { playCall, unlockAudio } from './audio/call'
 import { coinsFor, starString } from './photo/score'
+import { TutorialRunner } from './tutorial/runner'
+import { STEPS } from './tutorial/steps'
+import type { TutorialCtx, Control } from './tutorial/types'
+import { Chalkboard } from './ui/chalkboard'
 
 const CARD_CAPACITY = 60
 
@@ -45,6 +49,11 @@ for (const key of ['side', '3q', 'takeoff'] as const) {
 const spawner = new Spawner(bird, world.perches)
 spawner.onCall = () => { playCall(spottedDove); callFlashT = 1.5 }
 let callFlashT = 0
+
+// 教學
+const tutorial = new TutorialRunner(STEPS)
+const TUTORIAL_KEY = 'rookie-birder.tutorialDone'
+function allowed(c: Control): boolean { return tutorial.allowed(c) }
 
 const cam = new CameraState('L1', 'B1', 'S0')
 const rig = new Rig(camera)
@@ -77,6 +86,7 @@ layout()
 pipeline = new Pipeline(renderer, renderer.domElement.width, renderer.domElement.height)
 const capture = new PhotoCapture(renderer)
 const hud = new Viewfinder(hudEl)
+const chalk = new Chalkboard(hudEl)
 const album = new AlbumView(() => {})
 window.addEventListener('resize', layout)
 
@@ -121,26 +131,28 @@ function setGear(lens: string, body: string, support: string): void {
 }
 
 new Input(canvas, {
-  onLook: (dx, dy) => { if (!album.open) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
-  onFocusRing: (d) => cam.focusBy(d),
-  onZoom: (steps) => cam.zoom(steps),
-  onShutter: (down) => { shutterDown = down && !overview; unlockAudio() },
+  onLook: (dx, dy) => { if (!album.open && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
+  onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
+  onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
+  onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); unlockAudio() },
   onHalfPress: (down) => { halfPress = down },
   onKey: (code) => {
     unlockAudio()
     if (album.open) { if (code === 'Escape' || code === 'KeyG') album.hide(); return }
+    if (tutorial.active && code === 'Escape') { endTutorial(); return }
+    if (code === 'KeyT') { startTutorial(); return }
     switch (code) {
-      case 'KeyQ': cam.stepAperture(-1); break
-      case 'KeyE': cam.stepAperture(1); break
-      case 'KeyA': cam.stepShutter(-1); break
-      case 'KeyD': cam.stepShutter(1); break
-      case 'KeyZ': cam.stepIso(-1); break
-      case 'KeyC': cam.stepIso(1); break
-      case 'Tab': overview = !overview; break
+      case 'KeyQ': if (allowed('aperture')) cam.stepAperture(-1); break
+      case 'KeyE': if (allowed('aperture')) cam.stepAperture(1); break
+      case 'KeyA': if (allowed('shutter')) cam.stepShutter(-1); break
+      case 'KeyD': if (allowed('shutter')) cam.stepShutter(1); break
+      case 'KeyZ': if (allowed('iso')) cam.stepIso(-1); break
+      case 'KeyC': if (allowed('iso')) cam.stepIso(1); break
+      case 'Tab': if (allowed('overview')) overview = !overview; break
       case 'KeyH': helpVisible = !helpVisible; break
-      case 'KeyB': bird.forceTakeoff(); break
-      case 'KeyN': spawner.spawnNow(); break
-      case 'KeyG': document.exitPointerLock(); void album.show(); break
+      case 'KeyB': if (!tutorial.active) bird.forceTakeoff(); break
+      case 'KeyN': if (!tutorial.active) spawner.spawnNow(); break
+      case 'KeyG': if (allowed('album')) { document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show() } break
       case 'Digit1': time = 'dawn'; setLighting(); break
       case 'Digit2': time = 'morning'; setLighting(); break
       case 'Digit3': time = 'noon'; setLighting(); break
@@ -231,12 +243,54 @@ function takePhoto(m: PhotoMetrics): void {
   if (rec) {
     flashT = 0.08
     rec.then((p) => {
+      tutorial.notePhoto(p)
       coins += coinsFor(p.score.stars)
       toast = `${starString(p.score.stars)} ${Math.round(p.score.total)} 分  ${p.score.advice}`
       toastT = 3
     }).catch((e) => console.error('photo failed', e))
   }
 }
+
+/** 教學步驟看到的世界。 */
+const tutorialCtx: TutorialCtx = {
+  settings: cam.settings,
+  overview: false,
+  metrics: null,
+  photos: [],
+  albumOpened: false,
+  birdState: 'S1',
+  birdInScene: false,
+  elapsed: 0,
+  setFocal: (mm) => { cam.settings.focalMm = Math.min(cam.lens.focalMax, Math.max(cam.lens.focalMin, mm)); cam.clampAperture() },
+  setFocus: (m) => { cam.settings.focusM = m },
+  setExposure: (f, t, iso) => { if (f !== null) cam.settings.fNumber = f; if (t !== null) cam.settings.shutterS = t; if (iso !== null) cam.settings.iso = iso; cam.clampAperture() },
+  setLighting: (t, w) => { time = t; weather = w; setLighting() },
+  aimOffset: (y, p) => { aimAtPerch(); rig.yaw += y; rig.pitch += p },
+  birdPlace: () => { bird.scripted = true; bird.placeOnPerch(world.perches[0], 0) },
+  birdScript: (st) => bird.scriptState(st),
+  birdTakeoff: () => bird.forceTakeoff(),
+  birdReenter: () => { const p = world.perches[0]; bird.enter(p, p.position.clone().add(new THREE.Vector3(9, 5, -3))) },
+  giveCoins: (n) => { coins += n },
+}
+
+function startTutorial(): void {
+  overview = false
+  helpVisible = false
+  bird.onLeft = null
+  if (bird.inScene) { bird.inScene = false; bird.group.visible = false }
+  tutorialCtx.settings = cam.settings
+  tutorial.start(tutorialCtx)
+}
+
+function endTutorial(): void {
+  tutorial.stop()
+  bird.scripted = false
+  bird.onLeft = () => { spawner.timer = 8; spawner.called = false }
+  if (bird.inScene) bird.forceTakeoff()
+  else { spawner.timer = 6; spawner.called = false }
+  try { localStorage.setItem(TUTORIAL_KEY, '1') } catch { /* 私密視窗 */ }
+}
+tutorial.onFinished = endTutorial
 
 const STATE_LABEL: Record<string, string> = { S1: '靜止', S2: '小動作', S3: '跳枝', S4: '起飛/降落', S5: '飛行' }
 
@@ -253,12 +307,20 @@ startLoop((dt) => {
   toastT = Math.max(0, toastT - dt)
   callFlashT = Math.max(0, callFlashT - dt)
 
-  spawner.update(dt)
+  if (!tutorial.active) spawner.update(dt)
   bird.update(dt, camera.position)
 
   // 量測與拍照都用真實姿態
   const metrics = measureBird(dt)
   lastMetrics = metrics
+  if (tutorial.active) {
+    tutorialCtx.settings = cam.settings
+    tutorialCtx.overview = overview
+    tutorialCtx.metrics = metrics
+    tutorialCtx.birdState = bird.state
+    tutorialCtx.birdInScene = bird.inScene
+    tutorial.update(dt, tutorialCtx)
+  }
   const shots = shooting.update(dt, shutterDown && !album.open)
   for (let i = 0; i < shots; i++) takePhoto(metrics)
 
@@ -310,7 +372,15 @@ startLoop((dt) => {
     coins,
     toast: toastT > 0 ? toast : '',
   })
+  chalk.update(tutorial, { x: m.eyeX, y: m.eyeY, facing: bird.facing, visible: m.birdInFrame }, {
+    aperture: allowed('aperture'), shutter: allowed('shutter'), iso: allowed('iso'),
+  })
 })
+
+// 第一次進入直接上第零課
+let tutorialDone = false
+try { tutorialDone = localStorage.getItem(TUTORIAL_KEY) === '1' } catch { /* 私密視窗 */ }
+if (!tutorialDone) startTutorial()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
@@ -322,4 +392,5 @@ startLoop((dt) => {
   aimAtBird,
   shoot: () => { if (lastMetrics) takePhoto(lastMetrics) },
   metrics: () => lastMetrics,
+  tutorial, startTutorial, endTutorial,
 }

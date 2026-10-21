@@ -58,7 +58,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--cream)
 .album-count { font-size: 20px; opacity: 0.7; }
 .album button { font-family: var(--font); font-size: 18px; background: var(--orange); color: #fff; border: 2px solid var(--pencil); border-radius: 8px; padding: 6px 14px; cursor: pointer; transform: rotate(-1deg); }
 .album button.album-delete { background: var(--blue); }
-.album-close { margin-left: auto; }
+.album-export { margin-left: auto; background: var(--blue) !important; }
+.album-close { }
 .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
 .album-card { background: #fff; padding: 10px 10px 8px; border: 2px solid var(--pencil); border-radius: 4px; cursor: pointer; transform: rotate(-0.6deg); box-shadow: 3px 3px 0 rgba(74,74,74,0.25); }
 .album-card:nth-child(even) { transform: rotate(0.7deg); }
@@ -89,3 +90,32 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--cream)
 .bar-fill { display: block; height: 100%; background: var(--blue); }
 .bar-val { width: 54px; text-align: right; }
 .score-advice { margin-top: 8px; font-size: 18px; background: #2f3a33; color: var(--chalk); padding: 6px 10px; border-radius: 4px; }
+
+/* 黑板與粉筆輔助線 */
+.chalkboard { position: absolute; top: 26px; left: 50%; transform: translateX(-50%) rotate(-0.4deg); background: #2f3a33; color: var(--chalk); border: 6px solid #8a6a4a; border-radius: 6px; padding: 10px 18px 8px; width: min(720px, 80%); box-shadow: 4px 4px 0 rgba(0,0,0,0.25); }
+.chalkboard.hidden { display: none; }
+.chalk-title { font-size: 20px; opacity: 0.85; margin-bottom: 4px; }
+.chalk-lines { font-size: 22px; line-height: 1.35; }
+.chalk-lines div + div { font-size: 17px; opacity: 0.8; margin-top: 4px; }
+.chalk-stuck { margin-top: 8px; font-size: 18px; color: #ffd98a; border-top: 1px dashed rgba(255,253,247,0.4); padding-top: 6px; }
+.chalk-stuck.hidden { display: none; }
+.chalk-skip { position: absolute; right: 10px; bottom: 4px; font-size: 13px; opacity: 0.55; }
+
+.ov { position: absolute; pointer-events: none; }
+.ov.hidden { display: none; }
+.ov-focus { left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border: 3px dashed var(--chalk); border-radius: 6px; box-shadow: 0 0 0 2px rgba(0,0,0,0.25); }
+.ov-thirds { inset: 18px; }
+.ov-thirds i { position: absolute; background: rgba(255,253,247,0.75); box-shadow: 0 0 2px rgba(0,0,0,0.3); }
+.ov-thirds i:nth-child(1) { left: 33.33%; top: 0; bottom: 0; width: 2px; }
+.ov-thirds i:nth-child(2) { left: 66.66%; top: 0; bottom: 0; width: 2px; }
+.ov-thirds i:nth-child(3) { top: 33.33%; left: 0; right: 0; height: 2px; }
+.ov-thirds i:nth-child(4) { top: 66.66%; left: 0; right: 0; height: 2px; }
+.ov-lead { font-size: 44px; color: var(--chalk); text-shadow: 0 0 4px rgba(0,0,0,0.5); }
+.ov-triangle { right: 40px; bottom: 90px; width: 200px; height: 180px; }
+.ov-triangle svg { width: 100%; height: 100%; }
+.ov-triangle polygon { fill: none; stroke: var(--chalk); stroke-width: 3; stroke-dasharray: 6 4; }
+.ov-triangle span { position: absolute; font-size: 20px; color: var(--chalk); background: #2f3a33; padding: 2px 8px; border-radius: 4px; }
+.ov-triangle span.on { color: #2f3a33; background: var(--orange); }
+.ov-triangle .tri-a { left: 50%; top: -6px; transform: translateX(-50%); }
+.ov-triangle .tri-s { left: -8px; bottom: -4px; }
+.ov-triangle .tri-i { right: -8px; bottom: -4px; }

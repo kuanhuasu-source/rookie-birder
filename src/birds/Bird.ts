@@ -29,6 +29,8 @@ export class Bird {
   albedo = 0.44
   facing: 1 | -1 = 1
   onLeft: (() => void) | null = null
+  /** 教學用：停棲後不自動轉移狀態，由外面指定 */
+  scripted = false
 
   private sprite: SpriteDef
   private stateT = 0
@@ -91,6 +93,28 @@ export class Bird {
     this.setFacing(to.x - from.x >= 0 ? 1 : -1)
     this.applySprite(this.species.sprites.takeoff)
     this.setState('S5')
+  }
+
+  /** 教學用：直接放在停棲點上，靜止等待指令。 */
+  placeOnPerch(perch: Perch, offset = 0): void {
+    this.perch = perch
+    this.perchOffset = offset
+    this.inScene = true
+    this.leaving = false
+    this.flight = null
+    this.group.visible = true
+    this.dwellLeft = Infinity
+    this.group.position.copy(this.perchPos())
+    this.setFacing(1)
+    this.setState('S1')
+    if (this.scripted) this.stateDur = Infinity
+  }
+
+  /** 教學用：切到指定的停棲狀態並停在那裡（S3 跳完會回到 S1）。 */
+  scriptState(s: 'S1' | 'S2' | 'S3'): void {
+    if (!this.inScene) return
+    this.setState(s)
+    if (s !== 'S3') this.stateDur = Infinity
   }
 
   /** 測試與除錯：立刻起飛離開。 */
@@ -228,6 +252,7 @@ export class Bird {
   }
 
   private afterPerched(): void {
+    if (this.scripted) { this.setState('S1'); this.stateDur = Infinity; return }
     this.dwellLeft -= this.stateT
     if (this.dwellLeft <= 0) this.beginTakeoff()
     else this.nextPerchedState()
