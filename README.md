@@ -28,6 +28,11 @@ npm run build      # 型別檢查 + 打包到 dist/
 - 鳥種擴充：五種公園鳥（珠頸斑鳩、白頭翁、麻雀、綠繡眼、紅嘴黑鵯）依權重輪流出現，各有行為節奏、體型與叫聲；
   貼圖由 `scripts/gen_sprites.py` 用 Gemini 生成、去背、標眼睛、算反照率，眼睛標錯用 `scripts/fix_eye.py` 補。
 
+## 手機與平板
+
+橫向使用。單指拖動轉雲台、雙指捏合變焦、拖動下方對焦刻度對焦；右邊橘色大鈕是快門（按住連拍），
+左邊有放下相機、相簿、穩住與選單，光圈 / 快門 / ISO 讀數旁有 − + 鈕。教學提示會自動改成觸控的說法。
+
 ## 線上版
 
 推到 main 會由 GitHub Actions 自動部署到 GitHub Pages：https://kuanhuasu-source.github.io/rookie-birder/

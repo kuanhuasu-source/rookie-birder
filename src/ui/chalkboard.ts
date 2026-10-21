@@ -1,5 +1,6 @@
 import type { TutorialRunner } from '../tutorial/runner'
 import type { Overlay } from '../tutorial/types'
+import { wordsFor } from '../tutorial/steps'
 
 /** 黑板提示與粉筆輔助線，只在教學時出現。 */
 export class Chalkboard {
@@ -10,7 +11,7 @@ export class Chalkboard {
   private overlays: Record<Overlay, HTMLElement>
   private lead: HTMLElement
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, private touch = false) {
     const wrap = document.createElement('div')
     wrap.className = 'chalk-wrap'
     wrap.innerHTML = `
@@ -44,9 +45,9 @@ export class Chalkboard {
     for (const k of Object.keys(this.overlays) as Overlay[]) this.overlays[k].classList.toggle('hidden', !s || !s.overlays.includes(k))
     if (!s) return
     this.title.textContent = `第零課 · 第 ${runner.index + 1} / ${runner.total} 頁 · ${s.title}${runner.completing ? '  ✓' : ''}`
-    this.lines.innerHTML = s.hint.filter(Boolean).map((h) => `<div>${h}</div>`).join('')
+    this.lines.innerHTML = s.hint.filter(Boolean).map((h) => `<div>${wordsFor(h, this.touch)}</div>`).join('')
     this.stuck.classList.toggle('hidden', !(runner.stuck && s.stuckHint))
-    this.stuck.textContent = s.stuckHint ?? ''
+    this.stuck.textContent = s.stuckHint ? wordsFor(s.stuckHint, this.touch) : ''
     if (s.overlays.includes('leadArrow')) {
       this.lead.style.display = eye.visible ? '' : 'none'
       this.lead.style.left = `${eye.x * 100}%`

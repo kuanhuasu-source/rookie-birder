@@ -87,6 +87,14 @@ export class CameraState {
     s.focusM = Math.exp(lo + (hi - lo) * t)
   }
 
+  /** 直接以刻度位置 0 到 1 設定對焦距離（觸控滑桿用）。 */
+  setFocusT(t: number): void {
+    const lo = Math.log(this.lens.minFocusM)
+    const hi = Math.log(FOCUS_INFINITY_M)
+    const tc = Math.min(1, Math.max(0, t))
+    this.settings.focusM = Math.exp(lo + (hi - lo) * tc)
+  }
+
   /** 對焦距離在刻度上的 0 到 1 位置。 */
   focusT(): number {
     const lo = Math.log(this.lens.minFocusM)

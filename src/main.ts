@@ -8,7 +8,8 @@ import { effectiveSigma } from './camera/shake'
 import { Shooting } from './camera/body'
 import { exposureMultiplier, noiseSigma, overStops } from './camera/exposure'
 import { verticalFovDeg, cocPx, shakeBlurPx, lensSoftPx, totalBlurPx, mmToPx } from './camera/optics'
-import { Input } from './core/input'
+import { Input, isTouchDevice } from './core/input'
+import { TouchControls, TOUCH_COLUMN_PX } from './ui/touch'
 import { startLoop } from './core/loop'
 import { Viewfinder } from './ui/viewfinder'
 import { AlbumView } from './ui/album'
@@ -31,7 +32,8 @@ const CARD_CAPACITY = 60
 const canvas = document.getElementById('view') as HTMLCanvasElement
 const hudEl = document.getElementById('hud')!
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' })
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+const TOUCH = isTouchDevice()
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, TOUCH ? 1 : 1.5))
 renderer.toneMapping = THREE.NoToneMapping
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace
 
@@ -73,8 +75,11 @@ applyLighting(world.scene, world.sun, world.hemi, lighting)
 
 /** 觀景窗固定 3:2，置中於視窗。 */
 function layout(): void {
-  const margin = 24
-  const availW = window.innerWidth - margin * 2
+  const margin = TOUCH ? 8 : 24
+  const rotate = document.getElementById('rotate')
+  if (rotate) rotate.classList.toggle('hidden', !(TOUCH && window.innerHeight > window.innerWidth))
+  // 觸控時兩側留給按鈕欄
+  const availW = window.innerWidth - margin * 2 - (TOUCH ? TOUCH_COLUMN_PX * 2 : 0)
   const availH = window.innerHeight - margin * 2
   let w = availW
   let h = Math.round(w / 1.5)
@@ -93,7 +98,7 @@ layout()
 pipeline = new Pipeline(renderer, renderer.domElement.width, renderer.domElement.height)
 const capture = new PhotoCapture(renderer)
 const hud = new Viewfinder(hudEl)
-const chalk = new Chalkboard(hudEl)
+const chalk = new Chalkboard(hudEl, TOUCH)
 const album = new AlbumView(() => {})
 window.addEventListener('resize', layout)
 
@@ -142,13 +147,10 @@ function setGear(lens: string, body: string, support: string): void {
   lag.length = 0
 }
 
-const input = new Input(canvas, {
-  onLook: (dx, dy) => { if (!album.open && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
-  onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
-  onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
-  onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); unlockAudio() },
-  onHalfPress: (down) => { halfPress = down },
-  onKey: (code) => {
+let braceTouch = false
+/** 觸控點一下快門，按下與放開可能在同一幀內，所以另外記一個「至少拍一張」 */
+let pendingShot = false
+function handleKey(code: string): void {
     unlockAudio()
     if (album.open) { if (code === 'Escape' || code === 'KeyG') album.hide(); return }
     if (tutorial.active && code === 'Escape') { endTutorial(); return }
@@ -160,7 +162,7 @@ const input = new Input(canvas, {
       case 'KeyD': if (allowed('shutter')) cam.stepShutter(1); break
       case 'KeyZ': if (allowed('iso')) cam.stepIso(-1); break
       case 'KeyC': if (allowed('iso')) cam.stepIso(1); break
-      case 'Tab': if (allowed('overview')) overview = !overview; break
+      case 'Tab': if (allowed('overview')) { overview = !overview; touchUi?.setOverview(overview) } break
       case 'KeyH': helpVisible = !helpVisible; break
       case 'KeyV': reduceShake = !reduceShake; try { localStorage.setItem(REDUCE_KEY, reduceShake ? '1' : '0') } catch { /* 私密視窗 */ } break
       case 'KeyB': if (!tutorial.active) spawner.current?.forceTakeoff(); break
@@ -176,8 +178,22 @@ const input = new Input(canvas, {
       case 'Digit8': setGear('L3', 'B3', 'S0'); break
       case 'Digit9': setGear('L4', 'B4', 'S4'); break
     }
-  },
+}
+
+const input = new Input(canvas, {
+  onLook: (dx, dy) => { if (!album.open && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
+  onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
+  onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
+  onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); unlockAudio() },
+  onHalfPress: (down) => { halfPress = down },
+  onKey: handleKey,
 })
+const touchUi = TOUCH ? new TouchControls(hudEl, {
+  onKey: handleKey,
+  onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); if (shutterDown) pendingShot = true; unlockAudio() },
+  onBrace: (down) => { braceTouch = down },
+  onFocusT: (t) => { if (allowed('focus')) cam.setFocusT(t) },
+}) : null
 
 // 觀景窗延遲：環形緩衝保存最近幾幀的真實姿態
 const lag: THREE.Quaternion[] = []
@@ -317,7 +333,7 @@ startLoop((dt) => {
   camera.fov = overview ? 60 : verticalFovDeg(s.focalMm, cam.sensor)
   camera.updateProjectionMatrix()
   // 穩住：按住 Shift，手震減半、雲台變慢（模擬撐著、蹲低）
-  bracing = (input.held.has('ShiftLeft') || input.held.has('ShiftRight')) && !album.open
+  bracing = (input.held.has('ShiftLeft') || input.held.has('ShiftRight') || braceTouch) && !album.open
   rig.sensitivity = bracing ? 0.5 : 1
   rig.shake.sigma = overview ? 0 : effectiveSigma(cam.support.shakeMul, cam.lens.isStops) * (bracing ? 0.5 : 1)
   rig.update(dt)
@@ -344,7 +360,8 @@ startLoop((dt) => {
     tutorialCtx.birdInScene = dove.inScene
     tutorial.update(dt, tutorialCtx)
   }
-  const shots = shooting.update(dt, shutterDown && !album.open)
+  const shots = shooting.update(dt, (shutterDown || pendingShot) && !album.open)
+  pendingShot = false
   for (let i = 0; i < shots; i++) takePhoto(metrics)
 
   // 觀景窗延遲；「減少晃動」只影響畫面，照片仍用真實姿態
@@ -376,7 +393,7 @@ startLoop((dt) => {
   else if (callFlashT > 0) hint = `♪ 有鳥叫，${callName}要來了`
   else if (bracing) hint = '穩住中：手震減半，雲台變慢'
   else if (halfPress) hint = cam.body.afTier === 0 ? '這台機身只有手動對焦' : '半按快門'
-  else if (!document.pointerLockElement && !album.open) hint = '點一下畫面開始（滑鼠鎖定）'
+  else if (!TOUCH && !document.pointerLockElement && !album.open) hint = '點一下畫面開始（滑鼠鎖定）'
   else hint = ''
 
   const m = metrics
