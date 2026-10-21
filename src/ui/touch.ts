@@ -34,6 +34,8 @@ export class TouchControls {
         <div class="trow trow-iso"><span>ISO</span><button data-key="KeyZ">−</button><button data-key="KeyC">+</button></div>
       </div>
       <div class="tmenu hidden">
+        <button data-key="KeyK">賞鳥圖鑑</button>
+        <button data-key="KeyU">裝備與扭蛋</button>
         <button data-key="KeyV">減少畫面晃動</button>
         <button data-key="KeyT">重上第零課</button>
         <button data-key="KeyH">顯示 / 隱藏數據</button>

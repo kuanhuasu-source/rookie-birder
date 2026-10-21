@@ -170,3 +170,50 @@ body.touch .album-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 
 body.touch .album-bar { font-size: 22px; }
 body.touch .score-card { min-width: 0; width: 100%; }
 body.touch .album-photo img { max-height: 42vh; }
+
+/* 圖鑑 */
+.guide, .gearview { position: fixed; inset: 0; background: var(--cream); z-index: 10; overflow: auto; padding: 24px; }
+.guide.hidden, .gearview.hidden { display: none; }
+.guide-progress, .gear-coins { font-size: 20px; opacity: 0.75; }
+.guide-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
+.guide-page { background: #fffdf7; border: 2px solid var(--pencil); border-radius: 6px; padding: 12px; transform: rotate(-0.4deg); box-shadow: 3px 3px 0 rgba(74,74,74,0.2); background-image: repeating-linear-gradient(transparent 0 27px, rgba(29,111,184,0.12) 27px 28px); }
+.guide-page:nth-child(even) { transform: rotate(0.5deg); }
+.guide-page.unseen { opacity: 0.75; }
+.guide-page.unseen .guide-sticker { filter: brightness(0) opacity(0.25); }
+.guide-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.guide-sticker { width: 84px; height: 84px; object-fit: contain; }
+.guide-name { font-size: 26px; }
+.guide-latin { font-size: 14px; opacity: 0.7; }
+.guide-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.guide-slot-img { aspect-ratio: 3 / 2; background: #e9e2d0 center / cover no-repeat; border: 2px solid var(--pencil); border-radius: 4px; }
+.guide-slot.empty .guide-slot-img { background: repeating-linear-gradient(45deg, #efe8d6 0 6px, #e4dcc8 6px 12px); border-style: dashed; }
+.guide-slot-cap { font-size: 14px; text-align: center; margin-top: 4px; }
+.guide-slot-cap .stars { color: var(--orange); }
+
+/* 扭蛋與裝備 */
+.gear-cols { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+.gacha { text-align: center; }
+.gacha-machine { width: 240px; margin: 0 auto; }
+.gacha-dome { height: 150px; border: 3px solid var(--pencil); border-bottom: none; border-radius: 120px 120px 0 0; background: radial-gradient(circle at 35% 35%, #fff 0 10%, transparent 11%), radial-gradient(circle at 60% 55%, var(--orange) 0 16px, transparent 17px), radial-gradient(circle at 30% 70%, var(--blue) 0 16px, transparent 17px), radial-gradient(circle at 75% 78%, #f2c94c 0 16px, transparent 17px), radial-gradient(circle at 50% 80%, #8fbf6a 0 16px, transparent 17px), rgba(255,255,255,0.6); }
+.gacha-body { border: 3px solid var(--pencil); border-radius: 0 0 12px 12px; background: var(--orange); padding: 18px; }
+.gacha-pull { font-family: var(--font); font-size: 24px; line-height: 1.1; background: var(--cream); color: var(--pencil); border: 3px solid var(--pencil); border-radius: 50%; width: 120px; height: 120px; cursor: pointer; }
+.gacha-pull small { font-size: 14px; }
+.gacha-pull:active { transform: rotate(20deg); }
+.gacha-note { font-size: 14px; opacity: 0.7; margin: 8px 0; }
+.gacha-result.hidden { display: none; }
+.gacha-card { background: #fff; border: 2px solid var(--pencil); border-radius: 8px; padding: 12px; margin-top: 8px; transform: rotate(-1deg); box-shadow: 3px 3px 0 rgba(74,74,74,0.25); }
+.gacha-rarity { font-size: 14px; opacity: 0.75; }
+.gacha-name { font-size: 24px; }
+.gacha-sub { font-size: 15px; margin-top: 4px; }
+.r-rare { border-color: var(--blue) !important; }
+.r-epic { border-color: #8e44ad !important; }
+.r-legendary { border-color: #d4a017 !important; background: #fff8dc; }
+.gear-lists { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.gear-title { font-size: 22px; margin-bottom: 6px; }
+.gear-item { font-family: var(--font); display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left; font-size: 16px; padding: 8px 10px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
+.gear-item.locked { opacity: 0.5; cursor: default; background: #f1ebdc; }
+.gear-item.equipped { background: var(--blue); color: #fff; }
+.gear-tag { font-size: 13px; opacity: 0.8; }
+body.touch .gear-cols { grid-template-columns: 1fr; }
+body.touch .gear-lists { grid-template-columns: 1fr; }
+body.touch .guide-pages { grid-template-columns: 1fr; }

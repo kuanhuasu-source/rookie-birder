@@ -101,7 +101,7 @@ export const STEPS: TutorialStep[] = [
   },
   {
     id: 'done', title: '下課',
-    hint: ['第零課結束。你學會了找鳥、變焦、對焦、曝光三角、凍結動作、構圖與連拍。', '送你 30 枚代幣。接下來自由拍攝：鳥會自己來，{albumShort}看相簿，{restart}。'],
+    hint: ['第零課結束。你學會了找鳥、變焦、對焦、曝光三角、凍結動作、構圖與連拍。', '送你 30 枚代幣，剛好能{gacha}轉一次扭蛋。接下來自由拍攝：鳥會自己來，拍到的鳥會進{guide}圖鑑。'],
     unlocked: ['look', 'zoom', 'focus', 'aperture', 'shutter', 'iso', 'shoot', 'overview', 'album'],
     overlays: [],
     setup: (c) => { c.giveCoins(30) },
@@ -129,6 +129,8 @@ export const CONTROL_WORDS: Record<string, [string, string]> = {
   burst: ['按住左鍵連拍', '按住橘色快門鈕連拍'],
   burstStuck: ['按住左鍵', '按住快門鈕'],
   restart: ['按 T 可以重上這一課', '選單（⋯）裡可以重上這一課'],
+  gacha: ['按 U ', '在選單（⋯）裡'],
+  guide: ['（按 K 看）', '（選單裡看）'],
 }
 
 export function wordsFor(text: string, touch: boolean): string {

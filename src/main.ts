@@ -10,6 +10,10 @@ import { exposureMultiplier, noiseSigma, overStops } from './camera/exposure'
 import { verticalFovDeg, cocPx, shakeBlurPx, lensSoftPx, totalBlurPx, mmToPx } from './camera/optics'
 import { Input, isTouchDevice } from './core/input'
 import { TouchControls, TOUCH_COLUMN_PX } from './ui/touch'
+import { loadSave, storeSave } from './progress/save'
+import { updateGuide } from './progress/guide'
+import { GuideView } from './ui/guide'
+import { GearView } from './ui/gear'
 import { startLoop } from './core/loop'
 import { Viewfinder } from './ui/viewfinder'
 import { AlbumView } from './ui/album'
@@ -64,7 +68,8 @@ const tutorial = new TutorialRunner(STEPS)
 const TUTORIAL_KEY = 'rookie-birder.tutorialDone'
 function allowed(c: Control): boolean { return tutorial.allowed(c) }
 
-const cam = new CameraState('L1', 'B1', 'S0')
+const save = loadSave()
+const cam = new CameraState(save.equipped.lens, save.equipped.body, save.equipped.support)
 const rig = new Rig(camera)
 let shooting = new Shooting(cam.body, CARD_CAPACITY)
 
@@ -100,6 +105,13 @@ const capture = new PhotoCapture(renderer)
 const hud = new Viewfinder(hudEl)
 const chalk = new Chalkboard(hudEl, TOUCH)
 const album = new AlbumView(() => {})
+const guide = new GuideView(() => save, () => {})
+const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => {})
+/** 任一全螢幕頁打開時暫停拍攝輸入。 */
+function overlayOpen(): boolean { return album.open || guide.open || gearView.open }
+function applyEquipped(): void {
+  if (cam.lens.id !== save.equipped.lens || cam.body.id !== save.equipped.body || cam.support.id !== save.equipped.support) setGear(save.equipped.lens, save.equipped.body, save.equipped.support)
+}
 window.addEventListener('resize', layout)
 
 /** 把雲台轉向第一個停棲點（原型用：機位本來就面向枝頭）。 */
@@ -126,7 +138,6 @@ let hint = ''
 let shutterDown = false
 let halfPress = false
 let flashT = 0
-let coins = 0
 const REDUCE_KEY = 'rookie-birder.reduceShake'
 let reduceShake = false
 try { reduceShake = localStorage.getItem(REDUCE_KEY) === '1' } catch { /* 私密視窗 */ }
@@ -153,6 +164,8 @@ let pendingShot = false
 function handleKey(code: string): void {
     unlockAudio()
     if (album.open) { if (code === 'Escape' || code === 'KeyG') album.hide(); return }
+    if (guide.open) { if (code === 'Escape' || code === 'KeyK') guide.hide(); return }
+    if (gearView.open) { if (code === 'Escape' || code === 'KeyU') gearView.hide(); return }
     if (tutorial.active && code === 'Escape') { endTutorial(); return }
     if (code === 'KeyT') { startTutorial(); return }
     switch (code) {
@@ -168,6 +181,8 @@ function handleKey(code: string): void {
       case 'KeyB': if (!tutorial.active) spawner.current?.forceTakeoff(); break
       case 'KeyN': if (!tutorial.active) spawner.spawnNow(); break
       case 'KeyG': if (allowed('album')) { document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show() } break
+      case 'KeyK': if (!tutorial.active) { document.exitPointerLock(); void guide.show() } break
+      case 'KeyU': if (!tutorial.active) { document.exitPointerLock(); gearView.show() } break
       case 'Digit1': time = 'dawn'; setLighting(); break
       case 'Digit2': time = 'morning'; setLighting(); break
       case 'Digit3': time = 'noon'; setLighting(); break
@@ -177,11 +192,12 @@ function handleKey(code: string): void {
       case 'Digit7': setGear('L1', 'B1', 'S0'); break
       case 'Digit8': setGear('L3', 'B3', 'S0'); break
       case 'Digit9': setGear('L4', 'B4', 'S4'); break
+      case 'Digit0': save.coins += 100; storeSave(save); break
     }
 }
 
 const input = new Input(canvas, {
-  onLook: (dx, dy) => { if (!album.open && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
+  onLook: (dx, dy) => { if (!overlayOpen() && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
   onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
   onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
   onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); unlockAudio() },
@@ -275,7 +291,10 @@ function takePhoto(m: PhotoMetrics): void {
     flashT = 0.08
     rec.then((p) => {
       tutorial.notePhoto(p)
-      coins += coinsFor(p.score.stars)
+      save.coins += coinsFor(p.score.stars)
+      const gu = updateGuide(save, p)
+      storeSave(save)
+      if (gu?.bonus) { toast = `圖鑑：${speciesName(gu.species)}${gu.newSpecies ? '新鳥種' : '新格子'} +${gu.bonus} 代幣`; toastT = 3; return }
       const who = p.metrics.birdInFrame ? `${speciesName(p.metrics.species)}  ` : ''
       toast = `${starString(p.score.stars)} ${Math.round(p.score.total)} 分  ${who}${p.score.advice}`
       toastT = 3
@@ -302,7 +321,7 @@ const tutorialCtx: TutorialCtx = {
   birdScript: (st) => dove.scriptState(st),
   birdTakeoff: () => dove.forceTakeoff(),
   birdReenter: () => { const p = world.perches[0]; dove.enter(p, p.position.clone().add(new THREE.Vector3(9, 5, -3))) },
-  giveCoins: (n) => { coins += n },
+  giveCoins: (n) => { save.coins += n; storeSave(save) },
 }
 
 function startTutorial(): void {
@@ -333,14 +352,14 @@ startLoop((dt) => {
   camera.fov = overview ? 60 : verticalFovDeg(s.focalMm, cam.sensor)
   camera.updateProjectionMatrix()
   // 穩住：按住 Shift，手震減半、雲台變慢（模擬撐著、蹲低）
-  bracing = (input.held.has('ShiftLeft') || input.held.has('ShiftRight') || braceTouch) && !album.open
+  bracing = (input.held.has('ShiftLeft') || input.held.has('ShiftRight') || braceTouch) && !overlayOpen()
   rig.sensitivity = bracing ? 0.5 : 1
   rig.shake.sigma = overview ? 0 : effectiveSigma(cam.support.shakeMul, cam.lens.isStops) * (bracing ? 0.5 : 1)
   rig.update(dt)
   trueQuat.copy(camera.quaternion)
   // 鍵盤對焦環：按住持續轉
   const fdir = input.focusKeyDir()
-  if (fdir !== 0 && allowed('focus') && !album.open) cam.focusBy(fdir * dt * 0.35)
+  if (fdir !== 0 && allowed('focus') && !overlayOpen()) cam.focusBy(fdir * dt * 0.35)
   flashT = Math.max(0, flashT - dt)
   toastT = Math.max(0, toastT - dt)
   callFlashT = Math.max(0, callFlashT - dt)
@@ -360,7 +379,7 @@ startLoop((dt) => {
     tutorialCtx.birdInScene = dove.inScene
     tutorial.update(dt, tutorialCtx)
   }
-  const shots = shooting.update(dt, (shutterDown || pendingShot) && !album.open)
+  const shots = shooting.update(dt, (shutterDown || pendingShot) && !overlayOpen())
   pendingShot = false
   for (let i = 0; i < shots; i++) takePhoto(metrics)
 
@@ -373,7 +392,7 @@ startLoop((dt) => {
   camera.quaternion.copy(lag[0])
 
   seed = (seed + 1) % 1000
-  if (!album.open) {
+  if (!overlayOpen()) {
     pipeline!.render(world.scene, camera, {
       focalMm: s.focalMm,
       fNumber: s.fNumber,
@@ -393,7 +412,7 @@ startLoop((dt) => {
   else if (callFlashT > 0) hint = `♪ 有鳥叫，${callName}要來了`
   else if (bracing) hint = '穩住中：手震減半，雲台變慢'
   else if (halfPress) hint = cam.body.afTier === 0 ? '這台機身只有手動對焦' : '半按快門'
-  else if (!TOUCH && !document.pointerLockElement && !album.open) hint = '點一下畫面開始（滑鼠鎖定）'
+  else if (!TOUCH && !document.pointerLockElement && !overlayOpen()) hint = '點一下畫面開始（滑鼠鎖定）'
   else hint = ''
 
   const m = metrics
@@ -412,7 +431,7 @@ startLoop((dt) => {
     bufferMax: cam.body.bufferFrames,
     blackout: shooting.blackoutT > 0,
     flash: flashT > 0,
-    coins,
+    coins: save.coins,
     toast: toastT > 0 ? toast : '',
     reduceShake,
   })
@@ -428,7 +447,7 @@ if (!tutorialDone) startTutorial()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
-  cam, rig, world, camera, capture, album, birds, dove, spawner, activeBird, shooting: () => shooting,
+  cam, rig, world, camera, capture, album, guide, gearView, save, birds, dove, spawner, activeBird, shooting: () => shooting,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },
   setHelp: (v: boolean) => { helpVisible = v },
