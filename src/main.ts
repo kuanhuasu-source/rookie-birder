@@ -40,7 +40,7 @@ const bird = new Bird(spottedDove)
 world.scene.add(bird.group)
 const loader = new THREE.TextureLoader()
 for (const key of ['side', '3q', 'takeoff'] as const) {
-  loader.load(spottedDove.sprites[key].file, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; bird.setTexture(key, t) })
+  loader.load(import.meta.env.BASE_URL + spottedDove.sprites[key].file, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; bird.setTexture(key, t) })
 }
 const spawner = new Spawner(bird, world.perches)
 spawner.onCall = () => { playCall(spottedDove); callFlashT = 1.5 }
