@@ -63,10 +63,23 @@ spawner.onCall = (b) => { playCall(b.species); callFlashT = 1.5; callName = b.sp
 /** 目前要量測與拍的鳥：教學時是斑鳩，否則是 spawner 放出來的那隻。 */
 function activeBird(): Bird | null { return tutorial.active ? dove : spawner.current }
 
+let toast = ''
+let toastT = 0
+
 // 教學
 const tutorial = new TutorialRunner(STEPS)
 const TUTORIAL_KEY = 'rookie-birder.tutorialDone'
-function allowed(c: Control): boolean { return tutorial.allowed(c) }
+let lockToastT = 0
+/** 教學中被鎖住的操作：回傳 false 並提示玩家這一步先練什麼。 */
+function allowed(c: Control): boolean {
+  if (tutorial.allowed(c)) return true
+  if (lockToastT <= 0 && tutorial.step) {
+    toast = `第零課第 ${tutorial.index + 1} 頁先練「${tutorial.step.title}」，這個操作等一下再用`
+    toastT = 2
+    lockToastT = 2
+  }
+  return false
+}
 
 const save = loadSave()
 const cam = new CameraState(save.equipped.lens, save.equipped.body, save.equipped.support)
@@ -103,7 +116,7 @@ layout()
 pipeline = new Pipeline(renderer, renderer.domElement.width, renderer.domElement.height)
 const capture = new PhotoCapture(renderer)
 const hud = new Viewfinder(hudEl)
-const chalk = new Chalkboard(hudEl, TOUCH)
+const chalk = new Chalkboard(hudEl, TOUCH, () => { if (tutorial.active) endTutorial() })
 const album = new AlbumView(() => {})
 const guide = new GuideView(() => save, () => {})
 const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => {})
@@ -142,8 +155,6 @@ const REDUCE_KEY = 'rookie-birder.reduceShake'
 let reduceShake = false
 try { reduceShake = localStorage.getItem(REDUCE_KEY) === '1' } catch { /* 私密視窗 */ }
 let bracing = false
-let toast = ''
-let toastT = 0
 
 function setLighting(): void {
   lighting = lightingPreset(time, weather)
@@ -180,9 +191,9 @@ function handleKey(code: string): void {
       case 'KeyV': reduceShake = !reduceShake; try { localStorage.setItem(REDUCE_KEY, reduceShake ? '1' : '0') } catch { /* 私密視窗 */ } break
       case 'KeyB': if (!tutorial.active) spawner.current?.forceTakeoff(); break
       case 'KeyN': if (!tutorial.active) spawner.spawnNow(); break
-      case 'KeyG': if (allowed('album')) { document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show() } break
-      case 'KeyK': if (!tutorial.active) { document.exitPointerLock(); void guide.show() } break
-      case 'KeyU': if (!tutorial.active) { document.exitPointerLock(); gearView.show() } break
+      case 'KeyG': document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show(); break
+      case 'KeyK': document.exitPointerLock(); void guide.show(); break
+      case 'KeyU': document.exitPointerLock(); gearView.show(); break
       case 'Digit1': time = 'dawn'; setLighting(); break
       case 'Digit2': time = 'morning'; setLighting(); break
       case 'Digit3': time = 'noon'; setLighting(); break
@@ -197,7 +208,7 @@ function handleKey(code: string): void {
 }
 
 const input = new Input(canvas, {
-  onLook: (dx, dy) => { if (!overlayOpen() && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
+  onLook: (dx, dy) => { if (!overlayOpen()) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
   onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
   onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
   onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); unlockAudio() },
@@ -362,6 +373,7 @@ startLoop((dt) => {
   if (fdir !== 0 && allowed('focus') && !overlayOpen()) cam.focusBy(fdir * dt * 0.35)
   flashT = Math.max(0, flashT - dt)
   toastT = Math.max(0, toastT - dt)
+  lockToastT = Math.max(0, lockToastT - dt)
   callFlashT = Math.max(0, callFlashT - dt)
 
   if (!tutorial.active) spawner.update(dt)

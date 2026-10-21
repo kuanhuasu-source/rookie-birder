@@ -99,7 +99,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--cream)
 .chalk-lines div + div { font-size: 17px; opacity: 0.8; margin-top: 4px; }
 .chalk-stuck { margin-top: 8px; font-size: 18px; color: #ffd98a; border-top: 1px dashed rgba(255,253,247,0.4); padding-top: 6px; }
 .chalk-stuck.hidden { display: none; }
-.chalk-skip { position: absolute; right: 10px; bottom: 4px; font-size: 13px; opacity: 0.55; }
+.chalk-skip { position: absolute; right: 8px; bottom: 6px; font-family: var(--font); font-size: 13px; color: var(--chalk); background: transparent; border: 1px solid rgba(255,253,247,0.5); border-radius: 4px; padding: 2px 8px; opacity: 0.75; pointer-events: auto; cursor: pointer; }
+.chalk-skip:active { background: rgba(255,253,247,0.2); }
 
 .ov { position: absolute; pointer-events: none; }
 .ov.hidden { display: none; }
@@ -139,11 +140,11 @@ body.touch .focus-scale { bottom: 16px; width: clamp(180px, 34vw, 320px); height
 body.touch .shots { display: none; }
 body.touch .toast { top: auto; bottom: 64px; font-size: clamp(14px, 2.2vw, 20px); white-space: normal; max-width: 70%; text-align: center; }
 body.touch .hint { bottom: auto; top: 60px; font-size: clamp(14px, 2.2vw, 20px); }
-body.touch .chalkboard { top: 14px; width: min(640px, 78%); padding: 6px 12px 16px; }
+body.touch .chalkboard { top: 14px; width: min(640px, 78%); padding: 6px 12px 30px; }
 body.touch .chalk-title { font-size: clamp(12px, 2vw, 16px); }
 body.touch .chalk-lines { font-size: clamp(14px, 2.4vw, 20px); }
 body.touch .chalk-lines div + div { font-size: clamp(12px, 2vw, 15px); }
-body.touch .chalk-skip { display: none; }
+body.touch .chalk-skip { font-size: 14px; padding: 4px 10px; }
 body.touch .ov-triangle { right: 90px; bottom: 70px; width: 120px; height: 108px; }
 body.touch .ov-triangle span { font-size: 14px; }
 

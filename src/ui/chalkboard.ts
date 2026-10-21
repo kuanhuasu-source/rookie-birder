@@ -11,7 +11,7 @@ export class Chalkboard {
   private overlays: Record<Overlay, HTMLElement>
   private lead: HTMLElement
 
-  constructor(container: HTMLElement, private touch = false) {
+  constructor(container: HTMLElement, private touch = false, onSkip?: () => void) {
     const wrap = document.createElement('div')
     wrap.className = 'chalk-wrap'
     wrap.innerHTML = `
@@ -19,7 +19,7 @@ export class Chalkboard {
         <div class="chalk-title"></div>
         <div class="chalk-lines"></div>
         <div class="chalk-stuck hidden"></div>
-        <div class="chalk-skip">Esc 跳過教學</div>
+        <button class="chalk-skip">跳過教學</button>
       </div>
       <div class="ov ov-focus hidden"></div>
       <div class="ov ov-thirds hidden"><i></i><i></i><i></i><i></i></div>
@@ -36,6 +36,7 @@ export class Chalkboard {
     this.lines = q('.chalk-lines')
     this.stuck = q('.chalk-stuck')
     this.lead = q('.ov-lead')
+    q('.chalk-skip').addEventListener('click', () => onSkip?.())
     this.overlays = { focusPoint: q('.ov-focus'), thirds: q('.ov-thirds'), leadArrow: q('.ov-lead'), triangle: q('.ov-triangle') }
   }
 
