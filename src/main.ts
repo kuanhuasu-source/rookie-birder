@@ -129,10 +129,18 @@ let currentLevel: LevelDef = LEVELS[0]
 let currentHide: HideDef = world.hides[0]
 const questsDone = new Set<string>()
 for (const id of save.questsDone) questsDone.add(id)
-const levelView = new LevelView(() => questsDone, (l, h) => startLevel(l, h))
+const levelView = new LevelView(() => questsDone, (l, h) => startLevel(l, h), (what) => {
+  levelView.hide()
+  if (what === 'guide') { void guide.show(); guideReturn = true }
+  else if (what === 'gear') { gearView.show(); gearReturn = true }
+  else startTutorial()
+})
+// 從主畫面打開圖鑑或裝備，關閉後回主畫面
+let guideReturn = false
+let gearReturn = false
 const summaryView = new SummaryView(() => startLevel(currentLevel, currentHide), () => levelView.show())
-const guide = new GuideView(() => save, () => {})
-const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => {})
+const guide = new GuideView(() => save, () => { if (guideReturn) { guideReturn = false; levelView.show() } })
+const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => { if (gearReturn) { gearReturn = false; levelView.show() } })
 /** 任一全螢幕頁打開時暫停拍攝輸入。 */
 function overlayOpen(): boolean { return album.open || guide.open || gearView.open || levelView.open || summaryView.open }
 function applyEquipped(): void {
@@ -391,6 +399,10 @@ const tutorialCtx: TutorialCtx = {
 }
 
 function startTutorial(): void {
+  levelView.hide()
+  summaryView.hide()
+  if (currentLevel.sceneId !== 'park') { const w = buildScene('park'); const bench = w.hides[0]; w.dispose(); startLevel(LEVELS[0], bench) }
+  session = null
   overview = false
   helpVisible = false
   // 把場上的鳥清掉，教學只用斑鳩
@@ -405,8 +417,11 @@ function endTutorial(): void {
   dove.scripted = false
   if (dove.inScene) dove.forceTakeoff()
   spawner.reset(dove.inScene ? 10 : 6)
-  if (!session) session = new LevelSession(currentLevel, questsDone)
   try { localStorage.setItem(TUTORIAL_KEY, '1') } catch { /* 私密視窗 */ }
+  // 下課後回主畫面選關；教學中的關卡不結算
+  session = null
+  document.exitPointerLock()
+  levelView.show()
 }
 tutorial.onFinished = endTutorial
 

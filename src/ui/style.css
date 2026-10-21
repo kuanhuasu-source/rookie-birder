@@ -261,3 +261,9 @@ body.touch .guide-pages { grid-template-columns: 1fr; }
 body.touch .timer { top: 14px; left: 50%; font-size: clamp(13px, 2vw, 18px); }
 body.touch .readout.coins { left: auto; right: 100px; transform: rotate(0.6deg); }
 body.touch .quests { top: 56px; left: 14px; font-size: clamp(11px, 1.8vw, 14px); max-width: 46%; padding: 4px 8px; }
+
+.levels-menu { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.levels-menu button { font-family: var(--font); font-size: 16px; background: #fff; color: var(--pencil); border: 2px solid var(--pencil); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.levels-menu button[data-menu="gear"] { background: var(--orange); color: #fff; }
+.levels-menu button.hidden { display: none; }
+body.touch .levels-menu button { font-size: 14px; padding: 5px 9px; }

@@ -101,7 +101,7 @@ export const STEPS: TutorialStep[] = [
   },
   {
     id: 'done', title: '下課',
-    hint: ['第零課結束。你學會了找鳥、變焦、對焦、曝光三角、凍結動作、構圖與連拍。', '送你 30 枚代幣，剛好能{gacha}轉一次扭蛋。接下來自由拍攝：鳥會自己來，拍到的鳥會進{guide}圖鑑。'],
+    hint: ['第零課結束。你學會了找鳥、變焦、對焦、曝光三角、凍結動作、構圖與連拍。', '送你 30 枚代幣，剛好能轉一次扭蛋。等一下回到主畫面：選一關、選一個機位就出發，拍到的鳥會進圖鑑。'],
     unlocked: ['look', 'zoom', 'focus', 'aperture', 'shutter', 'iso', 'shoot', 'overview', 'album'],
     overlays: [],
     setup: (c) => { c.giveCoins(30) },
