@@ -17,7 +17,7 @@ export interface HudExtra {
   toast: string
 }
 
-const HELP = `滑鼠 轉雲台   滾輪 變焦   右鍵拖曳 對焦環
+const HELP = `滑鼠 轉雲台   滾輪 變焦   對焦環：W/S 或方向鍵、Shift+滾輪、右鍵拖曳
 Q/E 光圈   A/D 快門   Z/C ISO   Tab 放下相機看全景
 左鍵 快門（按住連拍）   G 相簿   T 重上第零課
 H 隱藏說明   N 讓鳥現在出現   B 讓鳥起飛   1-4 時段   5-6 天氣   7-9 換器材`

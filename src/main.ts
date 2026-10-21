@@ -130,7 +130,7 @@ function setGear(lens: string, body: string, support: string): void {
   lag.length = 0
 }
 
-new Input(canvas, {
+const input = new Input(canvas, {
   onLook: (dx, dy) => { if (!album.open && allowed('look')) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
   onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
   onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
@@ -303,6 +303,9 @@ startLoop((dt) => {
   rig.shake.sigma = overview ? 0 : effectiveSigma(cam.support.shakeMul, cam.lens.isStops)
   rig.update(dt)
   trueQuat.copy(camera.quaternion)
+  // 鍵盤對焦環：按住持續轉
+  const fdir = input.focusKeyDir()
+  if (fdir !== 0 && allowed('focus') && !album.open) cam.focusBy(fdir * dt * 0.35)
   flashT = Math.max(0, flashT - dt)
   toastT = Math.max(0, toastT - dt)
   callFlashT = Math.max(0, callFlashT - dt)

@@ -26,8 +26,8 @@ export const STEPS: TutorialStep[] = [
   },
   {
     id: 'focus', title: '對焦',
-    hint: ['按住右鍵左右拖曳轉對焦環，直到斑鳩的眼睛清楚。', '長焦距的景深只有幾公分，差一點點眼睛就糊了。'],
-    stuckHint: '右鍵按住往右拖是對遠處，往左是對近處。看牠的眼睛，不要看身體。',
+    hint: ['按住 W 或 S 轉對焦環（Shift 加滾輪、右鍵拖曳也行），直到斑鳩的眼睛清楚。', '長焦距的景深只有幾公分，差一點點眼睛就糊了。'],
+    stuckHint: 'W 是對遠處，S 是對近處，按住不放會一直轉。看牠的眼睛，不要看身體。',
     unlocked: ['look', 'overview', 'zoom', 'focus'],
     overlays: ['focusPoint'],
     setup: (c) => { c.setFocus(4) },
