@@ -16,7 +16,7 @@ export const STEPS: TutorialStep[] = [
   },
   {
     id: 'zoom', title: '拉近',
-    hint: ['{zoom}，把斑鳩拉到大約佔畫面高度三分之一。', '焦距決定鳥在畫面裡的大小，距離不變時只能靠焦距。', '畫面會晃是手持長鏡頭的手震，正常。{brace}；之後有防手震與腳架。'],
+    hint: ['{zoom}，把斑鳩拉到大約佔畫面高度三分之一。', '焦距決定鳥在畫面裡的大小，距離不變時只能靠焦距。', '畫面會晃是手持長鏡頭的手震，正常，等一下會教你怎麼穩住。'],
     stuckHint: '{zoomIn}。拉到牠的身體有畫面三分之一高就好，不用塞滿。',
     unlocked: ['look', 'overview', 'zoom'],
     overlays: [],
@@ -53,6 +53,16 @@ export const STEPS: TutorialStep[] = [
     setup: (c) => { c.setLighting('dusk', 'overcast'); c.setExposure(11, 1 / 500, 200) },
     done: (c) => Math.abs(c.metrics?.overStops ?? 9) < 0.6,
     holdS: 1,
+  },
+  {
+    id: 'steady', title: '穩住',
+    hint: ['畫面在晃，這是手持長鏡頭的手震。{brace}，再把快門調快（ISO 補回來），拍一張清楚的。', '安全快門大約是 1 / 等效焦距；穩住可以再多撐一格。容易暈的話，{reduce}只縮小畫面的晃動，不影響照片。'],
+    stuckHint: '{braceStuck}同時把快門調到 1/500 以上，ISO 拉高把亮度補回來，再拍。拍完看提示有沒有說「手震」。',
+    unlocked: ['look', 'shutter', 'aperture', 'iso', 'shoot'],
+    overlays: [],
+    setup: (c) => { c.setLighting('dusk', 'sunny'); c.setExposure(5.6, 1 / 60, 100); c.birdScript('S1') },
+    done: (c) => c.photos.some((p) => p.metrics.birdInFrame && p.metrics.shakePx < 3),
+    holdS: 1.2,
   },
   {
     id: 'moving', title: '牠在動',
@@ -129,6 +139,8 @@ export const CONTROL_WORDS: Record<string, [string, string]> = {
   burst: ['按住左鍵連拍', '按住橘色快門鈕連拍'],
   burstStuck: ['按住左鍵', '按住快門鈕'],
   restart: ['按 T 可以重上這一課', '選單（⋯）裡可以重上這一課'],
+  braceStuck: ['按住 Shift 不放，', '按住左邊的「穩住」不放，'],
+  reduce: ['按 V 的「減少晃動」', '選單裡的「減少畫面晃動」'],
   gacha: ['按 U ', '在選單（⋯）裡'],
   guide: ['（按 K 看）', '（選單裡看）'],
 }
