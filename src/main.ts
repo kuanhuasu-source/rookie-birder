@@ -6,6 +6,7 @@ import { CameraState } from './camera/state'
 import { Rig } from './camera/rig'
 import { effectiveSigma } from './camera/shake'
 import { Shooting } from './camera/body'
+import { Autofocus, AF_LABEL, type AfTier } from './camera/autofocus'
 import { exposureMultiplier, noiseSigma, overStops } from './camera/exposure'
 import { verticalFovDeg, cocPx, shakeBlurPx, lensSoftPx, totalBlurPx, mmToPx } from './camera/optics'
 import { Input, isTouchDevice } from './core/input'
@@ -30,7 +31,7 @@ import { BIRD_LAYER } from './render/mask'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
-import { playCall, unlockAudio } from './audio/call'
+import { playCall, playBeep, unlockAudio } from './audio/call'
 import { coinsFor, starString } from './photo/score'
 import { TutorialRunner } from './tutorial/runner'
 import { STEPS } from './tutorial/steps'
@@ -43,6 +44,8 @@ const canvas = document.getElementById('view') as HTMLCanvasElement
 const hudEl = document.getElementById('hud')!
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' })
 const TOUCH = isTouchDevice()
+/** 開發者模式：網址加 ?dev=1，開放加代幣與換器材的除錯鍵 */
+const DEV = new URLSearchParams(location.search).has('dev')
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, TOUCH ? 1 : 1.5))
 renderer.toneMapping = THREE.NoToneMapping
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace
@@ -92,6 +95,17 @@ const save = loadSave()
 const cam = new CameraState(save.equipped.lens, save.equipped.body, save.equipped.support)
 const rig = new Rig(camera)
 let shooting = new Shooting(cam.body, CARD_CAPACITY)
+const af = new Autofocus()
+const afRay = new THREE.Raycaster()
+afRay.layers.enableAll()   // 鳥的紙片在獨立圖層，也要打得到
+const afCenter = new THREE.Vector2(0, 0)
+/** 畫面中心打到的距離；沒打到東西回 null。 */
+function centerDistance(): number | null {
+  afRay.setFromCamera(afCenter, camera)
+  afRay.far = 300
+  const hit = afRay.intersectObjects(world.scene.children, true).find((h) => h.object.visible)
+  return hit ? hit.distance : null
+}
 
 let time: TimeOfDay = 'morning'
 let weather: Weather = 'sunny'
@@ -264,10 +278,10 @@ function handleKey(code: string): void {
       case 'Digit4': time = 'dusk'; setLighting(); break
       case 'Digit5': weather = 'sunny'; setLighting(); break
       case 'Digit6': weather = 'overcast'; setLighting(); break
-      case 'Digit7': setGear('L1', 'B1', 'S0'); break
-      case 'Digit8': setGear('L3', 'B3', 'S0'); break
-      case 'Digit9': setGear('L4', 'B4', 'S4'); break
-      case 'Digit0': save.coins += 100; storeSave(save); break
+      case 'Digit7': if (DEV) setGear('L1', 'B1', 'S0'); break
+      case 'Digit8': if (DEV) setGear('L3', 'B3', 'S0'); break
+      case 'Digit9': if (DEV) setGear('L4', 'B4', 'S4'); break
+      case 'Digit0': if (DEV) { save.coins += 100; storeSave(save); toast = '開發者模式：+100 代幣'; toastT = 2 } break
     }
 }
 
@@ -279,11 +293,12 @@ const input = new Input(canvas, {
   onHalfPress: (down) => { halfPress = down },
   onKey: handleKey,
 })
-const touchUi = TOUCH ? new TouchControls(hudEl, {
+const touchUi = TOUCH ? new TouchControls(hudEl, DEV, {
   onKey: handleKey,
   onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); if (shutterDown) pendingShot = true; unlockAudio() },
   onBrace: (down) => { braceTouch = down },
   onFocusT: (t) => { if (allowed('focus')) cam.setFocusT(t) },
+  onHalfPress: (down) => { halfPress = down },
 }) : null
 
 // 觀景窗延遲：環形緩衝保存最近幾幀的真實姿態
@@ -461,6 +476,19 @@ startLoop((dt) => {
   for (const b of birds) b.update(dt, camera.position)
   const bird = activeBird()
 
+  // 自動對焦：教學中一律手動
+  const tier: AfTier = tutorial.active ? 0 : cam.body.afTier
+  if (!overview && !overlayOpen()) {
+    const b = activeBird()
+    const eyeDist = b && b.inScene && lastMetrics?.birdInFrame ? lastMetrics.distM : null
+    s.focusM = af.update(dt, s.focusM, {
+      halfPressed: halfPress, tier, lensSpeed: cam.lens.afSpeed || 0.9,
+      centerDistM: halfPress && tier > 0 ? centerDistance() : null, eyeDistM: eyeDist,
+      minFocusM: cam.lens.minFocusM, maxFocusM: 200,
+    })
+    if (af.justLocked) playBeep()
+  }
+
   // 量測與拍照都用真實姿態
   const metrics = measureBird(dt)
   lastMetrics = metrics
@@ -504,7 +532,7 @@ startLoop((dt) => {
   if (shooting.cardLeft <= 0) hint = TOUCH ? '記憶卡滿了，選單裡收工' : '記憶卡滿了，按 X 收工'
   else if (callFlashT > 0) hint = `♪ 有鳥叫，${callName}要來了`
   else if (bracing) hint = '穩住中：手震減半，雲台變慢'
-  else if (halfPress) hint = cam.body.afTier === 0 ? '這台機身只有手動對焦' : '半按快門'
+  else if (halfPress && tier === 0) hint = tutorial.active ? '這一課練手動對焦' : '這台機身只有手動對焦，升級機身才有自動對焦'
   else if (!TOUCH && !document.pointerLockElement && !overlayOpen()) hint = '點一下畫面開始（滑鼠鎖定）'
   else hint = ''
 
@@ -527,6 +555,8 @@ startLoop((dt) => {
     coins: save.coins,
     toast: toastT > 0 ? toast : '',
     reduceShake,
+    afLabel: AF_LABEL[tier],
+    afState: af.state,
     timerS: session && !tutorial.active ? session.remainingS : null,
     quests: session && !tutorial.active ? session.level.quests.map((qq) => ({ title: qq.title, done: questsDone.has(qq.id) })) : [],
   })
@@ -544,7 +574,8 @@ else levelView.show()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
-  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, knowledge, save, birds, dove, activeBird, shooting: () => shooting,
+  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, knowledge, save, af,
+  setHalfPress: (v: boolean) => { halfPress = v }, birds, dove, activeBird, shooting: () => shooting,
   world: () => world, spawner: () => spawner, session: () => session, startLevel, endLevel, levels: LEVELS, levelById: LEVEL_BY_ID,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },

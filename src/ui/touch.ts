@@ -8,6 +8,7 @@ export interface TouchHandlers {
   onShutter: (down: boolean) => void
   onBrace: (down: boolean) => void
   onFocusT: (t: number) => void
+  onHalfPress: (down: boolean) => void
 }
 
 export const TOUCH_COLUMN_PX = 96
@@ -16,7 +17,7 @@ export class TouchControls {
   private root: HTMLElement
   private overviewBtn: HTMLElement
 
-  constructor(hud: HTMLElement, h: TouchHandlers) {
+  constructor(hud: HTMLElement, dev: boolean, h: TouchHandlers) {
     document.body.classList.add('touch')
     this.root = document.createElement('div')
     this.root.id = 'touch'
@@ -28,6 +29,7 @@ export class TouchControls {
         <button class="tbtn tb-menu">⋯</button>
       </div>
       <div class="tcol tcol-right">
+        <button class="taf">AF</button>
         <button class="tshutter" aria-label="快門"></button>
         <div class="trow trow-aperture"><span>光圈</span><button data-key="KeyQ">−</button><button data-key="KeyE">+</button></div>
         <div class="trow trow-shutter"><span>快門</span><button data-key="KeyA">−</button><button data-key="KeyD">+</button></div>
@@ -41,6 +43,7 @@ export class TouchControls {
         <button data-key="KeyV">減少畫面晃動</button>
         <button data-key="KeyT">重上第零課</button>
         <button data-key="KeyH">顯示 / 隱藏數據</button>
+        ${dev ? '<button data-key="Digit0">測試：+100 代幣</button>' : ''}
         <button class="tmenu-close">關閉</button>
       </div>
     `
@@ -54,6 +57,8 @@ export class TouchControls {
       el.addEventListener('pointercancel', up)
     }
     press(q('.tshutter'), () => h.onShutter(true), () => h.onShutter(false))
+    const af = q('.taf')
+    press(af, () => { h.onHalfPress(true); af.classList.add('on') }, () => { h.onHalfPress(false); af.classList.remove('on') })
     const brace = q('.tb-brace')
     press(brace, () => { h.onBrace(true); brace.classList.add('on') }, () => { h.onBrace(false); brace.classList.remove('on') })
     this.overviewBtn = q('.tb-overview')

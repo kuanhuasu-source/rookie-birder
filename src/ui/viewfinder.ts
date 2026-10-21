@@ -19,13 +19,15 @@ export interface HudExtra {
   /** 剩餘秒數，null 表示沒有計時 */
   timerS: number | null
   quests: { title: string; done: boolean }[]
+  afLabel: string
+  afState: 'idle' | 'seeking' | 'locked' | 'hunting'
 }
 
 const HELP = `滑鼠 轉雲台   滾輪 變焦   對焦環：W/S 或方向鍵、Shift+滾輪、右鍵拖曳
 Q/E 光圈   A/D 快門   Z/C ISO   Tab 放下相機看全景
-Shift 穩住（手震減半、雲台變慢）   V 減少畫面晃動（不影響照片）
+空白鍵 半按對焦（機身有自動對焦時）   Shift 穩住（手震減半、雲台變慢）   V 減少畫面晃動（不影響照片）
 左鍵 快門（按住連拍）   G 相簿   K 圖鑑   U 裝備與扭蛋   I 攝影知識   X 收工 / 選關   T 重上第零課
-H 隱藏說明   N 讓鳥現在出現   B 讓鳥起飛   1-4 時段   5-6 天氣   7-9 換器材`
+H 隱藏說明   N 讓鳥現在出現   B 讓鳥起飛   1-4 時段   5-6 天氣   （?dev=1：0 加代幣、7-9 換器材）`
 
 /** 紙框觀景窗的 HTML 層。 */
 export class Viewfinder {
@@ -46,6 +48,8 @@ export class Viewfinder {
   private toast: HTMLElement
   private timer: HTMLElement
   private quests: HTMLElement
+  private afMode: HTMLElement
+  private centerMark: HTMLElement
 
   constructor(container: HTMLElement) {
     this.root = container
@@ -67,6 +71,7 @@ export class Viewfinder {
       <div class="toast hidden"></div>
       <div class="readout timer"></div>
       <div class="quests hidden"></div>
+      <div class="readout afmode"></div>
     `
     const q = (s: string) => container.querySelector(s) as HTMLElement
     this.focal = q('.tl')
@@ -85,6 +90,8 @@ export class Viewfinder {
     this.toast = q('.toast')
     this.timer = q('.timer')
     this.quests = q('.quests')
+    this.afMode = q('.afmode')
+    this.centerMark = q('.center-mark')
     this.help.textContent = HELP
 
     const scale = q('.focus-scale')
@@ -122,7 +129,9 @@ export class Viewfinder {
       this.timer.textContent = `${m}:${sec.toString().padStart(2, '0')}`
       this.timer.classList.toggle('low', extra.timerS < 60)
     }
-    this.quests.classList.toggle('hidden', extra.quests.length === 0 || !extra.helpVisible && false)
+    this.afMode.textContent = extra.afLabel
+    this.centerMark.className = `center-mark af-${extra.afState}`
+    this.quests.classList.toggle('hidden', extra.quests.length === 0)
     const qh = extra.quests.map((qq) => `<div class="${qq.done ? 'done' : ''}">${qq.done ? '✓' : '○'} ${qq.title}</div>`).join('')
     if (this.quests.innerHTML !== qh) this.quests.innerHTML = qh
     const o = extra.overStops

@@ -4,7 +4,7 @@
     "APSC": { "widthMm": 22.3, "heightMm": 14.9, "cocMm": 0.019 }
   },
   "lenses": [
-    { "id": "L1", "name": "55-250mm f/4-5.6", "focalMin": 55,  "focalMax": 250, "apertureAtMin": 4.0, "apertureAtMax": 5.6, "minFocusM": 1.0, "afSpeed": 0,   "isStops": 0,   "softWideOpenPx": 1.6 },
+    { "id": "L1", "name": "55-250mm f/4-5.6", "focalMin": 55,  "focalMax": 250, "apertureAtMin": 4.0, "apertureAtMax": 5.6, "minFocusM": 1.0, "afSpeed": 0.9,   "isStops": 0,   "softWideOpenPx": 1.6 },
     { "id": "L2", "name": "100-400mm f/5.6-6.3", "focalMin": 100, "focalMax": 400, "apertureAtMin": 5.6, "apertureAtMax": 6.3, "minFocusM": 1.5, "afSpeed": 0.6, "isStops": 3,   "softWideOpenPx": 0.9 },
     { "id": "L3", "name": "100-500mm f/4.5-7.1", "focalMin": 100, "focalMax": 500, "apertureAtMin": 4.5, "apertureAtMax": 7.1, "minFocusM": 1.2, "afSpeed": 0.35, "isStops": 5,  "softWideOpenPx": 0.5 },
     { "id": "L4", "name": "500mm f/4", "focalMin": 500, "focalMax": 500, "apertureAtMin": 4.0, "apertureAtMax": 4.0, "minFocusM": 4.0, "afSpeed": 0.3, "isStops": 5,   "softWideOpenPx": 0.2 },

@@ -46,3 +46,21 @@ export function playCall(species: SpeciesDef): void {
     osc.stop(start + c.noteS + 0.02); vib.stop(start + c.noteS + 0.02)
   }
 }
+
+/** 合焦提示：短短的兩聲嗶。 */
+export function playBeep(): void {
+  const ac = context()
+  if (!ac || ac.state !== 'running') return
+  const t0 = ac.currentTime + 0.01
+  for (let i = 0; i < 2; i++) {
+    const osc = ac.createOscillator()
+    osc.type = 'square'
+    osc.frequency.value = 2400
+    const g = ac.createGain()
+    g.gain.setValueAtTime(0.0001, t0 + i * 0.09)
+    g.gain.exponentialRampToValueAtTime(0.08, t0 + i * 0.09 + 0.005)
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.09 + 0.06)
+    osc.connect(g).connect(ac.destination)
+    osc.start(t0 + i * 0.09); osc.stop(t0 + i * 0.09 + 0.07)
+  }
+}

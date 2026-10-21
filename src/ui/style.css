@@ -302,3 +302,13 @@ body.touch .know-group { display: none; }
 body.touch .know-nav button { width: auto; font-size: 14px; padding: 4px 8px; margin: 0; }
 body.touch .know-article { padding: 12px 14px 20px; font-size: 15px; }
 body.touch .know-article h2 { font-size: 24px; }
+
+/* 自動對焦 */
+.readout.afmode { top: 70px; left: 26px; font-size: 16px; opacity: 0.85; transform: rotate(-0.8deg); }
+.center-mark.af-seeking { border-color: var(--orange); border-style: dashed; }
+.center-mark.af-hunting { border-color: var(--orange); border-style: dotted; }
+.center-mark.af-locked { border-color: #3cab4b; box-shadow: 0 0 0 2px rgba(60,171,75,0.35); }
+body.touch .readout.afmode { top: 50px; left: 14px; font-size: clamp(11px, 1.8vw, 14px); }
+body.touch .quests { top: 78px; }
+.taf { font-family: var(--font); font-size: 15px; width: 64px; height: 36px; border: 2px solid var(--pencil); border-radius: 10px; background: var(--cream); color: var(--pencil); margin-bottom: 4px; }
+.taf.on, .taf:active { background: #3cab4b; color: #fff; }
