@@ -68,6 +68,7 @@ describe('gacha', () => {
     expect(ids).not.toContain('B1')
     expect(ids).not.toContain('S0')
     expect(ids).toContain('L5')
+    expect(ids).toContain('A1')
   })
   it('refuses without coins and charges the cost', () => {
     const s = defaultSave()

@@ -30,6 +30,7 @@ export const lightVentedBulbul: SpeciesDef = {
   flightSpeedMs: 8, hopDistM: 0.5,
   call: { baseHz: 2300, notes: 4, noteS: 0.13, gapS: 0.07 },
   rarity: 'common',
+  skittish: 0.8, flushDistM: 6,
 }
 
 /** 麻雀：小、動得快、停不久。 */
@@ -43,6 +44,7 @@ export const treeSparrow: SpeciesDef = {
   flightSpeedMs: 9, hopDistM: 0.4,
   call: { baseHz: 3000, notes: 3, noteS: 0.1, gapS: 0.06 },
   rarity: 'common',
+  skittish: 1.0, flushDistM: 5,
 }
 
 /** 綠繡眼：很小、很活潑，需要長焦距。 */
@@ -56,6 +58,7 @@ export const swinhoesWhiteEye: SpeciesDef = {
   flightSpeedMs: 9, hopDistM: 0.35,
   call: { baseHz: 4000, notes: 5, noteS: 0.08, gapS: 0.05 },
   rarity: 'common',
+  skittish: 1.2, flushDistM: 5,
 }
 
 /** 紅嘴黑鵯：全黑，曝光的考題；停留較久。 */
@@ -69,6 +72,7 @@ export const blackBulbul: SpeciesDef = {
   flightSpeedMs: 8, hopDistM: 0.5,
   call: { baseHz: 1900, notes: 2, noteS: 0.25, gapS: 0.12 },
   rarity: 'rare',
+  skittish: 1.0, flushDistM: 8,
 }
 
 /** 翠鳥：停很久、動作少，但離開前會突然俯衝；起飛是重頭戲。 */
@@ -82,6 +86,7 @@ export const commonKingfisher: SpeciesDef = {
   flightSpeedMs: 11, hopDistM: 0.3,
   call: { baseHz: 5200, notes: 2, noteS: 0.09, gapS: 0.05 },
   rarity: 'rare',
+  skittish: 1.3, flushDistM: 9,
 }
 
 /** 白鶺鴒：一直走、一直擺尾，動作格的練習。 */
@@ -95,6 +100,7 @@ export const whiteWagtail: SpeciesDef = {
   flightSpeedMs: 9, hopDistM: 0.5,
   call: { baseHz: 3600, notes: 2, noteS: 0.1, gapS: 0.08 },
   rarity: 'common',
+  skittish: 0.9, flushDistM: 6,
 }
 
 /** 小白鷺：大、慢、全白，曝光的考題。 */
@@ -108,6 +114,7 @@ export const littleEgret: SpeciesDef = {
   flightSpeedMs: 6, hopDistM: 0.8,
   call: { baseHz: 700, notes: 1, noteS: 0.35, gapS: 0.1 },
   rarity: 'common',
+  skittish: 1.1, flushDistM: 12,
 }
 
 export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret]

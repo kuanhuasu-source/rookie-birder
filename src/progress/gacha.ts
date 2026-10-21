@@ -2,7 +2,7 @@ import { gear } from '../data/gear'
 import type { SaveData } from './save'
 
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary'
-export type GearKind = 'lens' | 'body' | 'support'
+export type GearKind = 'lens' | 'body' | 'support' | 'accessory'
 
 export interface GachaItem { kind: GearKind; id: string; name: string; rarity: Rarity }
 
@@ -17,6 +17,7 @@ const RARITY_OF: Record<string, Rarity> = {
   L1: 'common', L2: 'common', L3: 'rare', L4: 'epic', L5: 'legendary',
   B1: 'common', B2: 'common', B3: 'rare', B4: 'epic',
   S1: 'common', S2: 'rare', S3: 'rare', S4: 'epic',
+  A1: 'common', A2: 'rare', A3: 'rare', A4: 'epic',
 }
 
 /** 扭蛋池：起始配備（L1 B1 S0）不在池裡。 */
@@ -25,6 +26,7 @@ export function pool(): GachaItem[] {
   for (const l of gear.lenses) if (RARITY_OF[l.id]) items.push({ kind: 'lens', id: l.id, name: l.name, rarity: RARITY_OF[l.id] })
   for (const b of gear.bodies) if (RARITY_OF[b.id]) items.push({ kind: 'body', id: b.id, name: b.name, rarity: RARITY_OF[b.id] })
   for (const s of gear.supports) if (RARITY_OF[s.id]) items.push({ kind: 'support', id: s.id, name: s.name, rarity: RARITY_OF[s.id] })
+  for (const a of gear.accessories) if (RARITY_OF[a.id]) items.push({ kind: 'accessory', id: a.id, name: a.name, rarity: RARITY_OF[a.id] })
   return items.filter((i) => i.id !== 'L1' && i.id !== 'B1')
 }
 

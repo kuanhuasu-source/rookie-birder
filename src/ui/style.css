@@ -209,12 +209,13 @@ body.touch .album-photo img { max-height: 42vh; }
 .r-rare { border-color: var(--blue) !important; }
 .r-epic { border-color: #8e44ad !important; }
 .r-legendary { border-color: #d4a017 !important; background: #fff8dc; }
-.gear-lists { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.gear-lists { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .gear-title { font-size: 22px; margin-bottom: 6px; }
-.gear-item { font-family: var(--font); display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font-size: 16px; padding: 6px 10px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
-.gear-img { width: 64px; height: 64px; object-fit: contain; flex: none; }
+.gear-item { font-family: var(--font); display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; width: 100%; text-align: left; font-size: 15px; padding: 6px 8px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
+.gear-img { grid-row: 1 / span 2; width: 56px; height: 56px; object-fit: contain; }
 .gear-item.locked .gear-img { filter: brightness(0) opacity(0.25); }
-.gear-name { flex: 1; }
+.gear-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gear-tag { font-size: 12px; opacity: 0.8; }
 .gacha-img { width: 160px; height: 160px; object-fit: contain; display: block; margin: 0 auto 6px; }
 .gear-item.locked { opacity: 0.5; cursor: default; background: #f1ebdc; }
 .gear-item.equipped { background: var(--blue); color: #fff; }
@@ -258,7 +259,7 @@ body.touch .guide-pages { grid-template-columns: 1fr; }
 /* 計時與任務面板 */
 .timer { position: absolute; top: 26px; left: 50%; transform: translateX(-50%) rotate(-0.5deg); font-size: 20px; }
 .timer.low { color: var(--orange); border-color: var(--orange); }
-.quests { position: absolute; top: 74px; left: 26px; background: rgba(246,238,220,0.9); border: 2px solid var(--pencil); border-radius: 6px; padding: 6px 10px; font-size: 15px; max-width: 320px; transform: rotate(-0.6deg); }
+.quests { position: absolute; top: 136px; left: 26px; background: rgba(246,238,220,0.9); border: 2px solid var(--pencil); border-radius: 6px; padding: 6px 10px; font-size: 15px; max-width: 320px; transform: rotate(-0.6deg); }
 .quests div { line-height: 1.4; }
 .quests div.done { color: var(--blue); text-decoration: line-through; }
 .quests.hidden { display: none; }
@@ -312,3 +313,14 @@ body.touch .readout.afmode { top: 50px; left: 14px; font-size: clamp(11px, 1.8vw
 body.touch .quests { top: 78px; }
 .taf { font-family: var(--font); font-size: 15px; width: 64px; height: 36px; border: 2px solid var(--pencil); border-radius: 10px; background: var(--cream); color: var(--pencil); margin-bottom: 4px; }
 .taf.on, .taf:active { background: #3cab4b; color: #fff; }
+
+/* 警戒表 */
+.alertbar { position: absolute; top: 100px; left: 26px; background: rgba(246,238,220,0.9); border: 2px solid var(--pencil); border-radius: 6px; padding: 4px 10px; font-size: 15px; transform: rotate(-0.5deg); }
+.alertbar.hidden { display: none; }
+.alertbar .track { display: inline-block; width: 110px; height: 10px; border: 2px solid var(--pencil); border-radius: 5px; vertical-align: middle; margin: 0 6px; overflow: hidden; background: #fff; }
+.alertbar .fill { display: block; height: 100%; background: #3cab4b; }
+.alertbar.wary .fill { background: var(--orange); }
+.alertbar.wary { color: var(--orange); border-color: var(--orange); }
+body.touch .alertbar { top: 78px; left: 14px; font-size: 12px; padding: 2px 6px; }
+body.touch .alertbar .track { width: 70px; height: 8px; }
+body.touch .quests { top: 104px; }

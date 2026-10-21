@@ -51,20 +51,33 @@ export class GearView {
       { kind: 'lens', title: '鏡頭', items: gear.lenses },
       { kind: 'body', title: '機身', items: gear.bodies },
       { kind: 'support', title: '支撐', items: gear.supports },
+      { kind: 'accessory', title: '配件（可多選）', items: gear.accessories },
     ]
     const poolIds = new Set(pool().map((i) => i.id))
     lists.innerHTML = kinds.map((k) => `
       <div class="gear-col"><div class="gear-title">${k.title}</div>${k.items.map((it) => {
         const owned = save.owned[k.kind].includes(it.id)
-        const eq = save.equipped[k.kind] === it.id
+        const eq = k.kind === 'accessory' ? save.equipped.accessories.includes(it.id) : save.equipped[k.kind] === it.id
         const r = rarityOf(it.id)
         const name = owned ? it.name : (poolIds.has(it.id) ? '？？？' : it.name)
-        return `<button class="gear-item r-${r} ${owned ? 'owned' : 'locked'} ${eq ? 'equipped' : ''}" data-kind="${k.kind}" data-id="${it.id}" ${owned ? '' : 'disabled'}><img class="gear-img" src="${gearImage(it.id)}" alt=""><span class="gear-name">${name}</span><span class="gear-tag">${eq ? '使用中' : owned ? '換上' : RARITY_LABEL[r]}</span></button>`
+        return `<button class="gear-item r-${r} ${owned ? 'owned' : 'locked'} ${eq ? 'equipped' : ''}" data-kind="${k.kind}" data-id="${it.id}" ${owned ? '' : 'disabled'}><img class="gear-img" src="${gearImage(it.id)}" alt=""><span class="gear-name">${name}</span><span class="gear-tag">${eq ? (k.kind === 'accessory' ? '已裝（點一下卸下）' : '使用中') : owned ? (k.kind === 'accessory' ? '裝上' : '換上') : RARITY_LABEL[r]}</span></button>`
       }).join('')}</div>`).join('')
     for (const b of lists.querySelectorAll<HTMLButtonElement>('.gear-item.owned')) {
       b.addEventListener('click', () => {
         const s = this.getSave()
-        s.equipped[b.dataset.kind as GearKind] = b.dataset.id!
+        const kind = b.dataset.kind as GearKind
+        const id = b.dataset.id!
+        if (kind === 'accessory') {
+          const list = s.equipped.accessories
+          const i = list.indexOf(id)
+          if (i >= 0) list.splice(i, 1)
+          else {
+            // 增距鏡只能裝一個
+            const tc = ['A3', 'A4']
+            if (tc.includes(id)) for (const t of tc) { const j = list.indexOf(t); if (j >= 0) list.splice(j, 1) }
+            list.push(id)
+          }
+        } else s.equipped[kind] = id
         this.onEquip()
         this.refresh()
       })

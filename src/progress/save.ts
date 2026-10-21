@@ -13,8 +13,8 @@ export interface GuideEntry {
 export interface SaveData {
   version: 1
   coins: number
-  owned: { lens: string[]; body: string[]; support: string[] }
-  equipped: { lens: string; body: string; support: string }
+  owned: { lens: string[]; body: string[]; support: string[]; accessory: string[] }
+  equipped: { lens: string; body: string; support: string; accessories: string[] }
   /** species id → slot → 最佳照片 */
   guide: Record<string, Partial<Record<GuideSlot, GuideEntry>>>
   pulls: number
@@ -28,8 +28,8 @@ export function defaultSave(): SaveData {
   return {
     version: 1,
     coins: 0,
-    owned: { lens: ['L1'], body: ['B1'], support: ['S0'] },
-    equipped: { lens: 'L1', body: 'B1', support: 'S0' },
+    owned: { lens: ['L1'], body: ['B1'], support: ['S0'], accessory: [] },
+    equipped: { lens: 'L1', body: 'B1', support: 'S0', accessories: [] },
     guide: {},
     pulls: 0,
     pity: 0,

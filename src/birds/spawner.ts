@@ -12,7 +12,7 @@ export class Spawner {
   current: Bird | null = null
   onCall: ((bird: Bird) => void) | null = null
 
-  constructor(private birds: Bird[], private perches: Perch[], private rng: Rng = Math.random, private weights?: Record<string, number>, private intervalMul = 1) {
+  constructor(private birds: Bird[], private perches: Perch[], private rng: Rng = Math.random, private weights?: Record<string, number>, public intervalMul = 1) {
     if (birds.length === 0) throw new Error('spawner needs at least one bird')
     this.next = this.pick()
     this.timer = this.nextInterval() * 0.4   // 第一次快一點，不要讓玩家等太久
@@ -37,6 +37,16 @@ export class Spawner {
   private nextInterval(): number {
     const r = this.next.species.interval
     return (r.min + (r.max - r.min) * this.rng()) * this.intervalMul
+  }
+
+  /** 比目前更遠離相機的停棲點（被嚇到時飛過去）；沒有就回 null，讓鳥直接離場。 */
+  fartherPerch(from: Perch | null, cameraPos: THREE.Vector3): Perch | null {
+    const others = this.perches.filter((p) => p !== from)
+    if (!others.length) return null
+    const cur = from ? from.position.distanceTo(cameraPos) : 0
+    const far = others.filter((p) => p.position.distanceTo(cameraPos) > cur + 1)
+    if (!far.length) return null
+    return far[Math.floor(this.rng() * far.length)]
   }
 
   /** 立刻出現（除錯用）。 */

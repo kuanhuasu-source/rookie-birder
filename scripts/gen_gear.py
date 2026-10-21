@@ -24,6 +24,10 @@ ITEMS = {
     'S2': "a carbon-fiber tripod with a ball head on top, standing",
     'S3': "a tripod with a fluid video head with a long pan handle, standing",
     'S4': "a sturdy tripod with a gimbal head (a swinging arm cradle for a big lens) on top, standing",
+    'A1': "a folded piece of camouflage netting fabric in green and brown leaf pattern, loosely draped",
+    'A2': "a small dome-shaped camouflage pop-up bird hide tent with a lens opening window, standing on grass",
+    'A3': "a short 1.4x teleconverter lens adapter, a stubby black cylinder with lens mounts on both ends",
+    'A4': "a 2x teleconverter lens adapter, a slightly longer black cylinder with lens mounts on both ends",
 }
 
 def main():

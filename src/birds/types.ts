@@ -40,4 +40,8 @@ export interface SpeciesDef {
   hopDistM: number
   call: { baseHz: number; notes: number; noteS: number; gapS: number }
   rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  /** 驚嚇敏感度，1 為中等 */
+  skittish?: number
+  /** 容忍距離（m），比這近會一直累積警戒 */
+  flushDistM?: number
 }

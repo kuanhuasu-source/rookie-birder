@@ -58,3 +58,20 @@ describe('shake', () => {
     expect(Math.abs(m.yaw)).toBeLessThan(0.1)
   })
 })
+
+describe('accessories', () => {
+  it('a 2x teleconverter doubles focal length and costs two stops', () => {
+    const c = new CameraState('L4', 'B3', 'S4')
+    c.setAccessories(['A4'])
+    expect(c.optics.focalMm).toBe(1000)
+    expect(c.optics.fNumber).toBeCloseTo(8, 1)
+    expect(c.optics.afSpeed).toBeGreaterThan(c.lens.afSpeed)
+  })
+  it('camouflage and hide multiply alert and interval', () => {
+    const c = new CameraState('L1', 'B1', 'S0')
+    c.setAccessories(['A1', 'A2'])
+    expect(c.mods.alertMul).toBeCloseTo(0.125)
+    expect(c.mods.intervalMul).toBeCloseTo(0.7)
+    expect(c.optics.focalMm).toBe(250)
+  })
+})

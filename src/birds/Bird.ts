@@ -117,6 +117,29 @@ export class Bird {
     if (s !== 'S3') this.stateDur = Infinity
   }
 
+  /** 警戒：抬頭跳開（進 S3），之後回到停棲循環。 */
+  startle(): void {
+    if (!this.inScene || this.state === 'S4' || this.state === 'S5') return
+    this.setState('S3')
+    if (this.scripted) this.stateDur = Math.max(this.stateDur, 0.4)
+  }
+
+  /** 被嚇到：飛到另一個停棲點（不離場），停留時間減少。 */
+  relocate(perch: Perch): void {
+    if (!this.inScene || this.state === 'S4' || this.state === 'S5') return
+    this.perch = perch
+    this.perchOffset = (this.rng() - 0.5) * perch.range
+    const to = this.perchPos()
+    this.dwellLeft = Math.min(this.dwellLeft, 12)
+    this.leaving = false
+    this.flight = { from: this.group.position.clone(), to, dur: Math.max(0.6, this.group.position.distanceTo(to) / this.species.flightSpeedMs), leaving: false }
+    this.setFacing(to.x - this.group.position.x >= 0 ? 1 : -1)
+    this.setState('S5')
+  }
+
+  /** 目前的停棲點（沒有就 null）。 */
+  get currentPerch(): Perch | null { return this.perch }
+
   /** 測試與除錯：立刻起飛離開。 */
   forceTakeoff(): void {
     if (this.inScene && this.state !== 'S4' && this.state !== 'S5') this.beginTakeoff()

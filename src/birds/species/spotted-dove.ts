@@ -24,4 +24,5 @@ export const spottedDove: SpeciesDef = {
   hopDistM: 0.45,
   call: { baseHz: 430, notes: 3, noteS: 0.32, gapS: 0.12 },
   rarity: 'common',
+  skittish: 0.6, flushDistM: 5,
 }

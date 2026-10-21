@@ -1,5 +1,5 @@
 import { APERTURE_STEPS, ISO_STEPS, SHUTTER_STEPS, nearestIndex } from './exposure'
-import { gear, lensById, bodyById, supportById, maxApertureAt, type LensDef, type BodyDef, type SupportDef, type SensorDef } from '../data/gear'
+import { gear, lensById, bodyById, supportById, accessoryById, maxApertureAt, type LensDef, type BodyDef, type SupportDef, type SensorDef, type AccessoryDef } from '../data/gear'
 
 export interface CameraSettings {
   focalMm: number
@@ -15,6 +15,7 @@ export class CameraState {
   lens: LensDef
   body: BodyDef
   support: SupportDef
+  accessories: AccessoryDef[] = []
   settings: CameraSettings
 
   constructor(lensId: string, bodyId: string, supportId: string) {
@@ -29,6 +30,35 @@ export class CameraState {
       focusM: 10,
     }
     this.clampAperture()
+  }
+
+  setAccessories(ids: string[]): void {
+    this.accessories = ids.map((id) => accessoryById(id))
+  }
+
+  /** 配件效果的乘積：焦距倍率、光圈損失格數、對焦速度倍率、柔化、警戒倍率、出現間隔倍率。 */
+  get mods(): { focalMul: number; apertureStops: number; afSpeedMul: number; softPx: number; alertMul: number; intervalMul: number } {
+    let focalMul = 1, apertureStops = 0, afSpeedMul = 1, softPx = 0, alertMul = 1, intervalMul = 1
+    for (const a of this.accessories) {
+      focalMul *= a.focalMul ?? 1
+      apertureStops += a.apertureStops ?? 0
+      afSpeedMul *= a.afSpeedMul ?? 1
+      softPx += a.softPx ?? 0
+      alertMul *= a.alertMul ?? 1
+      intervalMul *= a.intervalMul ?? 1
+    }
+    return { focalMul, apertureStops, afSpeedMul, softPx, alertMul, intervalMul }
+  }
+
+  /** 實際成像用的焦距與光圈（含增距鏡）。 */
+  get optics(): { focalMm: number; fNumber: number; softPx: number; afSpeed: number } {
+    const m = this.mods
+    return {
+      focalMm: this.settings.focalMm * m.focalMul,
+      fNumber: this.settings.fNumber * Math.pow(Math.SQRT2, m.apertureStops),
+      softPx: this.lens.softWideOpenPx + m.softPx,
+      afSpeed: (this.lens.afSpeed || 0.9) * m.afSpeedMul,
+    }
   }
 
   get sensor(): SensorDef {

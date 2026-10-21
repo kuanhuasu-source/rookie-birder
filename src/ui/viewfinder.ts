@@ -21,6 +21,8 @@ export interface HudExtra {
   quests: { title: string; done: boolean }[]
   afLabel: string
   afState: 'idle' | 'seeking' | 'locked' | 'hunting'
+  /** 場上那隻鳥的警戒值 0 到 1，沒鳥為 null */
+  alert: { name: string; value: number } | null
 }
 
 const HELP = `滑鼠 轉雲台   滾輪 變焦   對焦環：W/S 或方向鍵、Shift+滾輪、右鍵拖曳
@@ -50,6 +52,7 @@ export class Viewfinder {
   private quests: HTMLElement
   private afMode: HTMLElement
   private centerMark: HTMLElement
+  private alertBar: HTMLElement
 
   constructor(container: HTMLElement) {
     this.root = container
@@ -72,6 +75,7 @@ export class Viewfinder {
       <div class="readout timer"></div>
       <div class="quests hidden"></div>
       <div class="readout afmode"></div>
+      <div class="alertbar hidden"><span class="who"></span>警戒<span class="track"><span class="fill"></span></span></div>
     `
     const q = (s: string) => container.querySelector(s) as HTMLElement
     this.focal = q('.tl')
@@ -91,6 +95,7 @@ export class Viewfinder {
     this.timer = q('.timer')
     this.quests = q('.quests')
     this.afMode = q('.afmode')
+    this.alertBar = q('.alertbar')
     this.centerMark = q('.center-mark')
     this.help.textContent = HELP
 
@@ -106,8 +111,9 @@ export class Viewfinder {
 
   update(cam: CameraState, extra: HudExtra): void {
     const s = cam.settings
-    this.focal.textContent = `${Math.round(s.focalMm)}mm`
-    this.aperture.textContent = `f/${s.fNumber < 10 ? s.fNumber.toFixed(1).replace(/\.0$/, '') : Math.round(s.fNumber)}`
+    this.focal.textContent = `${Math.round(cam.optics.focalMm)}mm`
+    const fn = cam.optics.fNumber
+    this.aperture.textContent = `f/${fn < 10 ? fn.toFixed(1).replace(/\.0$/, '') : Math.round(fn)}`
     this.shutter.textContent = formatShutter(s.shutterS)
     this.iso.textContent = `ISO ${s.iso}`
     this.needle.style.left = `${8 + cam.focusT() * 300}px`
@@ -130,6 +136,12 @@ export class Viewfinder {
       this.timer.classList.toggle('low', extra.timerS < 60)
     }
     this.afMode.textContent = extra.afLabel
+    this.alertBar.classList.toggle('hidden', !extra.alert)
+    if (extra.alert) {
+      ;(this.alertBar.querySelector('.who') as HTMLElement).textContent = `${extra.alert.name} `
+      ;(this.alertBar.querySelector('.fill') as HTMLElement).style.width = `${Math.round(extra.alert.value * 100)}%`
+      this.alertBar.classList.toggle('wary', extra.alert.value >= 0.6)
+    }
     this.centerMark.className = `center-mark af-${extra.afState}`
     this.quests.classList.toggle('hidden', extra.quests.length === 0)
     const qh = extra.quests.map((qq) => `<div class="${qq.done ? 'done' : ''}">${qq.done ? '✓' : '○'} ${qq.title}</div>`).join('')

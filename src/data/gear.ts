@@ -30,11 +30,22 @@ export interface BodyDef {
 
 export interface SupportDef { id: string; name: string; shakeMul: number; panDamping: number; panMaxRadS: number }
 
+export interface AccessoryDef {
+  id: string; name: string
+  alertMul?: number
+  intervalMul?: number
+  focalMul?: number
+  apertureStops?: number
+  afSpeedMul?: number
+  softPx?: number
+}
+
 export interface GearData {
   sensors: Record<SensorId, SensorDef>
   lenses: LensDef[]
   bodies: BodyDef[]
   supports: SupportDef[]
+  accessories: AccessoryDef[]
 }
 
 export const gear = raw as unknown as GearData
@@ -53,6 +64,12 @@ export function supportById(id: string): SupportDef {
   const s = gear.supports.find((x) => x.id === id)
   if (!s) throw new Error(`unknown support ${id}`)
   return s
+}
+
+export function accessoryById(id: string): AccessoryDef {
+  const a = gear.accessories.find((x) => x.id === id)
+  if (!a) throw new Error(`unknown accessory ${id}`)
+  return a
 }
 
 /** 變焦鏡的最大光圈隨焦距變化，以 stop 為單位在對數焦距上線性插值。 */

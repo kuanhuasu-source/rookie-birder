@@ -7,6 +7,7 @@ import { Rig } from './camera/rig'
 import { effectiveSigma } from './camera/shake'
 import { Shooting } from './camera/body'
 import { Autofocus, AF_LABEL, type AfTier } from './camera/autofocus'
+import { AlertModel } from './birds/alert'
 import { exposureMultiplier, noiseSigma, overStops } from './camera/exposure'
 import { verticalFovDeg, cocPx, shakeBlurPx, lensSoftPx, totalBlurPx, mmToPx } from './camera/optics'
 import { Input, isTouchDevice } from './core/input'
@@ -93,6 +94,10 @@ function allowed(c: Control): boolean {
 
 const save = loadSave()
 const cam = new CameraState(save.equipped.lens, save.equipped.body, save.equipped.support)
+cam.setAccessories(save.equipped.accessories)
+const alert = new AlertModel()
+let alertFlushes = 0
+let scareToastT = 0
 const rig = new Rig(camera)
 let shooting = new Shooting(cam.body, CARD_CAPACITY)
 const af = new Autofocus()
@@ -163,6 +168,8 @@ const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped
 function overlayOpen(): boolean { return album.open || guide.open || gearView.open || levelView.open || summaryView.open || knowledge.open }
 function applyEquipped(): void {
   if (cam.lens.id !== save.equipped.lens || cam.body.id !== save.equipped.body || cam.support.id !== save.equipped.support) setGear(save.equipped.lens, save.equipped.body, save.equipped.support)
+  cam.setAccessories(save.equipped.accessories)
+  cam.clampAperture()
 }
 window.addEventListener('resize', layout)
 
@@ -238,6 +245,7 @@ function setLighting(): void {
 function setGear(lens: string, body: string, support: string): void {
   const n = new CameraState(lens, body, support)
   cam.lens = n.lens; cam.body = n.body; cam.support = n.support; cam.settings = n.settings
+  cam.setAccessories(save.equipped.accessories)
   shooting = new Shooting(cam.body, shooting.cardLeft)
   rig.shake.sigma = effectiveSigma(cam.support.shakeMul, cam.lens.isStops)
   lag.length = 0
@@ -314,13 +322,14 @@ let eyePrevValid = false
 /** 以目前相機投影鳥眼現在與上一幀的位置，差值就是鳥自己的移動（不含雲台）。 */
 function measureBird(dt: number): PhotoMetrics {
   const s = cam.settings
+  const o = cam.optics
   const sensor = cam.sensor
   const bird = activeBird()
   const base: PhotoMetrics = {
     birdInFrame: false, distM: 0, cocPx: 0, motionPx: 0,
-    shakePx: shakeBlurPx(s.focalMm, Math.hypot(rig.shake.omegaYaw + rig.panOmegaYaw, rig.shake.omegaPitch + rig.panOmegaPitch), s.shutterS, sensor, PHOTO_W),
-    softPx: lensSoftPx(cam.lens.softWideOpenPx, s.fNumber, cam.maxAperture), totalBlurPx: 0,
-    overStops: overStops(lighting.evScene, s.fNumber, s.shutterS, s.iso),
+    shakePx: shakeBlurPx(o.focalMm, Math.hypot(rig.shake.omegaYaw + rig.panOmegaYaw, rig.shake.omegaPitch + rig.panOmegaPitch), s.shutterS, sensor, PHOTO_W),
+    softPx: lensSoftPx(o.softPx, o.fNumber, cam.maxAperture * Math.pow(Math.SQRT2, cam.mods.apertureStops)), totalBlurPx: 0,
+    overStops: overStops(lighting.evScene, o.fNumber, s.shutterS, s.iso),
     noiseSigma: noiseSigma(cam.body.kNoise, s.iso),
     eyeX: 0, eyeY: 0, birdHeightFrac: 0,
     species: bird?.species.id,
@@ -346,10 +355,10 @@ function measureBird(dt: number): PhotoMetrics {
   const lightAngleDeg = (Math.acos(Math.min(1, Math.max(-1, toCam.dot(lighting.sunDir)))) * 180) / Math.PI
   const pitchDeg = (Math.asin(-toCam.y) * 180) / Math.PI
 
-  const coc = cocPx(s.focalMm, s.fNumber, s.focusM, dist, sensor, PHOTO_W)
+  const coc = cocPx(o.focalMm, o.fNumber, s.focusM, dist, sensor, PHOTO_W)
   const motion = birdVelPx.length() * s.shutterS
   const total = totalBlurPx({ coc, motion, shake: base.shakePx, soft: base.softPx })
-  const focalPx = mmToPx(s.focalMm, sensor, PHOTO_W)
+  const focalPx = mmToPx(o.focalMm, sensor, PHOTO_W)
   const birdHeightPx = (bird.species.bodyHeightM / dist) * focalPx
   return {
     ...base,
@@ -363,16 +372,17 @@ function measureBird(dt: number): PhotoMetrics {
 function takePhoto(m: PhotoMetrics): void {
   const s = cam.settings
   const bird = activeBird()
+  const o = cam.optics
   const rec = capture.capture({
     scene: world.scene,
     camera,
     birdPapers: bird && bird.inScene ? [bird.paper] : [],
-    settings: { ...s },
+    settings: { ...s, focalMm: o.focalMm, fNumber: o.fNumber },
     gear: { lens: cam.lens.id, body: cam.body.id, support: cam.support.id },
     lighting: { time, weather, evScene: lighting.evScene },
     metrics: m,
     sensorWmm: cam.sensor.widthMm,
-    exposureMul: exposureMultiplier(lighting.evScene, s.fNumber, s.shutterS, s.iso),
+    exposureMul: exposureMultiplier(lighting.evScene, o.fNumber, s.shutterS, s.iso),
     noiseSigma: noiseSigma(cam.body.kNoise, s.iso),
     camOmega: new THREE.Vector2(rig.shake.omegaYaw + rig.panOmegaYaw, rig.shake.omegaPitch + rig.panOmegaPitch),
     birdVelPx: birdVelPx.clone(),
@@ -452,7 +462,8 @@ let seed = 0
 let lastMetrics: PhotoMetrics | null = null
 startLoop((dt) => {
   const s = cam.settings
-  camera.fov = overview ? 60 : verticalFovDeg(s.focalMm, cam.sensor)
+  const o = cam.optics
+  camera.fov = overview ? 60 : verticalFovDeg(o.focalMm, cam.sensor)
   camera.updateProjectionMatrix()
   // 穩住：按住 Shift，手震減半、雲台變慢（模擬撐著、蹲低）
   bracing = (input.held.has('ShiftLeft') || input.held.has('ShiftRight') || braceTouch) && !overlayOpen()
@@ -482,7 +493,7 @@ startLoop((dt) => {
     const b = activeBird()
     const eyeDist = b && b.inScene && lastMetrics?.birdInFrame ? lastMetrics.distM : null
     s.focusM = af.update(dt, s.focusM, {
-      halfPressed: halfPress, tier, lensSpeed: cam.lens.afSpeed || 0.9,
+      halfPressed: halfPress, tier, lensSpeed: o.afSpeed,
       centerDistM: halfPress && tier > 0 ? centerDistance() : null, eyeDistM: eyeDist,
       minFocusM: cam.lens.minFocusM, maxFocusM: 200,
     })
@@ -504,6 +515,25 @@ startLoop((dt) => {
   pendingShot = false
   for (let i = 0; i < shots; i++) takePhoto(metrics)
 
+  // 驚嚇：只對停棲中的鳥，教學中不嚇
+  scareToastT = Math.max(0, scareToastT - dt)
+  spawner.intervalMul = currentLevel.intervalMul * cam.mods.intervalMul
+  if (bird && bird.inScene && !tutorial.active && (bird.state === 'S1' || bird.state === 'S2' || bird.state === 'S3')) {
+    const ev = alert.update(dt, {
+      panOmega: rig.panOmega, shots, distM: metrics.distM || bird.group.position.distanceTo(camera.position),
+      skittish: bird.species.skittish ?? 1, flushDistM: bird.species.flushDistM ?? 6,
+      mul: cam.mods.alertMul, silent: !cam.body.blackout,
+    })
+    if (ev === 'wary') { bird.startle(); toast = `${bird.species.nameZh}在警戒，別動、別連拍`; toastT = 2.5 }
+    if (ev === 'flush') {
+      alertFlushes++
+      const next = alertFlushes % 2 === 1 ? spawner.fartherPerch(bird.currentPerch, camera.position) : null
+      if (next) { bird.relocate(next); toast = `${bird.species.nameZh}被嚇到，飛遠了`; }
+      else { bird.forceTakeoff(); toast = `${bird.species.nameZh}被你嚇走了`; }
+      toastT = 3
+    }
+  } else if (!(bird && bird.inScene)) { alert.reset(); alertFlushes = 0 }
+
   // 觀景窗延遲；「減少晃動」只影響畫面，照片仍用真實姿態
   if (reduceShake) rig.applyTo(camera, 0.3)
   lag.push(camera.quaternion.clone())
@@ -515,11 +545,11 @@ startLoop((dt) => {
   seed = (seed + 1) % 1000
   if (!overlayOpen()) {
     pipeline!.render(world.scene, camera, {
-      focalMm: s.focalMm,
-      fNumber: s.fNumber,
+      focalMm: o.focalMm,
+      fNumber: o.fNumber,
       focusM: s.focusM,
       sensorWmm: cam.sensor.widthMm,
-      exposureMul: overview ? 1 : exposureMultiplier(lighting.evScene, s.fNumber, s.shutterS, s.iso),
+      exposureMul: overview ? 1 : exposureMultiplier(lighting.evScene, o.fNumber, s.shutterS, s.iso),
       noiseSigma: overview ? 0 : noiseSigma(cam.body.kNoise, s.iso),
       dofEnabled: !overview,
       styleStrength: overview ? 0.6 : 1,
@@ -555,8 +585,9 @@ startLoop((dt) => {
     coins: save.coins,
     toast: toastT > 0 ? toast : '',
     reduceShake,
-    afLabel: AF_LABEL[tier],
+    afLabel: AF_LABEL[tier] + (cam.mods.focalMul > 1 ? ` · ${cam.mods.focalMul}x` : ''),
     afState: af.state,
+    alert: bird && bird.inScene && !tutorial.active ? { name: bird.species.nameZh, value: alert.value } : null,
     timerS: session && !tutorial.active ? session.remainingS : null,
     quests: session && !tutorial.active ? session.level.quests.map((qq) => ({ title: qq.title, done: questsDone.has(qq.id) })) : [],
   })
@@ -574,8 +605,9 @@ else levelView.show()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
-  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, knowledge, save, af,
-  setHalfPress: (v: boolean) => { halfPress = v }, birds, dove, activeBird, shooting: () => shooting,
+  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, knowledge, save, af, alert,
+  setHalfPress: (v: boolean) => { halfPress = v },
+  applyEquipped, birds, dove, activeBird, shooting: () => shooting,
   world: () => world, spawner: () => spawner, session: () => session, startLevel, endLevel, levels: LEVELS, levelById: LEVEL_BY_ID,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },
