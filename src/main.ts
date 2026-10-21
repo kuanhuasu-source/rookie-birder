@@ -18,6 +18,7 @@ import { Bird } from './birds/Bird'
 import { BIRD_LAYER } from './render/mask'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
+import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
 import { playCall, unlockAudio } from './audio/call'
 import { coinsFor, starString } from './photo/score'
 import { TutorialRunner } from './tutorial/runner'
@@ -39,16 +40,22 @@ const camera = new THREE.PerspectiveCamera(10, 1.5, 0.3, 600)
 camera.position.copy(world.hidePosition)
 camera.layers.enable(BIRD_LAYER)
 
-// 鳥
-const bird = new Bird(spottedDove)
-world.scene.add(bird.group)
+// 鳥：每種一隻，同時只有一隻在場
+const birds: Bird[] = SPECIES.map((sp) => new Bird(sp))
+for (const b of birds) world.scene.add(b.group)
+const dove = birds.find((b) => b.species === spottedDove)!
 const loader = new THREE.TextureLoader()
-for (const key of ['side', '3q', 'takeoff'] as const) {
-  loader.load(import.meta.env.BASE_URL + spottedDove.sprites[key].file, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; bird.setTexture(key, t) })
+for (const b of birds) {
+  for (const key of ['side', '3q', 'takeoff'] as const) {
+    loader.load(import.meta.env.BASE_URL + b.species.sprites[key].file, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; b.setTexture(key, t) })
+  }
 }
-const spawner = new Spawner(bird, world.perches)
-spawner.onCall = () => { playCall(spottedDove); callFlashT = 1.5 }
+const spawner = new Spawner(birds, world.perches, Math.random, PARK_WEIGHTS)
 let callFlashT = 0
+let callName = ''
+spawner.onCall = (b) => { playCall(b.species); callFlashT = 1.5; callName = b.species.nameZh }
+/** 目前要量測與拍的鳥：教學時是斑鳩，否則是 spawner 放出來的那隻。 */
+function activeBird(): Bird | null { return tutorial.active ? dove : spawner.current }
 
 // 教學
 const tutorial = new TutorialRunner(STEPS)
@@ -97,7 +104,8 @@ function aimAtPerch(): void {
   rig.pitch = Math.asin(d.y)
 }
 function aimAtBird(): void {
-  if (!bird.inScene) { aimAtPerch(); return }
+  const bird = activeBird()
+  if (!bird || !bird.inScene) { aimAtPerch(); return }
   const target = new THREE.Vector3()
   bird.eye.getWorldPosition(target)
   const d = target.sub(camera.position).normalize()
@@ -155,7 +163,7 @@ const input = new Input(canvas, {
       case 'Tab': if (allowed('overview')) overview = !overview; break
       case 'KeyH': helpVisible = !helpVisible; break
       case 'KeyV': reduceShake = !reduceShake; try { localStorage.setItem(REDUCE_KEY, reduceShake ? '1' : '0') } catch { /* 私密視窗 */ } break
-      case 'KeyB': if (!tutorial.active) bird.forceTakeoff(); break
+      case 'KeyB': if (!tutorial.active) spawner.current?.forceTakeoff(); break
       case 'KeyN': if (!tutorial.active) spawner.spawnNow(); break
       case 'KeyG': if (allowed('album')) { document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show() } break
       case 'Digit1': time = 'dawn'; setLighting(); break
@@ -185,6 +193,7 @@ let eyePrevValid = false
 function measureBird(dt: number): PhotoMetrics {
   const s = cam.settings
   const sensor = cam.sensor
+  const bird = activeBird()
   const base: PhotoMetrics = {
     birdInFrame: false, distM: 0, cocPx: 0, motionPx: 0,
     shakePx: shakeBlurPx(s.focalMm, Math.hypot(rig.shake.omegaYaw + rig.panOmegaYaw, rig.shake.omegaPitch + rig.panOmegaPitch), s.shutterS, sensor, PHOTO_W),
@@ -192,9 +201,9 @@ function measureBird(dt: number): PhotoMetrics {
     overStops: overStops(lighting.evScene, s.fNumber, s.shutterS, s.iso),
     noiseSigma: noiseSigma(cam.body.kNoise, s.iso),
     eyeX: 0, eyeY: 0, birdHeightFrac: 0,
-    species: spottedDove.id,
+    species: bird?.species.id,
   }
-  if (!bird.inScene) { eyePrevValid = false; birdVelPx.set(0, 0); return base }
+  if (!bird || !bird.inScene) { eyePrevValid = false; birdVelPx.set(0, 0); return base }
 
   bird.eye.getWorldPosition(eyeWorld)
   const dist = eyeWorld.distanceTo(camera.position)
@@ -219,7 +228,7 @@ function measureBird(dt: number): PhotoMetrics {
   const motion = birdVelPx.length() * s.shutterS
   const total = totalBlurPx({ coc, motion, shake: base.shakePx, soft: base.softPx })
   const focalPx = mmToPx(s.focalMm, sensor, PHOTO_W)
-  const birdHeightPx = (spottedDove.bodyHeightM / dist) * focalPx
+  const birdHeightPx = (bird.species.bodyHeightM / dist) * focalPx
   return {
     ...base,
     birdInFrame: inFrame, distM: dist, cocPx: coc, motionPx: motion, totalBlurPx: total,
@@ -231,10 +240,11 @@ function measureBird(dt: number): PhotoMetrics {
 
 function takePhoto(m: PhotoMetrics): void {
   const s = cam.settings
+  const bird = activeBird()
   const rec = capture.capture({
     scene: world.scene,
     camera,
-    birdPapers: bird.inScene ? [bird.paper] : [],
+    birdPapers: bird && bird.inScene ? [bird.paper] : [],
     settings: { ...s },
     gear: { lens: cam.lens.id, body: cam.body.id, support: cam.support.id },
     lighting: { time, weather, evScene: lighting.evScene },
@@ -250,7 +260,8 @@ function takePhoto(m: PhotoMetrics): void {
     rec.then((p) => {
       tutorial.notePhoto(p)
       coins += coinsFor(p.score.stars)
-      toast = `${starString(p.score.stars)} ${Math.round(p.score.total)} 分  ${p.score.advice}`
+      const who = p.metrics.birdInFrame ? `${speciesName(p.metrics.species)}  ` : ''
+      toast = `${starString(p.score.stars)} ${Math.round(p.score.total)} 分  ${who}${p.score.advice}`
       toastT = 3
     }).catch((e) => console.error('photo failed', e))
   }
@@ -271,28 +282,28 @@ const tutorialCtx: TutorialCtx = {
   setExposure: (f, t, iso) => { if (f !== null) cam.settings.fNumber = f; if (t !== null) cam.settings.shutterS = t; if (iso !== null) cam.settings.iso = iso; cam.clampAperture() },
   setLighting: (t, w) => { time = t; weather = w; setLighting() },
   aimOffset: (y, p) => { aimAtPerch(); rig.yaw += y; rig.pitch += p },
-  birdPlace: () => { bird.scripted = true; bird.placeOnPerch(world.perches[0], 0) },
-  birdScript: (st) => bird.scriptState(st),
-  birdTakeoff: () => bird.forceTakeoff(),
-  birdReenter: () => { const p = world.perches[0]; bird.enter(p, p.position.clone().add(new THREE.Vector3(9, 5, -3))) },
+  birdPlace: () => { dove.scripted = true; dove.placeOnPerch(world.perches[0], 0) },
+  birdScript: (st) => dove.scriptState(st),
+  birdTakeoff: () => dove.forceTakeoff(),
+  birdReenter: () => { const p = world.perches[0]; dove.enter(p, p.position.clone().add(new THREE.Vector3(9, 5, -3))) },
   giveCoins: (n) => { coins += n },
 }
 
 function startTutorial(): void {
   overview = false
   helpVisible = false
-  bird.onLeft = null
-  if (bird.inScene) { bird.inScene = false; bird.group.visible = false }
+  // 把場上的鳥清掉，教學只用斑鳩
+  for (const b of birds) if (b.inScene) { b.inScene = false; b.group.visible = false }
+  spawner.current = null
   tutorialCtx.settings = cam.settings
   tutorial.start(tutorialCtx)
 }
 
 function endTutorial(): void {
   tutorial.stop()
-  bird.scripted = false
-  bird.onLeft = () => { spawner.timer = 8; spawner.called = false }
-  if (bird.inScene) bird.forceTakeoff()
-  else { spawner.timer = 6; spawner.called = false }
+  dove.scripted = false
+  if (dove.inScene) dove.forceTakeoff()
+  spawner.reset(dove.inScene ? 10 : 6)
   try { localStorage.setItem(TUTORIAL_KEY, '1') } catch { /* 私密視窗 */ }
 }
 tutorial.onFinished = endTutorial
@@ -319,7 +330,8 @@ startLoop((dt) => {
   callFlashT = Math.max(0, callFlashT - dt)
 
   if (!tutorial.active) spawner.update(dt)
-  bird.update(dt, camera.position)
+  for (const b of birds) b.update(dt, camera.position)
+  const bird = activeBird()
 
   // 量測與拍照都用真實姿態
   const metrics = measureBird(dt)
@@ -328,8 +340,8 @@ startLoop((dt) => {
     tutorialCtx.settings = cam.settings
     tutorialCtx.overview = overview
     tutorialCtx.metrics = metrics
-    tutorialCtx.birdState = bird.state
-    tutorialCtx.birdInScene = bird.inScene
+    tutorialCtx.birdState = dove.state
+    tutorialCtx.birdInScene = dove.inScene
     tutorial.update(dt, tutorialCtx)
   }
   const shots = shooting.update(dt, shutterDown && !album.open)
@@ -361,15 +373,15 @@ startLoop((dt) => {
   camera.quaternion.copy(trueQuat)
 
   if (shooting.cardLeft <= 0) hint = '記憶卡滿了，按 G 看相簿'
-  else if (callFlashT > 0) hint = '♪ 咕—咕—咕（有鳥要來了）'
+  else if (callFlashT > 0) hint = `♪ 有鳥叫，${callName}要來了`
   else if (bracing) hint = '穩住中：手震減半，雲台變慢'
   else if (halfPress) hint = cam.body.afTier === 0 ? '這台機身只有手動對焦' : '半按快門'
   else if (!document.pointerLockElement && !album.open) hint = '點一下畫面開始（滑鼠鎖定）'
   else hint = ''
 
   const m = metrics
-  const birdInfo = bird.inScene
-    ? `${STATE_LABEL[bird.state]}${m.birdInFrame ? `  鳥眼 ${m.distM.toFixed(1)}m  模糊圈 ${m.cocPx.toFixed(1)}px  動態 ${m.motionPx.toFixed(1)}px` : '  鳥不在畫面內'}  手震 ${m.shakePx.toFixed(1)}px`
+  const birdInfo = bird && bird.inScene
+    ? `${bird.species.nameZh} ${STATE_LABEL[bird.state]}${m.birdInFrame ? `  鳥眼 ${m.distM.toFixed(1)}m  模糊圈 ${m.cocPx.toFixed(1)}px  動態 ${m.motionPx.toFixed(1)}px` : '  鳥不在畫面內'}  手震 ${m.shakePx.toFixed(1)}px`
     : `等待中 ${Math.max(0, spawner.timer).toFixed(0)}s  手震 ${m.shakePx.toFixed(1)}px`
   hud.update(cam, {
     overview,
@@ -387,7 +399,7 @@ startLoop((dt) => {
     toast: toastT > 0 ? toast : '',
     reduceShake,
   })
-  chalk.update(tutorial, { x: m.eyeX, y: m.eyeY, facing: bird.facing, visible: m.birdInFrame }, {
+  chalk.update(tutorial, { x: m.eyeX, y: m.eyeY, facing: bird?.facing ?? 1, visible: m.birdInFrame }, {
     aperture: allowed('aperture'), shutter: allowed('shutter'), iso: allowed('iso'),
   })
 })
@@ -399,7 +411,7 @@ if (!tutorialDone) startTutorial()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
-  cam, rig, world, camera, capture, album, bird, spawner, shooting: () => shooting,
+  cam, rig, world, camera, capture, album, birds, dove, spawner, activeBird, shooting: () => shooting,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },
   setHelp: (v: boolean) => { helpVisible = v },

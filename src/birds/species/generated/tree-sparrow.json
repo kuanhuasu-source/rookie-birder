@@ -1,0 +1,41 @@
+{
+  "id": "tree-sparrow",
+  "nameZh": "麻雀",
+  "nameEn": "Eurasian Tree Sparrow",
+  "bodyLengthM": 0.14,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.836,
+        0.673
+      ],
+      "contentW": 0.969,
+      "contentH": 0.537,
+      "albedo": 0.383,
+      "file": "birds/tree-sparrow-side.png",
+      "sizeM": 0.144
+    },
+    "3q": {
+      "eyeUv": [
+        0.8176,
+        0.6816
+      ],
+      "contentW": 0.966,
+      "contentH": 0.584,
+      "albedo": 0.458,
+      "file": "birds/tree-sparrow-3q.png",
+      "sizeM": 0.138
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8315,
+        0.6461
+      ],
+      "contentW": 0.958,
+      "contentH": 0.734,
+      "albedo": 0.453,
+      "file": "birds/tree-sparrow-takeoff.png",
+      "sizeM": 0.212
+    }
+  }
+}

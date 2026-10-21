@@ -1,0 +1,41 @@
+{
+  "id": "swinhoes-white-eye",
+  "nameZh": "綠繡眼",
+  "nameEn": "Swinhoe's White-eye",
+  "bodyLengthM": 0.11,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.7934,
+        0.6592
+      ],
+      "contentW": 0.968,
+      "contentH": 0.492,
+      "albedo": 0.481,
+      "file": "birds/swinhoes-white-eye-side.png",
+      "sizeM": 0.114
+    },
+    "3q": {
+      "eyeUv": [
+        0.816,
+        0.692
+      ],
+      "contentW": 0.963,
+      "contentH": 0.61,
+      "albedo": 0.458,
+      "file": "birds/swinhoes-white-eye-3q.png",
+      "sizeM": 0.109
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.808,
+        0.508
+      ],
+      "contentW": 0.956,
+      "contentH": 0.734,
+      "albedo": 0.473,
+      "file": "birds/swinhoes-white-eye-takeoff.png",
+      "sizeM": 0.167
+    }
+  }
+}

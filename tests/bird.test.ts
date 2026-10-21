@@ -67,7 +67,7 @@ describe('Spawner', () => {
   it('calls before spawning and respawns after the bird leaves', () => {
     const rng = seeded(11)
     const bird = new Bird(spottedDove, rng)
-    const sp = new Spawner(bird, [perch], rng)
+    const sp = new Spawner([bird], [perch], rng)
     let calls = 0
     sp.onCall = () => { calls++ }
     const dt = 1 / 30
@@ -86,5 +86,25 @@ describe('Spawner', () => {
     }
     expect(respawned).toBe(true)
     expect(calls).toBe(2)
+  })
+})
+
+describe('Spawner with several species', () => {
+  it('picks species by weight and never has two birds in scene', async () => {
+    const { lightVentedBulbul, treeSparrow } = await import('../src/birds/species')
+    const rng = seeded(21)
+    const birds = [new Bird(spottedDove, rng), new Bird(lightVentedBulbul, rng), new Bird(treeSparrow, rng)]
+    const sp = new Spawner(birds, [perch], rng, { 'spotted-dove': 0.2, 'light-vented-bulbul': 0.6, 'tree-sparrow': 0.2 }, 0.2)
+    const seen = new Map<string, number>()
+    const dt = 1 / 30
+    for (let t = 0; t < 600; t += dt) {
+      sp.update(dt)
+      for (const b of birds) b.update(dt, camPos)
+      const inScene = birds.filter((b) => b.inScene)
+      expect(inScene.length).toBeLessThanOrEqual(1)
+      if (sp.current && sp.current.inScene && sp.current.state === 'S4') seen.set(sp.current.species.id, (seen.get(sp.current.species.id) ?? 0) + 1)
+    }
+    expect(seen.size).toBeGreaterThanOrEqual(2)
+    expect((seen.get('light-vented-bulbul') ?? 0)).toBeGreaterThan(seen.get('tree-sparrow') ?? 0)
   })
 })

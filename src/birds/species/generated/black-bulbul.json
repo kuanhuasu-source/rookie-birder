@@ -1,0 +1,41 @@
+{
+  "id": "black-bulbul",
+  "nameZh": "紅嘴黑鵯",
+  "nameEn": "Black Bulbul",
+  "bodyLengthM": 0.24,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8232,
+        0.6404
+      ],
+      "contentW": 0.969,
+      "contentH": 0.497,
+      "albedo": 0.236,
+      "file": "birds/black-bulbul-side.png",
+      "sizeM": 0.248
+    },
+    "3q": {
+      "eyeUv": [
+        0.843,
+        0.654
+      ],
+      "contentW": 0.964,
+      "contentH": 0.578,
+      "albedo": 0.228,
+      "file": "birds/black-bulbul-3q.png",
+      "sizeM": 0.237
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.836,
+        0.637
+      ],
+      "contentW": 0.963,
+      "contentH": 0.648,
+      "albedo": 0.201,
+      "file": "birds/black-bulbul-takeoff.png",
+      "sizeM": 0.361
+    }
+  }
+}

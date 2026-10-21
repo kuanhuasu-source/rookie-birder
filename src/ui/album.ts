@@ -2,6 +2,7 @@ import { listPhotos, deletePhoto } from '../photo/album'
 import type { PhotoRecord } from '../photo/types'
 import { formatShutter } from '../camera/exposure'
 import { starString } from '../photo/score'
+import { speciesName } from '../birds/species'
 
 function fmtAperture(n: number): string {
   return `f/${n < 10 ? n.toFixed(1).replace(/\.0$/, '') : Math.round(n)}`
@@ -16,7 +17,7 @@ export function metricsLine(p: PhotoRecord): string {
   const m = p.metrics
   if (!m.birdInFrame) return '鳥不在畫面內'
   const o = m.overStops
-  return `${m.species ?? ''} ${m.birdState ?? ''} · 鳥眼 ${m.distM.toFixed(1)}m · 模糊圈 ${m.cocPx.toFixed(1)}px · 動態 ${m.motionPx.toFixed(1)}px · 手震 ${m.shakePx.toFixed(1)}px · 總計 ${m.totalBlurPx.toFixed(1)}px · 曝光 ${o > 0 ? '+' : ''}${o.toFixed(1)} 格`
+  return `${speciesName(m.species)} ${m.birdState ?? ''} · 鳥眼 ${m.distM.toFixed(1)}m · 模糊圈 ${m.cocPx.toFixed(1)}px · 動態 ${m.motionPx.toFixed(1)}px · 手震 ${m.shakePx.toFixed(1)}px · 總計 ${m.totalBlurPx.toFixed(1)}px · 曝光 ${o > 0 ? '+' : ''}${o.toFixed(1)} 格`
 }
 
 /** 相簿：縮圖格 + 單張檢視。 */
@@ -90,7 +91,7 @@ export class AlbumView {
       this.urls.push(url)
       const card = document.createElement('div')
       card.className = 'album-card'
-      card.innerHTML = `<img src="${url}"><div class="cap stars">${starString(p.score?.stars ?? 0)} <span>${Math.round(p.score?.total ?? 0)}</span></div><div class="cap">${describe(p)}</div><div class="cap small">${p.score?.advice ?? ''}</div>`
+      card.innerHTML = `<img src="${url}"><div class="cap stars">${starString(p.score?.stars ?? 0)} <span>${Math.round(p.score?.total ?? 0)}</span></div><div class="cap">${p.metrics.birdInFrame ? speciesName(p.metrics.species) + ' · ' : ''}${describe(p)}</div><div class="cap small">${p.score?.advice ?? ''}</div>`
       card.addEventListener('click', () => this.view(p))
       this.grid.appendChild(card)
     }

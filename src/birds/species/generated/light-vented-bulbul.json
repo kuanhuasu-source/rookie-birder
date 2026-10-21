@@ -1,0 +1,41 @@
+{
+  "id": "light-vented-bulbul",
+  "nameZh": "白頭翁",
+  "nameEn": "Light-vented Bulbul",
+  "bodyLengthM": 0.19,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.822,
+        0.653
+      ],
+      "contentW": 0.967,
+      "contentH": 0.502,
+      "albedo": 0.361,
+      "file": "birds/light-vented-bulbul-side.png",
+      "sizeM": 0.196
+    },
+    "3q": {
+      "eyeUv": [
+        0.8016,
+        0.6368
+      ],
+      "contentW": 0.964,
+      "contentH": 0.554,
+      "albedo": 0.371,
+      "file": "birds/light-vented-bulbul-3q.png",
+      "sizeM": 0.187
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8212,
+        0.4857
+      ],
+      "contentW": 0.952,
+      "contentH": 0.832,
+      "albedo": 0.357,
+      "file": "birds/light-vented-bulbul-takeoff.png",
+      "sizeM": 0.289
+    }
+  }
+}
