@@ -14,6 +14,8 @@ export interface SpriteDef {
   sizeM: number
   /** 頭部方向與相機視線的夾角（度）：側面 90、四分之三 45、正面 0 */
   viewAngleDeg: number
+  /** 這張貼圖不透明區域的平均線性亮度，曝光評分的目標 */
+  albedo: number
 }
 
 export interface Range { min: number; max: number }

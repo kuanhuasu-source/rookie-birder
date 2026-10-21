@@ -1,6 +1,7 @@
 import { listPhotos, deletePhoto } from '../photo/album'
 import type { PhotoRecord } from '../photo/types'
 import { formatShutter } from '../camera/exposure'
+import { starString } from '../photo/score'
 
 function fmtAperture(n: number): string {
   return `f/${n < 10 ? n.toFixed(1).replace(/\.0$/, '') : Math.round(n)}`
@@ -70,7 +71,7 @@ export class AlbumView {
       this.urls.push(url)
       const card = document.createElement('div')
       card.className = 'album-card'
-      card.innerHTML = `<img src="${url}"><div class="cap">${describe(p)}</div><div class="cap small">${p.metrics.birdInFrame ? `總模糊 ${p.metrics.totalBlurPx.toFixed(1)}px` : '沒有鳥'}</div>`
+      card.innerHTML = `<img src="${url}"><div class="cap stars">${starString(p.score?.stars ?? 0)} <span>${Math.round(p.score?.total ?? 0)}</span></div><div class="cap">${describe(p)}</div><div class="cap small">${p.score?.advice ?? ''}</div>`
       card.addEventListener('click', () => this.view(p))
       this.grid.appendChild(card)
     }
@@ -80,7 +81,10 @@ export class AlbumView {
     const url = URL.createObjectURL(p.blob)
     this.urls.push(url)
     ;(this.viewer.querySelector('img') as HTMLImageElement).src = url
+    const sc = p.score
+    const bar = (label: string, v: number, max: number) => `<div class="bar"><span class="bar-label">${label}</span><span class="bar-track"><span class="bar-fill" style="width:${(v / max) * 100}%"></span></span><span class="bar-val">${Math.round(v)}/${max}</span></div>`
     ;(this.viewer.querySelector('.album-info') as HTMLElement).innerHTML =
+      (sc ? `<div class="score-card"><div class="score-stars">${starString(sc.stars)} <strong>${Math.round(sc.total)}</strong> 分</div>${bar('對焦與銳利度', sc.focus, 30)}${bar('曝光', sc.exposure, 25)}${bar('構圖與背景', sc.composition, 25)}${bar('姿態與時機', sc.moment, 20)}<div class="score-advice">${sc.advice}${sc.caps.length ? `（${sc.caps.join('、')}）` : ''}</div></div>` : '') +
       `<div>${describe(p)} · 對焦 ${p.settings.focusM.toFixed(1)}m · ${p.gear.lens} / ${p.gear.body} / ${p.gear.support}</div><div>${metricsLine(p)}</div><div>${p.lighting.time} · ${p.lighting.weather} · 場景 EV ${p.lighting.evScene} · ${new Date(p.takenAt).toLocaleString()}</div>`
     const del = this.viewer.querySelector('.album-delete') as HTMLButtonElement
     del.onclick = async () => { await deletePhoto(p.id); this.viewer.classList.add('hidden'); await this.refresh() }

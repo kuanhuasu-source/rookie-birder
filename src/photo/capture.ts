@@ -1,8 +1,10 @@
 import * as THREE from 'three'
 import { Pipeline } from '../render/pipeline'
-import { BirdMask } from '../render/mask'
+import { BirdMask, BIRD_LAYER } from '../render/mask'
 import type { PhotoRecord, PhotoMetrics } from './types'
 import { savePhoto } from './album'
+import { PhotoStats } from './stats'
+import { scorePhoto } from './score'
 
 export const PHOTO_W = 1920
 export const PHOTO_H = 1280
@@ -28,6 +30,7 @@ export interface CaptureInput {
 export class PhotoCapture {
   private pipeline: Pipeline
   private mask: BirdMask
+  private stats: PhotoStats
   private pool: THREE.WebGLRenderTarget[] = []
   private busy = new Set<THREE.WebGLRenderTarget>()
   private photoCamera = new THREE.PerspectiveCamera()
@@ -36,6 +39,7 @@ export class PhotoCapture {
   constructor(private renderer: THREE.WebGLRenderer) {
     this.pipeline = new Pipeline(renderer, PHOTO_W, PHOTO_H)
     this.mask = new BirdMask(PHOTO_W, PHOTO_H)
+    this.stats = new PhotoStats(renderer)
     for (let i = 0; i < 3; i++) this.pool.push(new THREE.WebGLRenderTarget(PHOTO_W, PHOTO_H, { type: THREE.UnsignedByteType, depthBuffer: false }))
   }
 
@@ -51,12 +55,14 @@ export class PhotoCapture {
     cam.near = input.camera.near
     cam.far = input.camera.far
     cam.aspect = PHOTO_W / PHOTO_H
+    cam.layers.enable(BIRD_LAYER)
     cam.updateProjectionMatrix()
     cam.position.copy(input.camera.position)
     cam.quaternion.copy(input.camera.quaternion)
     cam.updateMatrixWorld()
 
     this.mask.render(this.renderer, input.scene, cam, input.birdPapers)
+    const pre = input.metrics.birdInFrame ? this.stats.prepare(input.scene, cam, input.birdPapers, input.metrics.distM) : null
 
     const t = input.settings.shutterS
     const focalPx = (input.settings.focalMm / input.sensorWmm) * PHOTO_W
@@ -87,13 +93,16 @@ export class PhotoCapture {
       } finally {
         this.busy.delete(rt)
       }
+      const metrics = { ...input.metrics }
+      if (pre) metrics.stats = this.stats.finish(pre, buf, PHOTO_W, PHOTO_H)
+      const score = scorePhoto(metrics, { imageW: PHOTO_W, imageH: PHOTO_H })
       const { blob, thumb } = await encode(buf, PHOTO_W, PHOTO_H)
       const rec: PhotoRecord = {
         id, takenAt, width: PHOTO_W, height: PHOTO_H,
         settings: { ...input.settings },
         gear: { ...input.gear },
         lighting: { ...input.lighting },
-        metrics: { ...input.metrics },
+        metrics, score,
         blob, thumb,
       }
       await savePhoto(rec)

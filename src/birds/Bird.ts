@@ -25,6 +25,8 @@ export class Bird {
   inScene = false
   /** 目前貼圖的頭部角度（度） */
   viewAngleDeg = 90
+  /** 目前貼圖的平均反照率 */
+  albedo = 0.44
   facing: 1 | -1 = 1
   onLeft: (() => void) | null = null
 
@@ -45,7 +47,7 @@ export class Bird {
     this.sprite = species.sprites.side
     const mat = new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.5, side: THREE.DoubleSide })
     this.paper = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat)
-    this.paper.layers.enable(BIRD_LAYER)
+    this.paper.layers.set(BIRD_LAYER)
     this.group.add(this.paper, this.eye)
     this.group.visible = false
     this.applySprite(this.sprite)
@@ -67,6 +69,7 @@ export class Bird {
     this.paper.position.y = (s.contentH * s.sizeM) / 2
     this.eye.position.set((s.eyeUv[0] - 0.5) * s.sizeM * this.facing, (s.eyeUv[1] - 0.5) * s.sizeM + this.paper.position.y, 0.003)
     this.viewAngleDeg = s.viewAngleDeg
+    this.albedo = s.albedo
   }
 
   private setFacing(f: 1 | -1): void {

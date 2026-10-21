@@ -33,6 +33,9 @@ export class BirdMask {
     const prevFog = scene.fog
     scene.background = null
     scene.fog = null
+    const prevMask = camera.layers.mask
+    // 場景（不含鳥）用黑色寫入深度
+    camera.layers.set(0)
     scene.overrideMaterial = this.black
     renderer.setRenderTarget(this.target)
     renderer.setClearColor(0x000000, 1)
@@ -40,7 +43,6 @@ export class BirdMask {
     renderer.render(scene, camera)
     scene.overrideMaterial = null
 
-    const prevMask = camera.layers.mask
     camera.layers.set(BIRD_LAYER)
     const swapped: { m: THREE.Mesh; mat: THREE.Material | THREE.Material[] }[] = []
     for (const m of birdPapers) {

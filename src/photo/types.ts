@@ -16,6 +16,40 @@ export interface PhotoMetrics {
   birdState?: string
   viewAngleDeg?: number
   species?: string
+  albedo?: number
+  /** 鳥面向畫面右（1）或左（-1） */
+  facing?: 1 | -1
+  /** 太陽方向與「鳥到相機」方向的夾角：0 順光、180 逆光 */
+  lightAngleDeg?: number
+  /** 相機看鳥眼的俯仰角（度），0 代表平視 */
+  pitchDeg?: number
+  /** 影像統計（拍照時由小尺寸遮罩算出） */
+  stats?: ImageStats
+}
+
+export interface ImageStats {
+  /** 鳥被前景遮住的比例 0 到 1 */
+  occlusion: number
+  /** 主體在最終照片上的平均亮度（sRGB 解碼後的線性值） */
+  subjectMean: number
+  clippedFrac: number
+  crushedFrac: number
+  /** 主體周圍環帶的亮度變異數 */
+  bgVariance: number
+  /** 背景與主體的距離比：(背景距離 − 主體距離) / 主體距離，夾 0 到 1，天空為 1 */
+  bgSep: number
+}
+
+export interface PhotoScore {
+  focus: number
+  exposure: number
+  composition: number
+  moment: number
+  total: number
+  stars: number
+  advice: string
+  caps: string[]
+  detail: Record<string, number>
 }
 
 export interface PhotoRecord {
@@ -27,6 +61,7 @@ export interface PhotoRecord {
   gear: { lens: string; body: string; support: string }
   lighting: { time: string; weather: string; evScene: number }
   metrics: PhotoMetrics
+  score: PhotoScore
   blob: Blob
   thumb: Blob
 }

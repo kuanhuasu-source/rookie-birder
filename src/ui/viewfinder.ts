@@ -13,6 +13,8 @@ export interface HudExtra {
   bufferMax: number
   blackout: boolean
   flash: boolean
+  coins: number
+  toast: string
 }
 
 const HELP = `滑鼠 轉雲台   滾輪 變焦   右鍵拖曳 對焦環
@@ -35,6 +37,8 @@ export class Viewfinder {
   private shots: HTMLElement
   private blackout: HTMLElement
   private flash: HTMLElement
+  private coins: HTMLElement
+  private toast: HTMLElement
 
   constructor(container: HTMLElement) {
     this.root = container
@@ -52,6 +56,8 @@ export class Viewfinder {
       <div class="shots"></div>
       <div class="blackout"></div>
       <div class="flash"></div>
+      <div class="readout coins"></div>
+      <div class="toast hidden"></div>
     `
     const q = (s: string) => container.querySelector(s) as HTMLElement
     this.focal = q('.tl')
@@ -66,6 +72,8 @@ export class Viewfinder {
     this.shots = q('.shots')
     this.blackout = q('.blackout')
     this.flash = q('.flash')
+    this.coins = q('.coins')
+    this.toast = q('.toast')
     this.help.textContent = HELP
 
     const scale = q('.focus-scale')
@@ -93,6 +101,9 @@ export class Viewfinder {
     this.shots.textContent = `剩 ${extra.cardLeft} 張 · 緩衝 ${extra.buffer}/${extra.bufferMax}`
     this.blackout.classList.toggle('on', extra.blackout)
     this.flash.classList.toggle('on', extra.flash)
+    this.coins.textContent = `代幣 ${extra.coins}`
+    this.toast.classList.toggle('hidden', !extra.toast)
+    this.toast.textContent = extra.toast
     const o = extra.overStops
     this.debug.textContent = `場景 EV ${extra.evScene}  相機 ${o > 0 ? '+' : ''}${o.toFixed(1)} 格  ${extra.blurInfo}`
     this.debug.style.display = extra.helpVisible ? '' : 'none'

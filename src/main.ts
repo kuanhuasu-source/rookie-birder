@@ -15,9 +15,11 @@ import { AlbumView } from './ui/album'
 import { PhotoCapture, PHOTO_W } from './photo/capture'
 import type { PhotoMetrics } from './photo/types'
 import { Bird } from './birds/Bird'
+import { BIRD_LAYER } from './render/mask'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { playCall, unlockAudio } from './audio/call'
+import { coinsFor, starString } from './photo/score'
 
 const CARD_CAPACITY = 60
 
@@ -31,6 +33,7 @@ renderer.outputColorSpace = THREE.LinearSRGBColorSpace
 const world = buildWorld()
 const camera = new THREE.PerspectiveCamera(10, 1.5, 0.3, 600)
 camera.position.copy(world.hidePosition)
+camera.layers.enable(BIRD_LAYER)
 
 // 鳥
 const bird = new Bird(spottedDove)
@@ -100,6 +103,9 @@ let hint = ''
 let shutterDown = false
 let halfPress = false
 let flashT = 0
+let coins = 0
+let toast = ''
+let toastT = 0
 
 function setLighting(): void {
   lighting = lightingPreset(time, weather)
@@ -187,6 +193,11 @@ function measureBird(dt: number): PhotoMetrics {
   eyePrevWorld.copy(eyeWorld)
   eyePrevValid = true
 
+  // 光線方向：鳥到相機的方向與太陽方向的夾角
+  const toCam = camera.position.clone().sub(eyeWorld).normalize()
+  const lightAngleDeg = (Math.acos(Math.min(1, Math.max(-1, toCam.dot(lighting.sunDir)))) * 180) / Math.PI
+  const pitchDeg = (Math.asin(-toCam.y) * 180) / Math.PI
+
   const coc = cocPx(s.focalMm, s.fNumber, s.focusM, dist, sensor, PHOTO_W)
   const motion = birdVelPx.length() * s.shutterS
   const total = totalBlurPx({ coc, motion, shake: base.shakePx, soft: base.softPx })
@@ -196,7 +207,8 @@ function measureBird(dt: number): PhotoMetrics {
     ...base,
     birdInFrame: inFrame, distM: dist, cocPx: coc, motionPx: motion, totalBlurPx: total,
     eyeX: ex, eyeY: ey, birdHeightFrac: birdHeightPx / (PHOTO_W / 1.5),
-    birdState: bird.state, viewAngleDeg: bird.viewAngleDeg,
+    birdState: bird.state, viewAngleDeg: bird.viewAngleDeg, albedo: bird.albedo, facing: bird.facing,
+    lightAngleDeg, pitchDeg,
   }
 }
 
@@ -216,7 +228,14 @@ function takePhoto(m: PhotoMetrics): void {
     camOmega: new THREE.Vector2(rig.shake.omegaYaw + rig.panOmegaYaw, rig.shake.omegaPitch + rig.panOmegaPitch),
     birdVelPx: birdVelPx.clone(),
   })
-  if (rec) { flashT = 0.08; rec.catch((e) => console.error('photo failed', e)) }
+  if (rec) {
+    flashT = 0.08
+    rec.then((p) => {
+      coins += coinsFor(p.score.stars)
+      toast = `${starString(p.score.stars)} ${Math.round(p.score.total)} 分  ${p.score.advice}`
+      toastT = 3
+    }).catch((e) => console.error('photo failed', e))
+  }
 }
 
 const STATE_LABEL: Record<string, string> = { S1: '靜止', S2: '小動作', S3: '跳枝', S4: '起飛/降落', S5: '飛行' }
@@ -231,6 +250,7 @@ startLoop((dt) => {
   rig.update(dt)
   trueQuat.copy(camera.quaternion)
   flashT = Math.max(0, flashT - dt)
+  toastT = Math.max(0, toastT - dt)
   callFlashT = Math.max(0, callFlashT - dt)
 
   spawner.update(dt)
@@ -287,6 +307,8 @@ startLoop((dt) => {
     bufferMax: cam.body.bufferFrames,
     blackout: shooting.blackoutT > 0,
     flash: flashT > 0,
+    coins,
+    toast: toastT > 0 ? toast : '',
   })
 })
 

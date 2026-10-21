@@ -8,9 +8,9 @@ export const spottedDove: SpeciesDef = {
   bodyHeightM: 0.17,
   albedo: 0.42,
   sprites: {
-    side:    { file: '/birds/spotted-dove-side.png',    view: 'side',    eyeUv: [0.8658, 0.6996], contentW: 0.966, contentH: 0.551, sizeM: 0.31, viewAngleDeg: 90 },
-    '3q':    { file: '/birds/spotted-dove-3q.png',      view: '3q',      eyeUv: [0.8487, 0.7746], contentW: 0.958, contentH: 0.726, sizeM: 0.30, viewAngleDeg: 45 },
-    takeoff: { file: '/birds/spotted-dove-takeoff.png', view: 'takeoff', eyeUv: [0.8748, 0.5776], contentW: 0.963, contentH: 0.628, sizeM: 0.44, viewAngleDeg: 90 },
+    side:    { file: '/birds/spotted-dove-side.png',    view: 'side',    eyeUv: [0.8658, 0.6996], contentW: 0.966, contentH: 0.551, sizeM: 0.31, viewAngleDeg: 90, albedo: 0.44 },
+    '3q':    { file: '/birds/spotted-dove-3q.png',      view: '3q',      eyeUv: [0.8487, 0.7746], contentW: 0.958, contentH: 0.726, sizeM: 0.30, viewAngleDeg: 45, albedo: 0.475 },
+    takeoff: { file: '/birds/spotted-dove-takeoff.png', view: 'takeoff', eyeUv: [0.8748, 0.5776], contentW: 0.963, contentH: 0.628, sizeM: 0.44, viewAngleDeg: 90, albedo: 0.33 },
   },
   dwell: { min: 18, max: 40 },
   interval: { min: 12, max: 30 },
