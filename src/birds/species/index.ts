@@ -4,6 +4,9 @@ import bulbulGen from './generated/light-vented-bulbul.json'
 import sparrowGen from './generated/tree-sparrow.json'
 import whiteEyeGen from './generated/swinhoes-white-eye.json'
 import blackBulbulGen from './generated/black-bulbul.json'
+import kingfisherGen from './generated/common-kingfisher.json'
+import wagtailGen from './generated/white-wagtail.json'
+import egretGen from './generated/little-egret.json'
 
 interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number }
 interface Generated { id: string; nameZh: string; nameEn: string; bodyLengthM: number; sprites: Record<'side' | '3q' | 'takeoff', GeneratedSprite> }
@@ -68,7 +71,46 @@ export const blackBulbul: SpeciesDef = {
   rarity: 'rare',
 }
 
-export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul]
+/** 翠鳥：停很久、動作少，但離開前會突然俯衝；起飛是重頭戲。 */
+export const commonKingfisher: SpeciesDef = {
+  id: 'common-kingfisher', nameZh: '翠鳥', nameEn: 'Common Kingfisher',
+  bodyHeightM: 0.09, albedo: kingfisherGen.sprites.side.albedo,
+  sprites: sprites(kingfisherGen as Generated),
+  dwell: { min: 20, max: 45 }, interval: { min: 18, max: 40 },
+  stateDurations: { S1: { min: 4, max: 10 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.3, max: 0.5 } },
+  transitions: { S1: { S2: 0.6, S3: 0.25, S4: 0.15 }, S2: { S1: 0.75, S3: 0.15, S4: 0.1 }, S3: { S1: 0.7, S2: 0.3 } },
+  flightSpeedMs: 11, hopDistM: 0.3,
+  call: { baseHz: 5200, notes: 2, noteS: 0.09, gapS: 0.05 },
+  rarity: 'rare',
+}
+
+/** 白鶺鴒：一直走、一直擺尾，動作格的練習。 */
+export const whiteWagtail: SpeciesDef = {
+  id: 'white-wagtail', nameZh: '白鶺鴒', nameEn: 'White Wagtail',
+  bodyHeightM: 0.08, albedo: wagtailGen.sprites.side.albedo,
+  sprites: sprites(wagtailGen as Generated),
+  dwell: { min: 8, max: 20 }, interval: { min: 8, max: 18 },
+  stateDurations: { S1: { min: 0.6, max: 1.8 }, S2: { min: 0.8, max: 2 }, S3: { min: 0.35, max: 0.6 } },
+  transitions: { S1: { S2: 0.3, S3: 0.6, S4: 0.1 }, S2: { S1: 0.3, S3: 0.6, S4: 0.1 }, S3: { S1: 0.4, S2: 0.6 } },
+  flightSpeedMs: 9, hopDistM: 0.5,
+  call: { baseHz: 3600, notes: 2, noteS: 0.1, gapS: 0.08 },
+  rarity: 'common',
+}
+
+/** 小白鷺：大、慢、全白，曝光的考題。 */
+export const littleEgret: SpeciesDef = {
+  id: 'little-egret', nameZh: '小白鷺', nameEn: 'Little Egret',
+  bodyHeightM: 0.45, albedo: egretGen.sprites.side.albedo,
+  sprites: sprites(egretGen as Generated),
+  dwell: { min: 20, max: 45 }, interval: { min: 15, max: 35 },
+  stateDurations: { S1: { min: 3, max: 8 }, S2: { min: 1.5, max: 4 }, S3: { min: 0.8, max: 1.4 } },
+  transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
+  flightSpeedMs: 6, hopDistM: 0.8,
+  call: { baseHz: 700, notes: 1, noteS: 0.35, gapS: 0.1 },
+  rarity: 'common',
+}
+
+export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret]
 export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries(SPECIES.map((s) => [s.id, s]))
 
 /** 第一章公園草地的出現權重。 */

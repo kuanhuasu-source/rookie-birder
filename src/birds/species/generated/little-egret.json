@@ -1,0 +1,41 @@
+{
+  "id": "little-egret",
+  "nameZh": "小白鷺",
+  "nameEn": "Little Egret",
+  "bodyLengthM": 0.6,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.6935,
+        0.9129
+      ],
+      "contentW": 0.806,
+      "contentH": 0.946,
+      "albedo": 0.69,
+      "file": "birds/little-egret-side.png",
+      "sizeM": 0.744
+    },
+    "3q": {
+      "eyeUv": [
+        0.6912,
+        0.9171
+      ],
+      "contentW": 0.758,
+      "contentH": 0.946,
+      "albedo": 0.682,
+      "file": "birds/little-egret-3q.png",
+      "sizeM": 0.752
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.786,
+        0.637
+      ],
+      "contentW": 0.947,
+      "contentH": 0.936,
+      "albedo": 0.709,
+      "file": "birds/little-egret-takeoff.png",
+      "sizeM": 0.919
+    }
+  }
+}

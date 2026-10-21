@@ -218,3 +218,46 @@ body.touch .album-photo img { max-height: 42vh; }
 body.touch .gear-cols { grid-template-columns: 1fr; }
 body.touch .gear-lists { grid-template-columns: 1fr; }
 body.touch .guide-pages { grid-template-columns: 1fr; }
+
+/* 關卡選擇 */
+.levels, .summary { position: fixed; inset: 0; background: var(--cream); z-index: 11; overflow: auto; padding: 24px; }
+.levels.hidden, .summary.hidden { display: none; }
+.levels-sub { font-size: 16px; opacity: 0.7; }
+.chapter-title { font-size: 24px; margin: 10px 0 8px; }
+.level-grid, .hide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.level-card, .hide-card { font-family: var(--font); text-align: left; background: #fffdf7; border: 2px solid var(--pencil); border-radius: 6px; padding: 12px 14px; color: var(--pencil); cursor: pointer; transform: rotate(-0.4deg); box-shadow: 3px 3px 0 rgba(74,74,74,0.2); background-image: repeating-linear-gradient(transparent 0 27px, rgba(29,111,184,0.12) 27px 28px); }
+.level-card:nth-child(even), .hide-card:nth-child(even) { transform: rotate(0.5deg); }
+.level-card.locked { opacity: 0.5; cursor: default; }
+.level-name, .hide-name { font-size: 24px; }
+.level-sub, .hide-desc { font-size: 15px; opacity: 0.75; margin-bottom: 8px; }
+.level-quests div { font-size: 15px; line-height: 1.5; }
+.level-quests div.done { color: var(--blue); }
+.level-quests span { opacity: 0.6; font-size: 13px; }
+.level-progress { margin-top: 6px; font-size: 14px; opacity: 0.7; }
+.hide-go { margin-top: 8px; display: inline-block; background: var(--orange); color: #fff; border: 2px solid var(--pencil); border-radius: 6px; padding: 4px 14px; font-size: 18px; }
+
+/* 結算 */
+.summary { display: flex; align-items: center; justify-content: center; }
+.summary-card { background: #fff; border: 2px solid var(--pencil); border-radius: 8px; padding: 18px 22px; width: min(560px, 92vw); transform: rotate(-0.5deg); box-shadow: 4px 4px 0 rgba(74,74,74,0.25); text-align: center; }
+.summary-title { font-size: 32px; }
+.summary-level { font-size: 18px; opacity: 0.75; margin-bottom: 10px; }
+.summary-photo img { max-width: 100%; max-height: 40vh; border: 2px solid var(--pencil); }
+.summary-stats { font-size: 18px; margin: 10px 0; }
+.summary-coins { color: var(--orange); font-size: 26px; }
+.summary-quests { font-size: 16px; text-align: left; display: inline-block; }
+.summary-quests span { opacity: 0.6; }
+.summary-quests .muted { opacity: 0.6; }
+.summary-actions { margin-top: 12px; display: flex; gap: 10px; justify-content: center; }
+.summary-actions button { font-family: var(--font); font-size: 18px; background: var(--orange); color: #fff; border: 2px solid var(--pencil); border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+.summary-actions .s-levels { background: var(--blue); }
+
+/* 計時與任務面板 */
+.timer { position: absolute; top: 26px; left: 50%; transform: translateX(-50%) rotate(-0.5deg); font-size: 20px; }
+.timer.low { color: var(--orange); border-color: var(--orange); }
+.quests { position: absolute; top: 74px; left: 26px; background: rgba(246,238,220,0.9); border: 2px solid var(--pencil); border-radius: 6px; padding: 6px 10px; font-size: 15px; max-width: 320px; transform: rotate(-0.6deg); }
+.quests div { line-height: 1.4; }
+.quests div.done { color: var(--blue); text-decoration: line-through; }
+.quests.hidden { display: none; }
+body.touch .timer { top: 14px; left: 50%; font-size: clamp(13px, 2vw, 18px); }
+body.touch .readout.coins { left: auto; right: 100px; transform: rotate(0.6deg); }
+body.touch .quests { top: 56px; left: 14px; font-size: clamp(11px, 1.8vw, 14px); max-width: 46%; padding: 4px 8px; }

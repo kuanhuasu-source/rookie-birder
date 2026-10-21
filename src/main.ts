@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { buildWorld } from './world/scene'
+import { buildScene, type World } from './world/scene'
 import { lightingPreset, applyLighting, type TimeOfDay, type Weather } from './world/lighting'
 import { Pipeline } from './render/pipeline'
 import { CameraState } from './camera/state'
@@ -14,6 +14,11 @@ import { loadSave, storeSave } from './progress/save'
 import { updateGuide } from './progress/guide'
 import { GuideView } from './ui/guide'
 import { GearView } from './ui/gear'
+import { LevelView } from './ui/levels'
+import { SummaryView } from './ui/summary'
+import { LEVELS, LEVEL_BY_ID } from './levels/data'
+import { LevelSession } from './levels/session'
+import type { LevelDef, HideDef } from './levels/types'
 import { startLoop } from './core/loop'
 import { Viewfinder } from './ui/viewfinder'
 import { AlbumView } from './ui/album'
@@ -41,9 +46,9 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, TOUCH ? 1 : 1.5))
 renderer.toneMapping = THREE.NoToneMapping
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace
 
-const world = buildWorld()
+let world: World = buildScene('park')
 const camera = new THREE.PerspectiveCamera(10, 1.5, 0.3, 600)
-camera.position.copy(world.hidePosition)
+camera.position.set(...world.hides[0].position)
 camera.layers.enable(BIRD_LAYER)
 
 // 鳥：每種一隻，同時只有一隻在場
@@ -56,10 +61,11 @@ for (const b of birds) {
     loader.load(import.meta.env.BASE_URL + b.species.sprites[key].file, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; b.setTexture(key, t) })
   }
 }
-const spawner = new Spawner(birds, world.perches, Math.random, PARK_WEIGHTS)
+let spawner = new Spawner(birds, world.perches, Math.random, PARK_WEIGHTS)
 let callFlashT = 0
 let callName = ''
-spawner.onCall = (b) => { playCall(b.species); callFlashT = 1.5; callName = b.species.nameZh }
+function wireSpawner(sp: Spawner): void { sp.onCall = (b) => { playCall(b.species); callFlashT = 1.5; callName = b.species.nameZh } }
+wireSpawner(spawner)
 /** 目前要量測與拍的鳥：教學時是斑鳩，否則是 spawner 放出來的那隻。 */
 function activeBird(): Bird | null { return tutorial.active ? dove : spawner.current }
 
@@ -118,10 +124,17 @@ const capture = new PhotoCapture(renderer)
 const hud = new Viewfinder(hudEl)
 const chalk = new Chalkboard(hudEl, TOUCH, () => { if (tutorial.active) endTutorial() })
 const album = new AlbumView(() => {})
+let session: LevelSession | null = null
+let currentLevel: LevelDef = LEVELS[0]
+let currentHide: HideDef = world.hides[0]
+const questsDone = new Set<string>()
+for (const id of save.questsDone) questsDone.add(id)
+const levelView = new LevelView(() => questsDone, (l, h) => startLevel(l, h))
+const summaryView = new SummaryView(() => startLevel(currentLevel, currentHide), () => levelView.show())
 const guide = new GuideView(() => save, () => {})
 const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => {})
 /** 任一全螢幕頁打開時暫停拍攝輸入。 */
-function overlayOpen(): boolean { return album.open || guide.open || gearView.open }
+function overlayOpen(): boolean { return album.open || guide.open || gearView.open || levelView.open || summaryView.open }
 function applyEquipped(): void {
   if (cam.lens.id !== save.equipped.lens || cam.body.id !== save.equipped.body || cam.support.id !== save.equipped.support) setGear(save.equipped.lens, save.equipped.body, save.equipped.support)
 }
@@ -132,6 +145,41 @@ function aimAtPerch(): void {
   const d = world.perches[0].position.clone().sub(camera.position).normalize()
   rig.yaw = Math.atan2(-d.x, -d.z)
   rig.pitch = Math.asin(d.y)
+}
+
+/** 換關：重建場景、擺機位、設光線、換鳥群與計時。 */
+function startLevel(level: LevelDef, hide: HideDef): void {
+  currentLevel = level
+  currentHide = hide
+  for (const b of birds) { if (b.inScene) { b.inScene = false; b.group.visible = false }; world.scene.remove(b.group) }
+  world.dispose()
+  world = buildScene(level.sceneId)
+  for (const b of birds) world.scene.add(b.group)
+  time = level.time
+  weather = level.weather
+  setLighting()
+  camera.position.set(...hide.position)
+  rig.yaw = (hide.yawDeg * Math.PI) / 180
+  rig.pitch = 0
+  const roster = birds.filter((b) => (level.species[b.species.id] ?? 0) > 0)
+  spawner = new Spawner(roster.length ? roster : birds, world.perches, Math.random, level.species, level.intervalMul)
+  wireSpawner(spawner)
+  shooting = new Shooting(cam.body, level.cardCapacity)
+  session = new LevelSession(level, questsDone)
+  lag.length = 0
+  eyePrevValid = false
+  levelView.hide()
+  summaryView.hide()
+}
+
+/** 收工：結算並回關卡頁。 */
+function endLevel(): void {
+  if (!session) { levelView.show(); return }
+  const sum = session.end()
+  session = null
+  document.exitPointerLock()
+  for (const b of birds) if (b.inScene) b.forceTakeoff()
+  void summaryView.show(sum)
 }
 function aimAtBird(): void {
   const bird = activeBird()
@@ -177,6 +225,7 @@ function handleKey(code: string): void {
     if (album.open) { if (code === 'Escape' || code === 'KeyG') album.hide(); return }
     if (guide.open) { if (code === 'Escape' || code === 'KeyK') guide.hide(); return }
     if (gearView.open) { if (code === 'Escape' || code === 'KeyU') gearView.hide(); return }
+    if (levelView.open || summaryView.open) return
     if (tutorial.active && code === 'Escape') { endTutorial(); return }
     if (code === 'KeyT') { startTutorial(); return }
     switch (code) {
@@ -194,6 +243,7 @@ function handleKey(code: string): void {
       case 'KeyG': document.exitPointerLock(); tutorial.noteAlbumOpen(); void album.show(); break
       case 'KeyK': document.exitPointerLock(); void guide.show(); break
       case 'KeyU': document.exitPointerLock(); gearView.show(); break
+      case 'KeyX': if (!tutorial.active) endLevel(); break
       case 'Digit1': time = 'dawn'; setLighting(); break
       case 'Digit2': time = 'morning'; setLighting(); break
       case 'Digit3': time = 'noon'; setLighting(); break
@@ -302,9 +352,14 @@ function takePhoto(m: PhotoMetrics): void {
     flashT = 0.08
     rec.then((p) => {
       tutorial.notePhoto(p)
-      save.coins += coinsFor(p.score.stars)
+      const earned = coinsFor(p.score.stars)
+      save.coins += earned
       const gu = updateGuide(save, p)
+      const fresh = session?.onPhoto(p, earned + (gu?.bonus ?? 0)) ?? []
+      for (const qq of fresh) save.coins += qq.reward
+      save.questsDone = [...questsDone]
       storeSave(save)
+      if (fresh.length) { toast = `任務完成：${fresh[0].title} +${fresh[0].reward} 代幣`; toastT = 3.5; return }
       if (gu?.bonus) { toast = `圖鑑：${speciesName(gu.species)}${gu.newSpecies ? '新鳥種' : '新格子'} +${gu.bonus} 代幣`; toastT = 3; return }
       const who = p.metrics.birdInFrame ? `${speciesName(p.metrics.species)}  ` : ''
       toast = `${starString(p.score.stars)} ${Math.round(p.score.total)} 分  ${who}${p.score.advice}`
@@ -350,6 +405,7 @@ function endTutorial(): void {
   dove.scripted = false
   if (dove.inScene) dove.forceTakeoff()
   spawner.reset(dove.inScene ? 10 : 6)
+  if (!session) session = new LevelSession(currentLevel, questsDone)
   try { localStorage.setItem(TUTORIAL_KEY, '1') } catch { /* 私密視窗 */ }
 }
 tutorial.onFinished = endTutorial
@@ -376,7 +432,11 @@ startLoop((dt) => {
   lockToastT = Math.max(0, lockToastT - dt)
   callFlashT = Math.max(0, callFlashT - dt)
 
-  if (!tutorial.active) spawner.update(dt)
+  if (!tutorial.active && session && !overlayOpen()) {
+    spawner.update(dt)
+    session.update(dt)
+    if (session.timeUp) { endLevel(); return }
+  }
   for (const b of birds) b.update(dt, camera.position)
   const bird = activeBird()
 
@@ -420,7 +480,7 @@ startLoop((dt) => {
   }
   camera.quaternion.copy(trueQuat)
 
-  if (shooting.cardLeft <= 0) hint = '記憶卡滿了，按 G 看相簿'
+  if (shooting.cardLeft <= 0) hint = TOUCH ? '記憶卡滿了，選單裡收工' : '記憶卡滿了，按 X 收工'
   else if (callFlashT > 0) hint = `♪ 有鳥叫，${callName}要來了`
   else if (bracing) hint = '穩住中：手震減半，雲台變慢'
   else if (halfPress) hint = cam.body.afTier === 0 ? '這台機身只有手動對焦' : '半按快門'
@@ -446,20 +506,25 @@ startLoop((dt) => {
     coins: save.coins,
     toast: toastT > 0 ? toast : '',
     reduceShake,
+    timerS: session && !tutorial.active ? session.remainingS : null,
+    quests: session && !tutorial.active ? session.level.quests.map((qq) => ({ title: qq.title, done: questsDone.has(qq.id) })) : [],
   })
   chalk.update(tutorial, { x: m.eyeX, y: m.eyeY, facing: bird?.facing ?? 1, visible: m.birdInFrame }, {
     aperture: allowed('aperture'), shutter: allowed('shutter'), iso: allowed('iso'),
   })
 })
 
-// 第一次進入直接上第零課
+// 第一次進入：第一關的長椅機位直接上第零課；之後先到關卡頁
 let tutorialDone = false
 try { tutorialDone = localStorage.getItem(TUTORIAL_KEY) === '1' } catch { /* 私密視窗 */ }
+startLevel(LEVELS[0], world.hides[0])
 if (!tutorialDone) startTutorial()
+else levelView.show()
 
 // 給測試與截圖腳本用
 ;(window as unknown as { __game: unknown }).__game = {
-  cam, rig, world, camera, capture, album, guide, gearView, save, birds, dove, spawner, activeBird, shooting: () => shooting,
+  cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, save, birds, dove, activeBird, shooting: () => shooting,
+  world: () => world, spawner: () => spawner, session: () => session, startLevel, endLevel, levels: LEVELS, levelById: LEVEL_BY_ID,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },
   setHelp: (v: boolean) => { helpVisible = v },

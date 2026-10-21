@@ -1,0 +1,41 @@
+{
+  "id": "common-kingfisher",
+  "nameZh": "翠鳥",
+  "nameEn": "Common Kingfisher",
+  "bodyLengthM": 0.16,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.6947,
+        0.655
+      ],
+      "contentW": 0.971,
+      "contentH": 0.492,
+      "albedo": 0.381,
+      "file": "birds/common-kingfisher-side.png",
+      "sizeM": 0.165
+    },
+    "3q": {
+      "eyeUv": [
+        0.68,
+        0.704
+      ],
+      "contentW": 0.963,
+      "contentH": 0.615,
+      "albedo": 0.37,
+      "file": "birds/common-kingfisher-3q.png",
+      "sizeM": 0.158
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.7552,
+        0.5651
+      ],
+      "contentW": 0.958,
+      "contentH": 0.723,
+      "albedo": 0.375,
+      "file": "birds/common-kingfisher-takeoff.png",
+      "sizeM": 0.242
+    }
+  }
+}

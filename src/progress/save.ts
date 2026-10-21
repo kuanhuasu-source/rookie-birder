@@ -19,6 +19,7 @@ export interface SaveData {
   guide: Record<string, Partial<Record<GuideSlot, GuideEntry>>>
   pulls: number
   pity: number
+  questsDone: string[]
 }
 
 const KEY = 'rookie-birder.save'
@@ -32,6 +33,7 @@ export function defaultSave(): SaveData {
     guide: {},
     pulls: 0,
     pity: 0,
+    questsDone: [],
   }
 }
 
@@ -46,6 +48,7 @@ export function loadSave(): SaveData {
       owned: { ...base.owned, ...(d.owned ?? {}) },
       equipped: { ...base.equipped, ...(d.equipped ?? {}) },
       guide: d.guide ?? {},
+      questsDone: d.questsDone ?? [],
     }
   } catch {
     return defaultSave()

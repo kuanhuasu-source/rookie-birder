@@ -1,0 +1,41 @@
+{
+  "id": "white-wagtail",
+  "nameZh": "白鶺鴒",
+  "nameEn": "White Wagtail",
+  "bodyLengthM": 0.19,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8366,
+        0.698
+      ],
+      "contentW": 0.968,
+      "contentH": 0.51,
+      "albedo": 0.437,
+      "file": "birds/white-wagtail-side.png",
+      "sizeM": 0.196
+    },
+    "3q": {
+      "eyeUv": [
+        0.891,
+        0.726
+      ],
+      "contentW": 0.964,
+      "contentH": 0.591,
+      "albedo": 0.422,
+      "file": "birds/white-wagtail-3q.png",
+      "sizeM": 0.187
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8522,
+        0.5184
+      ],
+      "contentW": 0.962,
+      "contentH": 0.649,
+      "albedo": 0.395,
+      "file": "birds/white-wagtail-takeoff.png",
+      "sizeM": 0.286
+    }
+  }
+}
