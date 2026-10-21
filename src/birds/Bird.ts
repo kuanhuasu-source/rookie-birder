@@ -1,0 +1,232 @@
+import * as THREE from 'three'
+import type { BirdState, SpeciesDef, SpriteDef, Range } from './types'
+import { BIRD_LAYER } from '../render/mask'
+
+export interface Perch {
+  position: THREE.Vector3
+  /** 可以沿著跳動的方向（單位向量）與範圍（m） */
+  along: THREE.Vector3
+  range: number
+}
+
+export type Rng = () => number
+
+function pick(r: Range, rng: Rng): number { return r.min + (r.max - r.min) * rng() }
+
+/**
+ * 一隻紙片鳥：五段狀態機 + 貼圖切換 + 程式動畫。
+ * S5 飛行（飛入 / 飛離）、S4 降落 / 起飛、S1 靜止、S2 小動作、S3 跳枝。
+ */
+export class Bird {
+  readonly group = new THREE.Group()
+  readonly paper: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>
+  readonly eye = new THREE.Object3D()
+  state: BirdState = 'S1'
+  inScene = false
+  /** 目前貼圖的頭部角度（度） */
+  viewAngleDeg = 90
+  facing: 1 | -1 = 1
+  onLeft: (() => void) | null = null
+
+  private sprite: SpriteDef
+  private stateT = 0
+  private stateDur = 0
+  private dwellLeft = 0
+  private perch: Perch | null = null
+  private perchOffset = 0
+  private flight: { from: THREE.Vector3; to: THREE.Vector3; dur: number; leaving: boolean } | null = null
+  private hop: { from: number; to: number } | null = null
+  private bobPhase = 0
+  private leaving = false
+  private textures: Partial<Record<'side' | '3q' | 'takeoff', THREE.Texture>> = {}
+  private readonly tmpV = new THREE.Vector3()
+
+  constructor(readonly species: SpeciesDef, private rng: Rng = Math.random) {
+    this.sprite = species.sprites.side
+    const mat = new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.5, side: THREE.DoubleSide })
+    this.paper = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat)
+    this.paper.layers.enable(BIRD_LAYER)
+    this.group.add(this.paper, this.eye)
+    this.group.visible = false
+    this.applySprite(this.sprite)
+  }
+
+  /** 由外面載入貼圖（測試時可以不載）。 */
+  setTexture(key: 'side' | '3q' | 'takeoff', tex: THREE.Texture): void {
+    this.textures[key] = tex
+    if (this.sprite === this.species.sprites[key]) { this.paper.material.map = tex; this.paper.material.needsUpdate = true }
+  }
+
+  private applySprite(s: SpriteDef): void {
+    this.sprite = s
+    const key = (Object.keys(this.species.sprites) as ('side' | '3q' | 'takeoff')[]).find((k) => this.species.sprites[k] === s)!
+    const tex = this.textures[key] ?? null
+    if (this.paper.material.map !== tex) { this.paper.material.map = tex; this.paper.material.needsUpdate = true }
+    this.paper.scale.set(s.sizeM * this.facing, s.sizeM, 1)
+    // 內容在畫布中垂直置中，讓腳底落在群組原點
+    this.paper.position.y = (s.contentH * s.sizeM) / 2
+    this.eye.position.set((s.eyeUv[0] - 0.5) * s.sizeM * this.facing, (s.eyeUv[1] - 0.5) * s.sizeM + this.paper.position.y, 0.003)
+    this.viewAngleDeg = s.viewAngleDeg
+  }
+
+  private setFacing(f: 1 | -1): void {
+    this.facing = f
+    this.applySprite(this.sprite)
+  }
+
+  /** 從 from 飛進來停到 perch。 */
+  enter(perch: Perch, from: THREE.Vector3): void {
+    this.perch = perch
+    this.perchOffset = (this.rng() - 0.5) * perch.range
+    const to = this.perchPos()
+    this.inScene = true
+    this.leaving = false
+    this.group.visible = true
+    this.dwellLeft = pick(this.species.dwell, this.rng)
+    this.flight = { from: from.clone(), to, dur: from.distanceTo(to) / this.species.flightSpeedMs, leaving: false }
+    this.group.position.copy(from)
+    this.setFacing(to.x - from.x >= 0 ? 1 : -1)
+    this.applySprite(this.species.sprites.takeoff)
+    this.setState('S5')
+  }
+
+  /** 測試與除錯：立刻起飛離開。 */
+  forceTakeoff(): void {
+    if (this.inScene && this.state !== 'S4' && this.state !== 'S5') this.beginTakeoff()
+  }
+
+  private perchPos(): THREE.Vector3 {
+    const p = this.perch!
+    return p.position.clone().addScaledVector(p.along, this.perchOffset)
+  }
+
+  private setState(s: BirdState): void {
+    this.state = s
+    this.stateT = 0
+    switch (s) {
+      case 'S1':
+        this.stateDur = pick(this.species.stateDurations.S1, this.rng)
+        this.applySprite(this.rng() < 0.7 ? this.species.sprites.side : this.species.sprites['3q'])
+        break
+      case 'S2':
+        this.stateDur = pick(this.species.stateDurations.S2, this.rng)
+        this.bobPhase = 0
+        // 有時轉身或換個角度
+        if (this.rng() < 0.25) this.setFacing(this.facing === 1 ? -1 : 1)
+        else if (this.rng() < 0.4) this.applySprite(this.sprite.view === 'side' ? this.species.sprites['3q'] : this.species.sprites.side)
+        break
+      case 'S3': {
+        this.stateDur = pick(this.species.stateDurations.S3, this.rng)
+        const p = this.perch!
+        const dir = this.rng() < 0.5 ? -1 : 1
+        let to = this.perchOffset + dir * this.species.hopDistM * (0.6 + 0.8 * this.rng())
+        to = Math.max(-p.range / 2, Math.min(p.range / 2, to))
+        this.hop = { from: this.perchOffset, to }
+        this.applySprite(this.species.sprites.side)
+        this.setFacing((to - this.perchOffset) * p.along.x >= 0 ? 1 : -1)
+        break
+      }
+      case 'S4':
+        this.stateDur = 0.4
+        this.applySprite(this.species.sprites.takeoff)
+        break
+      case 'S5':
+        this.stateDur = this.flight ? this.flight.dur : 1
+        this.applySprite(this.species.sprites.takeoff)
+        break
+    }
+  }
+
+  private beginTakeoff(): void {
+    this.leaving = true
+    this.setState('S4')
+  }
+
+  private nextPerchedState(): void {
+    const table = this.species.transitions[this.state as 'S1' | 'S2' | 'S3']
+    let r = this.rng()
+    for (const [s, p] of Object.entries(table)) {
+      r -= p
+      if (r <= 0) {
+        if (s === 'S4') this.beginTakeoff()
+        else this.setState(s as BirdState)
+        return
+      }
+    }
+    this.setState('S1')
+  }
+
+  update(dt: number, cameraPos: THREE.Vector3): void {
+    if (!this.inScene) return
+    this.stateT += dt
+    const sp = this.species
+    switch (this.state) {
+      case 'S5': {
+        const f = this.flight!
+        const u = Math.min(1, this.stateT / f.dur)
+        // 飛行弧線：中段略高
+        this.group.position.lerpVectors(f.from, f.to, u)
+        this.group.position.y += Math.sin(u * Math.PI) * (f.leaving ? 1.2 : 0.8)
+        const flap = 0.78 + 0.22 * Math.abs(Math.sin(this.stateT * Math.PI * 7))
+        this.paper.scale.y = this.sprite.sizeM * flap
+        if (u >= 1) {
+          if (f.leaving) { this.inScene = false; this.group.visible = false; this.onLeft?.() }
+          else { this.group.position.copy(f.to); this.setState('S4') }
+        }
+        break
+      }
+      case 'S4': {
+        const u = Math.min(1, this.stateT / this.stateDur)
+        const base = this.perchPos()
+        if (this.leaving) {
+          this.group.position.copy(base).add(new THREE.Vector3(0, 0.25 * u, 0))
+          this.paper.scale.y = this.sprite.sizeM * (0.85 + 0.15 * Math.sin(u * Math.PI * 2))
+          if (u >= 1) {
+            const away = new THREE.Vector3(this.facing * 9, 5, (this.rng() - 0.5) * 6)
+            this.flight = { from: this.group.position.clone(), to: base.clone().add(away), dur: away.length() / sp.flightSpeedMs, leaving: true }
+            this.setState('S5')
+          }
+        } else {
+          this.group.position.copy(base).add(new THREE.Vector3(0, 0.12 * (1 - u), 0))
+          this.paper.scale.y = this.sprite.sizeM * (0.85 + 0.15 * (1 - u))
+          if (u >= 1) { this.group.position.copy(base); this.setState('S1') }
+        }
+        break
+      }
+      case 'S1': {
+        this.group.position.copy(this.perchPos())
+        this.paper.scale.y = this.sprite.sizeM * (1 + 0.008 * Math.sin(this.stateT * 2.2))
+        this.paper.rotation.z = 0
+        if (this.stateT >= this.stateDur) this.afterPerched()
+        break
+      }
+      case 'S2': {
+        this.group.position.copy(this.perchPos())
+        this.bobPhase += dt * 9
+        // 點頭、理毛：小幅前傾與擺動
+        this.paper.rotation.z = this.facing * Math.sin(this.bobPhase) * 0.07
+        this.paper.scale.y = this.sprite.sizeM * (1 - 0.03 * Math.max(0, Math.sin(this.bobPhase * 0.5)))
+        if (this.stateT >= this.stateDur) { this.paper.rotation.z = 0; this.afterPerched() }
+        break
+      }
+      case 'S3': {
+        const u = Math.min(1, this.stateT / this.stateDur)
+        const h = this.hop!
+        this.perchOffset = h.from + (h.to - h.from) * u
+        this.group.position.copy(this.perchPos())
+        this.group.position.y += Math.sin(u * Math.PI) * 0.12
+        if (u >= 1) this.afterPerched()
+        break
+      }
+    }
+    // 面向相機（只轉水平）
+    this.tmpV.subVectors(cameraPos, this.group.position)
+    this.group.rotation.y = Math.atan2(this.tmpV.x, this.tmpV.z)
+  }
+
+  private afterPerched(): void {
+    this.dwellLeft -= this.stateT
+    if (this.dwellLeft <= 0) this.beginTakeoff()
+    else this.nextPerchedState()
+  }
+}

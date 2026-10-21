@@ -1,0 +1,26 @@
+{
+  "sensors": {
+    "FF":   { "widthMm": 36.0, "heightMm": 24.0, "cocMm": 0.030 },
+    "APSC": { "widthMm": 22.3, "heightMm": 14.9, "cocMm": 0.019 }
+  },
+  "lenses": [
+    { "id": "L1", "name": "55-250mm f/4-5.6", "focalMin": 55,  "focalMax": 250, "apertureAtMin": 4.0, "apertureAtMax": 5.6, "minFocusM": 1.0, "afSpeed": 0,   "isStops": 0,   "softWideOpenPx": 1.6 },
+    { "id": "L2", "name": "100-400mm f/5.6-6.3", "focalMin": 100, "focalMax": 400, "apertureAtMin": 5.6, "apertureAtMax": 6.3, "minFocusM": 1.5, "afSpeed": 0.6, "isStops": 3,   "softWideOpenPx": 0.9 },
+    { "id": "L3", "name": "100-500mm f/4.5-7.1", "focalMin": 100, "focalMax": 500, "apertureAtMin": 4.5, "apertureAtMax": 7.1, "minFocusM": 1.2, "afSpeed": 0.35, "isStops": 5,  "softWideOpenPx": 0.5 },
+    { "id": "L4", "name": "500mm f/4", "focalMin": 500, "focalMax": 500, "apertureAtMin": 4.0, "apertureAtMax": 4.0, "minFocusM": 4.0, "afSpeed": 0.3, "isStops": 5,   "softWideOpenPx": 0.2 },
+    { "id": "L5", "name": "600mm f/4", "focalMin": 600, "focalMax": 600, "apertureAtMin": 4.0, "apertureAtMax": 4.0, "minFocusM": 4.5, "afSpeed": 0.2, "isStops": 5.5, "softWideOpenPx": 0.2 }
+  ],
+  "bodies": [
+    { "id": "B1", "name": "入門 APS-C", "sensor": "APSC", "kNoise": 1.6, "isoMax": 12800, "fps": 5,  "bufferFrames": 8,   "cardWriteFps": 1.5, "evfLagFrames": 3, "blackout": true,  "afTier": 0, "modes": ["M"] },
+    { "id": "B2", "name": "中階 APS-C", "sensor": "APSC", "kNoise": 1.2, "isoMax": 25600, "fps": 8,  "bufferFrames": 20,  "cardWriteFps": 3,   "evfLagFrames": 1, "blackout": true,  "afTier": 1, "modes": ["M", "Av", "Tv"] },
+    { "id": "B3", "name": "全幅",       "sensor": "FF",   "kNoise": 0.6, "isoMax": 51200, "fps": 12, "bufferFrames": 60,  "cardWriteFps": 6,   "evfLagFrames": 0, "blackout": false, "afTier": 2, "modes": ["M", "Av", "Tv", "P"] },
+    { "id": "B4", "name": "旗艦全幅",   "sensor": "FF",   "kNoise": 0.5, "isoMax": 102400, "fps": 30, "bufferFrames": 200, "cardWriteFps": 12,  "evfLagFrames": 0, "blackout": false, "afTier": 3, "modes": ["M", "Av", "Tv", "P"] }
+  ],
+  "supports": [
+    { "id": "S0", "name": "手持",             "shakeMul": 1.0,  "panDamping": 0,    "panMaxRadS": 0 },
+    { "id": "S1", "name": "單腳架",           "shakeMul": 0.5,  "panDamping": 0.05, "panMaxRadS": 0 },
+    { "id": "S2", "name": "三腳架 + 球型雲台", "shakeMul": 0.08, "panDamping": 0.3,  "panMaxRadS": 0.3 },
+    { "id": "S3", "name": "三腳架 + 油壓雲台", "shakeMul": 0.08, "panDamping": 0.2,  "panMaxRadS": 0.8 },
+    { "id": "S4", "name": "三腳架 + 懸臂雲台", "shakeMul": 0.05, "panDamping": 0.1,  "panMaxRadS": 0 }
+  ]
+}
