@@ -19,7 +19,7 @@ export interface LightingPreset {
  * 每個預設都正規化成「曝光正確時 18% 灰卡面向太陽約為 0.18」：
  * MeshToon 的輸出 = albedo × (sun + hemi × 約0.75) / π，所以 sun + 0.75·hemi ≈ π。
  */
-export function lightingPreset(time: TimeOfDay, weather: Weather): LightingPreset {
+export function lightingPreset(time: TimeOfDay, weather: Weather, sunAzDeg?: number): LightingPreset {
   const base = {
     dawn:    { ev: 11, elev: 12, az: 70,  sun: new THREE.Color('#ffd0a0'), sky: new THREE.Color('#f7e7cf') },
     morning: { ev: 13, elev: 35, az: 110, sun: new THREE.Color('#fff2dc'), sky: new THREE.Color('#f6eedc') },
@@ -30,7 +30,7 @@ export function lightingPreset(time: TimeOfDay, weather: Weather): LightingPrese
   const sunI = overcast ? 0.9 : 2.6
   const hemiI = overcast ? 2.9 : 0.7
   const el = (base.elev * Math.PI) / 180
-  const az = (base.az * Math.PI) / 180
+  const az = ((sunAzDeg ?? base.az) * Math.PI) / 180
   const dir = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), -Math.cos(el) * Math.cos(az)).normalize()
   return {
     evScene: overcast ? Math.min(base.ev, 12) : base.ev,

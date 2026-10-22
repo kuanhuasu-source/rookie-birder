@@ -33,6 +33,33 @@ describe('levels', () => {
     expect(compose.check(photo({}, { composition: 19 }))).toBe(false)
     expect(compose.check(photo({}, { composition: 21 }))).toBe(true)
   })
+  it('chapter 3 wetland quests check distance, hover, backlight and settings', () => {
+    const noon = LEVELS.find((l) => l.id === 'wetland-noon')!
+    const dusk = LEVELS.find((l) => l.id === 'wetland-dusk')!
+    expect(noon.sceneId).toBe('wetland')
+    expect(dusk.sunAzDeg).toBe(350)
+    const [heron, stilt, kite] = noon.quests
+    expect(heron.check(photo({ species: 'night-heron', birdState: 'S1' }, { stars: 3 }))).toBe(true)
+    expect(heron.check(photo({ species: 'night-heron', birdState: 'S1' }, { stars: 2 }))).toBe(false)
+    expect(stilt.check(photo({ species: 'black-winged-stilt', birdState: 'S3' }, { stars: 2 }))).toBe(true)
+    expect(stilt.check(photo({ species: 'black-winged-stilt', birdState: 'S1' }, { stars: 2 }))).toBe(false)
+    expect(kite.check(photo({ species: 'black-winged-kite', birdState: 'S5' }, { stars: 2 }))).toBe(true)
+    const [silhouette, fastKite, lowIso] = dusk.quests
+    expect(silhouette.check(photo({ lightAngleDeg: 150 }, { composition: 19 }))).toBe(true)
+    expect(silhouette.check(photo({ lightAngleDeg: 40 }, { composition: 19 }))).toBe(false)
+    expect(fastKite.check(photo({ species: 'black-winged-kite' }, { stars: 3 }, { shutterS: 1 / 2000 }))).toBe(true)
+    expect(fastKite.check(photo({ species: 'black-winged-kite' }, { stars: 3 }, { shutterS: 1 / 1000 }))).toBe(false)
+    expect(lowIso.check(photo({}, { stars: 3 }, { iso: 1600 }))).toBe(true)
+    expect(lowIso.check(photo({}, { stars: 3 }, { iso: 3200 }))).toBe(false)
+  })
+  it('a level can override the sun azimuth to put the sun in front of the camera', async () => {
+    const { lightingPreset } = await import('../src/world/lighting')
+    const def = lightingPreset('dusk', 'sunny')
+    const back = lightingPreset('dusk', 'sunny', 350)
+    expect(back.sunDir.z).toBeLessThan(-0.9)
+    expect(def.sunDir.z).toBeGreaterThan(back.sunDir.z)
+    expect(back.evScene).toBe(def.evScene)
+  })
   it('session counts photos, coins, best photo and completes quests once', () => {
     const done = new Set<string>()
     const s = new LevelSession(LEVELS[0], done)

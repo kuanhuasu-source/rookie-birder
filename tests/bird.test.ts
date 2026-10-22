@@ -108,3 +108,22 @@ describe('Spawner with several species', () => {
     expect((seen.get('light-vented-bulbul') ?? 0)).toBeGreaterThan(seen.get('tree-sparrow') ?? 0)
   })
 })
+
+describe('hovering species', () => {
+  it('flies to the hover point, hovers in S5 for its dwell, then leaves', async () => {
+    const { spottedDove } = await import('../src/birds/species/spotted-dove')
+    const kite = { ...spottedDove, id: 'kite-test', hovers: true, hoverHeightM: 6, dwell: { min: 4, max: 4 }, flightSpeedMs: 10 }
+    const bird = new Bird(kite, seeded(9))
+    let left = false
+    bird.onLeft = () => { left = true }
+    bird.enter(perch, new THREE.Vector3(12, 8, -14))
+    let hoverFrames = 0
+    let t = 0
+    while (!left && t < 30) {
+      bird.update(1 / 60, camPos); t += 1 / 60
+      if (bird.isHovering) { hoverFrames++; expect(bird.state).toBe('S5'); expect(bird.group.position.y).toBeGreaterThan(perch.position.y + 4) }
+    }
+    expect(hoverFrames).toBeGreaterThan(60 * 3)
+    expect(left).toBe(true)
+  })
+})

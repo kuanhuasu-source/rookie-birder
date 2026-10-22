@@ -42,6 +42,9 @@ export class Bird {
   private hop: { from: number; to: number } | null = null
   private bobPhase = 0
   private leaving = false
+  /** 懸停中：位置在停棲點上空，狀態維持 S5 */
+  private hovering = false
+  private hoverT = 0
   private textures: Partial<Record<'side' | '3q' | 'takeoff', THREE.Texture>> = {}
   private readonly tmpV = new THREE.Vector3()
 
@@ -79,13 +82,20 @@ export class Bird {
     this.applySprite(this.sprite)
   }
 
-  /** 從 from 飛進來停到 perch。 */
+  /** 懸停型的目標點：停棲點上空。 */
+  private hoverPos(): THREE.Vector3 {
+    return this.perchPos().add(new THREE.Vector3(0, this.species.hoverHeightM ?? 7, 0))
+  }
+
+  /** 從 from 飛進來停到 perch（懸停型則飛到上空）。 */
   enter(perch: Perch, from: THREE.Vector3): void {
     this.perch = perch
     this.perchOffset = (this.rng() - 0.5) * perch.range
-    const to = this.perchPos()
+    const to = this.species.hovers ? this.hoverPos() : this.perchPos()
     this.inScene = true
     this.leaving = false
+    this.hovering = false
+    this.hoverT = 0
     this.group.visible = true
     this.dwellLeft = pick(this.species.dwell, this.rng)
     this.flight = { from: from.clone(), to, dur: from.distanceTo(to) / this.species.flightSpeedMs, leaving: false }
@@ -140,10 +150,14 @@ export class Bird {
   /** 目前的停棲點（沒有就 null）。 */
   get currentPerch(): Perch | null { return this.perch }
 
-  /** 測試與除錯：立刻起飛離開。 */
+  /** 測試與除錯：立刻起飛離開（懸停型直接結束懸停）。 */
   forceTakeoff(): void {
-    if (this.inScene && this.state !== 'S4' && this.state !== 'S5') this.beginTakeoff()
+    if (!this.inScene) return
+    if (this.hovering) { this.dwellLeft = 0; return }
+    if (this.state !== 'S4' && this.state !== 'S5') this.beginTakeoff()
   }
+
+  get isHovering(): boolean { return this.hovering }
 
   private perchPos(): THREE.Vector3 {
     const p = this.perch!
@@ -212,6 +226,23 @@ export class Bird {
     const sp = this.species
     switch (this.state) {
       case 'S5': {
+        if (this.hovering) {
+          // 懸停：原地上下小幅起伏、快速拍翅，停留時間到了就離開
+          this.hoverT += dt
+          const base = this.hoverPos()
+          this.group.position.set(base.x + Math.sin(this.hoverT * 0.7) * 0.3, base.y + Math.sin(this.hoverT * 1.9) * 0.25, base.z)
+          this.paper.scale.y = this.sprite.sizeM * (0.7 + 0.3 * Math.abs(Math.sin(this.hoverT * Math.PI * 9)))
+          this.dwellLeft -= dt
+          if (this.dwellLeft <= 0 && !this.leaving) {
+            this.leaving = true
+            this.hovering = false
+            const away = new THREE.Vector3(this.facing * 12, 4, (this.rng() - 0.5) * 6)
+            this.flight = { from: this.group.position.clone(), to: base.clone().add(away), dur: away.length() / sp.flightSpeedMs, leaving: true }
+            this.stateT = 0
+            this.stateDur = this.flight.dur
+          }
+          break
+        }
         const f = this.flight!
         const u = Math.min(1, this.stateT / f.dur)
         // 飛行弧線：中段略高
@@ -221,6 +252,7 @@ export class Bird {
         this.paper.scale.y = this.sprite.sizeM * flap
         if (u >= 1) {
           if (f.leaving) { this.inScene = false; this.group.visible = false; this.onLeft?.() }
+          else if (this.species.hovers) { this.group.position.copy(f.to); this.hovering = true; this.hoverT = 0; this.flight = null }
           else { this.group.position.copy(f.to); this.setState('S4') }
         }
         break

@@ -1,0 +1,41 @@
+{
+  "id": "black-winged-kite",
+  "nameZh": "黑翅鳶",
+  "nameEn": "Black-winged Kite",
+  "bodyLengthM": 0.35,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.866,
+        0.7508
+      ],
+      "contentW": 0.96,
+      "contentH": 0.651,
+      "albedo": 0.453,
+      "file": "birds/black-winged-kite-side.png",
+      "sizeM": 0.365
+    },
+    "3q": {
+      "eyeUv": [
+        0.8581,
+        0.7764
+      ],
+      "contentW": 0.957,
+      "contentH": 0.717,
+      "albedo": 0.448,
+      "file": "birds/black-winged-kite-3q.png",
+      "sizeM": 0.347
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8669,
+        0.4603
+      ],
+      "contentW": 0.947,
+      "contentH": 0.928,
+      "albedo": 0.47,
+      "file": "birds/black-winged-kite-takeoff.png",
+      "sizeM": 0.536
+    }
+  }
+}

@@ -44,4 +44,8 @@ export interface SpeciesDef {
   skittish?: number
   /** 容忍距離（m），比這近會一直累積警戒 */
   flushDistM?: number
+  /** 懸停型（黑翅鳶）：不停棲，飛到停棲點上空懸停到停留時間結束 */
+  hovers?: boolean
+  /** 懸停高度（m） */
+  hoverHeightM?: number
 }

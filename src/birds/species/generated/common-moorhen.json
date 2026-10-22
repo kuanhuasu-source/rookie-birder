@@ -1,0 +1,41 @@
+{
+  "id": "common-moorhen",
+  "nameZh": "紅冠水雞",
+  "nameEn": "Common Moorhen",
+  "bodyLengthM": 0.33,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8204,
+        0.8726
+      ],
+      "contentW": 0.948,
+      "contentH": 0.9,
+      "albedo": 0.282,
+      "file": "birds/common-moorhen-side.png",
+      "sizeM": 0.348
+    },
+    "3q": {
+      "eyeUv": [
+        0.7791,
+        0.8579
+      ],
+      "contentW": 0.857,
+      "contentH": 0.946,
+      "albedo": 0.293,
+      "file": "birds/common-moorhen-3q.png",
+      "sizeM": 0.366
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8365,
+        0.5978
+      ],
+      "contentW": 0.918,
+      "contentH": 0.947,
+      "albedo": 0.203,
+      "file": "birds/common-moorhen-takeoff.png",
+      "sizeM": 0.521
+    }
+  }
+}

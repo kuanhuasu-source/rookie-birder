@@ -1,0 +1,41 @@
+{
+  "id": "black-winged-stilt",
+  "nameZh": "高蹺鴴",
+  "nameEn": "Black-winged Stilt",
+  "bodyLengthM": 0.36,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.71,
+        0.912
+      ],
+      "contentW": 0.891,
+      "contentH": 0.945,
+      "albedo": 0.487,
+      "file": "birds/black-winged-stilt-side.png",
+      "sizeM": 0.404
+    },
+    "3q": {
+      "eyeUv": [
+        0.729,
+        0.8958
+      ],
+      "contentW": 0.763,
+      "contentH": 0.945,
+      "albedo": 0.483,
+      "file": "birds/black-winged-stilt-3q.png",
+      "sizeM": 0.448
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.7544,
+        0.7127
+      ],
+      "contentW": 0.873,
+      "contentH": 0.944,
+      "albedo": 0.605,
+      "file": "birds/black-winged-stilt-takeoff.png",
+      "sizeM": 0.598
+    }
+  }
+}

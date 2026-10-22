@@ -7,6 +7,10 @@ import blackBulbulGen from './generated/black-bulbul.json'
 import kingfisherGen from './generated/common-kingfisher.json'
 import wagtailGen from './generated/white-wagtail.json'
 import egretGen from './generated/little-egret.json'
+import nightHeronGen from './generated/night-heron.json'
+import stiltGen from './generated/black-winged-stilt.json'
+import kiteGen from './generated/black-winged-kite.json'
+import moorhenGen from './generated/common-moorhen.json'
 
 interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number }
 interface Generated { id: string; nameZh: string; nameEn: string; bodyLengthM: number; sprites: Record<'side' | '3q' | 'takeoff', GeneratedSprite> }
@@ -117,7 +121,64 @@ export const littleEgret: SpeciesDef = {
   skittish: 1.1, flushDistM: 12,
 }
 
-export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret]
+/** 夜鷺：第三章的遠距離定點題，幾乎不動，但站得遠。 */
+export const nightHeron: SpeciesDef = {
+  id: 'night-heron', nameZh: '夜鷺', nameEn: 'Black-crowned Night Heron',
+  bodyHeightM: 0.40, albedo: nightHeronGen.sprites.side.albedo,
+  sprites: sprites(nightHeronGen as Generated),
+  dwell: { min: 30, max: 60 }, interval: { min: 15, max: 35 },
+  stateDurations: { S1: { min: 5, max: 12 }, S2: { min: 1.5, max: 4 }, S3: { min: 0.8, max: 1.4 } },
+  transitions: { S1: { S2: 0.7, S3: 0.25, S4: 0.05 }, S2: { S1: 0.8, S3: 0.15, S4: 0.05 }, S3: { S1: 0.8, S2: 0.2 } },
+  flightSpeedMs: 7, hopDistM: 0.6,
+  call: { baseHz: 500, notes: 1, noteS: 0.25, gapS: 0.1 },
+  rarity: 'common',
+  skittish: 0.8, flushDistM: 14,
+}
+
+/** 高蹺鴴：一直在泥灘上走動覓食的動作題。 */
+export const blackWingedStilt: SpeciesDef = {
+  id: 'black-winged-stilt', nameZh: '高蹺鴴', nameEn: 'Black-winged Stilt',
+  bodyHeightM: 0.36, albedo: stiltGen.sprites.side.albedo,
+  sprites: sprites(stiltGen as Generated),
+  dwell: { min: 20, max: 40 }, interval: { min: 12, max: 28 },
+  stateDurations: { S1: { min: 1, max: 2.5 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.9, max: 1.6 } },
+  transitions: { S1: { S2: 0.3, S3: 0.65, S4: 0.05 }, S2: { S1: 0.2, S3: 0.75, S4: 0.05 }, S3: { S1: 0.3, S2: 0.3, S3: 0.4 } },
+  flightSpeedMs: 9, hopDistM: 1.2,
+  call: { baseHz: 2400, notes: 3, noteS: 0.08, gapS: 0.06 },
+  rarity: 'common',
+  skittish: 1.2, flushDistM: 12,
+}
+
+/** 黑翅鳶：不停棲，在水面上空懸停，是飛行題的入門。 */
+export const blackWingedKite: SpeciesDef = {
+  id: 'black-winged-kite', nameZh: '黑翅鳶', nameEn: 'Black-winged Kite',
+  bodyHeightM: 0.35, albedo: kiteGen.sprites.side.albedo,
+  sprites: sprites(kiteGen as Generated),
+  dwell: { min: 10, max: 18 }, interval: { min: 25, max: 50 },
+  stateDurations: { S1: { min: 2, max: 4 }, S2: { min: 1, max: 2 }, S3: { min: 0.5, max: 0.9 } },
+  transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 10, hopDistM: 0.5,
+  call: { baseHz: 1800, notes: 2, noteS: 0.15, gapS: 0.1 },
+  rarity: 'rare',
+  skittish: 0.7, flushDistM: 20,
+  hovers: true, hoverHeightM: 8,
+}
+
+/** 紅冠水雞：在水面邊慢慢游走，紅色額甲是對焦與曝光的好目標。 */
+export const commonMoorhen: SpeciesDef = {
+  id: 'common-moorhen', nameZh: '紅冠水雞', nameEn: 'Common Moorhen',
+  bodyHeightM: 0.28, albedo: moorhenGen.sprites.side.albedo,
+  sprites: sprites(moorhenGen as Generated),
+  dwell: { min: 18, max: 36 }, interval: { min: 12, max: 26 },
+  stateDurations: { S1: { min: 2, max: 5 }, S2: { min: 1.5, max: 3 }, S3: { min: 1.0, max: 1.8 } },
+  transitions: { S1: { S2: 0.5, S3: 0.45, S4: 0.05 }, S2: { S1: 0.5, S3: 0.45, S4: 0.05 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 6, hopDistM: 0.9,
+  call: { baseHz: 1200, notes: 1, noteS: 0.2, gapS: 0.1 },
+  rarity: 'common',
+  skittish: 1.0, flushDistM: 9,
+}
+
+export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen]
 export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries(SPECIES.map((s) => [s.id, s]))
 
 /** 第一章公園草地的出現權重。 */

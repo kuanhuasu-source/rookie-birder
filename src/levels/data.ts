@@ -56,6 +56,28 @@ export const LEVELS: LevelDef[] = [
     ],
     durationS: 480, cardCapacity: 60, intervalMul: 0.9,
   },
+  {
+    id: 'wetland-noon', chapter: 3, title: '濕地 · 正午', subtitle: '晴，硬光、遠距離，天空很大',
+    sceneId: 'wetland', time: 'noon', weather: 'sunny',
+    species: { 'night-heron': 0.3, 'black-winged-stilt': 0.35, 'black-winged-kite': 0.15, 'common-moorhen': 0.2 },
+    quests: [
+      q('w1-heron', '拍到夜鷺停棲，三星以上', '牠不太動，但很遠，焦距要夠', 25, (p) => is(p, 'night-heron') && slot(p) === 'perched' && p.score.stars >= 3),
+      q('w1-stilt', '高蹺鴴的動作格，兩星以上', '牠一直在走，快門要跟上腳步', 25, (p) => is(p, 'black-winged-stilt') && slot(p) === 'action' && p.score.stars >= 2),
+      q('w1-kite', '黑翅鳶懸停的飛行格，兩星以上', '牠在空中定住的時候最好拍', 30, (p) => is(p, 'black-winged-kite') && slot(p) === 'flight' && p.score.stars >= 2),
+    ],
+    durationS: 540, cardCapacity: 60, intervalMul: 1.0,
+  },
+  {
+    id: 'wetland-dusk', chapter: 3, title: '濕地 · 黃昏', subtitle: '晴，逆光、剪影與邊光',
+    sceneId: 'wetland', time: 'dusk', weather: 'sunny', sunAzDeg: 350,
+    species: { 'night-heron': 0.35, 'black-winged-stilt': 0.3, 'black-winged-kite': 0.15, 'common-moorhen': 0.2 },
+    quests: [
+      q('w2-silhouette', '逆光拍到任何鳥，構圖 18 分以上', '剪影要靠輪廓，把牠放在乾淨的天空或水面前', 25, (p) => inFrame(p) && (p.metrics.lightAngleDeg ?? 0) > 110 && p.score.composition >= 18),
+      q('w2-kite', '用 1/2000 以上拍到黑翅鳶，三星以上', '懸停時翅膀還是在動，快門不能省', 35, (p) => is(p, 'black-winged-kite') && p.settings.shutterS <= 1 / 2000 && p.score.stars >= 3),
+      q('w2-iso', 'ISO 1600 以下拍到三星', '黃昏光弱，光圈開到底、穩住再拍', 30, (p) => inFrame(p) && p.settings.iso <= 1600 && p.score.stars >= 3),
+    ],
+    durationS: 540, cardCapacity: 60, intervalMul: 1.0,
+  },
 ]
 
 export const LEVEL_BY_ID: Record<string, LevelDef> = Object.fromEntries(LEVELS.map((l) => [l.id, l]))

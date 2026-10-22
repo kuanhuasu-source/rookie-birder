@@ -1,7 +1,7 @@
 import type { PhotoRecord } from '../photo/types'
 import type { TimeOfDay, Weather } from '../world/lighting'
 
-export type SceneId = 'park' | 'stream'
+export type SceneId = 'park' | 'stream' | 'wetland'
 
 export interface HideDef {
   id: string
@@ -36,4 +36,6 @@ export interface LevelDef {
   cardCapacity: number
   /** 間隔倍率：越小鳥越常來 */
   intervalMul: number
+  /** 覆寫太陽方位角（度，0 = 正前方 −z 方向、180 = 相機背後）；不給就用時段預設 */
+  sunAzDeg?: number
 }

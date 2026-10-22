@@ -36,7 +36,7 @@ export class LevelView {
       sub.textContent = '選一關出發。完成前一關的任何一個任務就能解鎖下一關'
       const chapters = [...new Set(LEVELS.map((l) => l.chapter))]
       body.innerHTML = chapters.map((c) => `
-        <div class="chapter"><div class="chapter-title">第 ${c} 章 ${c === 1 ? '公園草地' : '溪流'}</div>
+        <div class="chapter"><div class="chapter-title">第 ${c} 章 ${({ 1: '公園草地', 2: '溪流', 3: '濕地' } as Record<number, string>)[c] ?? ''}</div>
         <div class="level-grid">${LEVELS.filter((l) => l.chapter === c).map((l) => {
           const unlocked = isLevelUnlocked(l, done)
           const qd = l.quests.filter((q) => done.has(q.id)).length

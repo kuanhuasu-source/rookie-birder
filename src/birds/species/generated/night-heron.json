@@ -1,0 +1,41 @@
+{
+  "id": "night-heron",
+  "nameZh": "夜鷺",
+  "nameEn": "Black-crowned Night Heron",
+  "bodyLengthM": 0.58,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.7584,
+        0.6631
+      ],
+      "contentW": 0.969,
+      "contentH": 0.489,
+      "albedo": 0.43,
+      "file": "birds/night-heron-side.png",
+      "sizeM": 0.599
+    },
+    "3q": {
+      "eyeUv": [
+        0.725,
+        0.7216
+      ],
+      "contentW": 0.96,
+      "contentH": 0.65,
+      "albedo": 0.462,
+      "file": "birds/night-heron-3q.png",
+      "sizeM": 0.574
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.7768,
+        0.4798
+      ],
+      "contentW": 0.947,
+      "contentH": 0.928,
+      "albedo": 0.422,
+      "file": "birds/night-heron-takeoff.png",
+      "sizeM": 0.888
+    }
+  }
+}

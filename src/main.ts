@@ -238,7 +238,7 @@ try { reduceShake = localStorage.getItem(REDUCE_KEY) === '1' } catch { /* 私密
 let bracing = false
 
 function setLighting(): void {
-  lighting = lightingPreset(time, weather)
+  lighting = lightingPreset(time, weather, currentLevel?.sunAzDeg)
   applyLighting(world.scene, world.sun, world.hemi, lighting)
 }
 
