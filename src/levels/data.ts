@@ -37,11 +37,12 @@ export const LEVELS: LevelDef[] = [
   {
     id: 'stream-dawn', chapter: 2, title: '溪流 · 清晨', subtitle: '晴，低角度的光，水邊有霧氣',
     sceneId: 'stream', time: 'dawn', weather: 'sunny',
-    species: { 'common-kingfisher': 0.3, 'white-wagtail': 0.4, 'little-egret': 0.3 },
+    species: { 'common-kingfisher': 0.28, 'white-wagtail': 0.3, 'little-egret': 0.22, 'taiwan-whistling-thrush': 0.2 },
     quests: [
       q('s1-kf', '拍到翠鳥停棲，三星以上', '牠會停很久，慢慢對眼睛', 25, (p) => is(p, 'common-kingfisher') && slot(p) === 'perched' && p.score.stars >= 3),
       q('s1-egret', '小白鷺白色羽毛不過曝，曝光 20 分以上', '白色主體要比相機以為的再暗一點', 25, (p) => is(p, 'little-egret') && p.score.exposure >= 20),
       q('s1-wag', '白鶺鴒的動作格，兩星以上', '牠一直走一直擺尾，快門要快', 20, (p) => is(p, 'white-wagtail') && slot(p) === 'action' && p.score.stars >= 2),
+      q('s1-thrush', '台灣紫嘯鶇不死黑，曝光 18 分以上', '深藍黑的鳥在暗處，少給半格保住光澤，別讓石頭過曝', 25, (p) => is(p, 'taiwan-whistling-thrush') && p.score.exposure >= 18),
     ],
     durationS: 480, cardCapacity: 60, intervalMul: 0.9,
   },
@@ -59,7 +60,7 @@ export const LEVELS: LevelDef[] = [
   {
     id: 'wetland-noon', chapter: 3, title: '濕地 · 正午', subtitle: '晴，硬光、遠距離，天空很大',
     sceneId: 'wetland', time: 'noon', weather: 'sunny',
-    species: { 'night-heron': 0.3, 'black-winged-stilt': 0.35, 'black-winged-kite': 0.15, 'common-moorhen': 0.2 },
+    species: { 'night-heron': 0.25, 'black-winged-stilt': 0.27, 'black-winged-kite': 0.12, 'common-moorhen': 0.15, 'little-grebe': 0.15, 'crested-serpent-eagle': 0.06 },
     quests: [
       q('w1-heron', '拍到夜鷺停棲，三星以上', '牠不太動，但很遠，焦距要夠', 25, (p) => is(p, 'night-heron') && slot(p) === 'perched' && p.score.stars >= 3),
       q('w1-stilt', '高蹺鴴的動作格，兩星以上', '牠一直在走，快門要跟上腳步', 25, (p) => is(p, 'black-winged-stilt') && slot(p) === 'action' && p.score.stars >= 2),
@@ -70,22 +71,24 @@ export const LEVELS: LevelDef[] = [
   {
     id: 'wetland-dusk', chapter: 3, title: '濕地 · 黃昏', subtitle: '晴，逆光、剪影與邊光',
     sceneId: 'wetland', time: 'dusk', weather: 'sunny', sunAzDeg: 350,
-    species: { 'night-heron': 0.35, 'black-winged-stilt': 0.3, 'black-winged-kite': 0.15, 'common-moorhen': 0.2 },
+    species: { 'night-heron': 0.3, 'black-winged-stilt': 0.25, 'black-winged-kite': 0.15, 'common-moorhen': 0.15, 'little-grebe': 0.15 },
     quests: [
       q('w2-silhouette', '逆光拍到任何鳥，構圖 18 分以上', '剪影要靠輪廓，把牠放在乾淨的天空或水面前', 25, (p) => inFrame(p) && (p.metrics.lightAngleDeg ?? 0) > 110 && p.score.composition >= 18),
       q('w2-kite', '用 1/2000 以上拍到黑翅鳶，三星以上', '懸停時翅膀還是在動，快門不能省', 35, (p) => is(p, 'black-winged-kite') && p.settings.shutterS <= 1 / 2000 && p.score.stars >= 3),
       q('w2-iso', 'ISO 1600 以下拍到三星', '黃昏光弱，光圈開到底、穩住再拍', 30, (p) => inFrame(p) && p.settings.iso <= 1600 && p.score.stars >= 3),
+      q('w2-grebe', '小鸊鷉浮上來甩水的動作格，兩星以上', '牠潛下去就先對好那片水面，等牠冒出來', 30, (p) => is(p, 'little-grebe') && slot(p) === 'action' && p.score.stars >= 2),
     ],
     durationS: 540, cardCapacity: 60, intervalMul: 0.85,
   },
   {
     id: 'field-morning', chapter: 4, title: '田野草叢 · 上午', subtitle: '晴，前景的草與背後的樹籬',
     sceneId: 'field', time: 'morning', weather: 'sunny',
-    species: { 'plain-prinia': 0.35, 'scaly-breasted-munia': 0.3, 'long-tailed-shrike': 0.25, 'golden-headed-cisticola': 0.1 },
+    species: { 'plain-prinia': 0.32, 'scaly-breasted-munia': 0.28, 'long-tailed-shrike': 0.22, 'golden-headed-cisticola': 0.1, 'crested-serpent-eagle': 0.08 },
     quests: [
       q('f1-prinia', '拍到褐頭鷦鶯，沒被草擋住（遮擋 10% 以下），三星以上', '牠停的草穗一直在晃，等牠晃到空隙裡', 25, (p) => is(p, 'plain-prinia') && (p.metrics.stats?.occlusion ?? 1) <= 0.1 && p.score.stars >= 3),
       q('f1-munia', 'f/6.3 以下拍斑文鳥，背景分離 0.8 以上', '竹竿背後是整片田，光圈開到底就化開了；變焦鏡要退一點焦距光圈才開得大', 25, (p) => is(p, 'scaly-breasted-munia') && p.settings.fNumber <= 6.3 && (p.metrics.stats?.bgSep ?? 0) >= 0.8),
       q('f1-shrike', '拍到棕背伯勞，構圖 17 分以上', '電線後面的樹籬很近，想辦法讓背景乾淨', 30, (p) => is(p, 'long-tailed-shrike') && p.score.composition >= 17),
+      q('f1-eagle', '大冠鷲盤旋的飛行格，三星以上', '牠在高空繞大圈，追焦跟著圓弧走；背景是天空，曝光往上加一格', 40, (p) => is(p, 'crested-serpent-eagle') && slot(p) === 'flight' && p.score.stars >= 3),
     ],
     durationS: 540, cardCapacity: 60, intervalMul: 0.9,
   },

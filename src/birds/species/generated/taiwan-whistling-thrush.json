@@ -1,0 +1,41 @@
+{
+  "id": "taiwan-whistling-thrush",
+  "nameZh": "台灣紫嘯鶇",
+  "nameEn": "Taiwan Whistling Thrush",
+  "bodyLengthM": 0.3,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8175,
+        0.7081
+      ],
+      "contentW": 0.965,
+      "contentH": 0.56,
+      "albedo": 0.117,
+      "file": "birds/taiwan-whistling-thrush-side.png",
+      "sizeM": 0.311
+    },
+    "3q": {
+      "eyeUv": [
+        0.8181,
+        0.7496
+      ],
+      "contentW": 0.961,
+      "contentH": 0.636,
+      "albedo": 0.115,
+      "file": "birds/taiwan-whistling-thrush-3q.png",
+      "sizeM": 0.297
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8472,
+        0.6787
+      ],
+      "contentW": 0.96,
+      "contentH": 0.675,
+      "albedo": 0.102,
+      "file": "birds/taiwan-whistling-thrush-takeoff.png",
+      "sizeM": 0.453
+    }
+  }
+}

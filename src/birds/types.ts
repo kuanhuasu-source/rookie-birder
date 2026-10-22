@@ -54,6 +54,10 @@ export interface SpeciesDef {
   hovers?: boolean
   /** 懸停高度（m） */
   hoverHeightM?: number
+  /** 盤旋型（大冠鷲）：在停棲點上空繞大圈滑翔，不停棲 */
+  soars?: { heightM: number; radiusM: number; periodS: number }
+  /** 潛水型（小鸊鷉）：停在水面時週期性潛下去再浮上來 */
+  dives?: { everyS: [number, number]; underS: [number, number] }
   /** 會停的停棲點類型；沒給就什麼都停 */
   perchTags?: import('./Bird').PerchTag[]
   /** 群體：一次來幾隻（含領頭），在同一個停棲點上隔 spacingM 排開 */

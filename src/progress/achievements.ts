@@ -31,7 +31,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'full-guide', title: '圖鑑大全', desc: '圖鑑全部填滿', reward: 150, check: (s) => filled(s) >= SPECIES.length * 4 },
   { id: 'legend', title: '傳說目擊者', desc: '拍到八色鳥', reward: 100, check: (s) => seen(s, 'fairy-pitta') },
   { id: 'collector', title: '器材收藏家', desc: '扭蛋池裡的器材全部到手', reward: 100, check: (s) => pool().every((i) => s.owned[i.kind].includes(i.id)) },
-  { id: 'all-quests', title: '結業', desc: '三十個任務全部完成', reward: 150, check: (s) => LEVELS.every((l) => l.quests.every((q) => s.questsDone.includes(q.id))) },
+  { id: 'all-quests', title: '結業', desc: '所有任務全部完成', reward: 150, check: (s) => LEVELS.every((l) => l.quests.every((q) => s.questsDone.includes(q.id))) },
 ]
 
 export const ACHIEVEMENT_BY_ID: Record<string, AchievementDef> = Object.fromEntries(ACHIEVEMENTS.map((a) => [a.id, a]))

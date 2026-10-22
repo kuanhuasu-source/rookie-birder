@@ -350,7 +350,7 @@ function measureBird(dt: number): PhotoMetrics {
     eyeX: 0, eyeY: 0, birdHeightFrac: 0,
     species: bird?.species.id,
   }
-  if (!bird || !bird.inScene) { eyePrevValid = false; birdVelPx.set(0, 0); return base }
+  if (!bird || !bird.inScene || bird.submerged) { eyePrevValid = false; birdVelPx.set(0, 0); return base }
 
   bird.eye.getWorldPosition(eyeWorld)
   const dist = eyeWorld.distanceTo(camera.position)

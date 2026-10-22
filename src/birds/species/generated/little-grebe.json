@@ -1,0 +1,41 @@
+{
+  "id": "little-grebe",
+  "nameZh": "小鸊鷉",
+  "nameEn": "Little Grebe",
+  "bodyLengthM": 0.25,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.7506,
+        0.7137
+      ],
+      "contentW": 0.954,
+      "contentH": 0.698,
+      "albedo": 0.26,
+      "file": "birds/little-grebe-side.png",
+      "sizeM": 0.262
+    },
+    "3q": {
+      "eyeUv": [
+        0.7161,
+        0.8116
+      ],
+      "contentW": 0.846,
+      "contentH": 0.944,
+      "albedo": 0.27,
+      "file": "birds/little-grebe-3q.png",
+      "sizeM": 0.281
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8286,
+        0.6019
+      ],
+      "contentW": 0.947,
+      "contentH": 0.907,
+      "albedo": 0.249,
+      "file": "birds/little-grebe-takeoff.png",
+      "sizeM": 0.383
+    }
+  }
+}

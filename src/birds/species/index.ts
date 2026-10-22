@@ -20,6 +20,9 @@ import magpieGen from './generated/taiwan-blue-magpie.json'
 import monarchGen from './generated/black-naped-monarch.json'
 import yuhinaGen from './generated/taiwan-yuhina.json'
 import pittaGen from './generated/fairy-pitta.json'
+import eagleGen from './generated/crested-serpent-eagle.json'
+import grebeGen from './generated/little-grebe.json'
+import whistlingGen from './generated/taiwan-whistling-thrush.json'
 
 interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number }
 interface Generated { id: string; nameZh: string; nameEn: string; bodyLengthM: number; sprites: Record<'side' | '3q' | 'takeoff', GeneratedSprite> }
@@ -339,7 +342,54 @@ export const fairyPitta: SpeciesDef = {
   skittish: 1.4, flushDistM: 8,
 }
 
-export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen, plainPrinia, scalyBreastedMunia, goldenHeadedCisticola, longTailedShrike, taiwanBarbet, taiwanBlueMagpie, blackNapedMonarch, taiwanYuhina, fairyPitta]
+/** 大冠鷲：不停棲，在田野與濕地上空繞大圈盤旋，飛行格的進階題。 */
+export const crestedSerpentEagle: SpeciesDef = {
+  id: 'crested-serpent-eagle', nameZh: '大冠鷲', nameEn: 'Crested Serpent Eagle',
+  bodyHeightM: 0.45, albedo: eagleGen.sprites.side.albedo,
+  sprites: sprites(eagleGen as Generated),
+  dwell: { min: 25, max: 45 }, interval: { min: 30, max: 60 },
+  stateDurations: { S1: { min: 3, max: 6 }, S2: { min: 1, max: 2 }, S3: { min: 0.5, max: 0.9 } },
+  transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 12, hopDistM: 0.5,
+  call: { baseHz: 2200, notes: 3, noteS: 0.35, gapS: 0.15 },
+  perchTags: ['mud', 'ground', 'grass', 'wire', 'post', 'bamboo'],
+  rarity: 'epic',
+  skittish: 0.5, flushDistM: 30,
+  soars: { heightM: 22, radiusM: 12, periodS: 26 },
+}
+
+/** 小鸊鷉：浮在水面，一直潛水再冒出來，消失再出現的時機題。 */
+export const littleGrebe: SpeciesDef = {
+  id: 'little-grebe', nameZh: '小鸊鷉', nameEn: 'Little Grebe',
+  bodyHeightM: 0.16, albedo: grebeGen.sprites.side.albedo,
+  sprites: sprites(grebeGen as Generated),
+  dwell: { min: 30, max: 50 }, interval: { min: 14, max: 30 },
+  stateDurations: { S1: { min: 4, max: 9 }, S2: { min: 0.8, max: 1.5 }, S3: { min: 0.8, max: 1.4 } },
+  transitions: { S1: { S2: 0.4, S3: 0.55, S4: 0.05 }, S2: { S1: 0.7, S3: 0.25, S4: 0.05 }, S3: { S1: 0.6, S2: 0.4 } },
+  flightSpeedMs: 7, hopDistM: 1.2,
+  call: { baseHz: 2800, notes: 6, noteS: 0.06, gapS: 0.03 },
+  perchTags: ['water'],
+  rarity: 'common',
+  skittish: 1.0, flushDistM: 10,
+  dives: { everyS: [4, 9], underS: [5, 10] },
+}
+
+/** 台灣紫嘯鶇：溪邊暗處的深藍黑色鳥，清晨的曝光題。 */
+export const taiwanWhistlingThrush: SpeciesDef = {
+  id: 'taiwan-whistling-thrush', nameZh: '台灣紫嘯鶇', nameEn: 'Taiwan Whistling Thrush',
+  bodyHeightM: 0.17, albedo: whistlingGen.sprites.side.albedo,
+  sprites: sprites(whistlingGen as Generated),
+  dwell: { min: 14, max: 28 }, interval: { min: 14, max: 30 },
+  stateDurations: { S1: { min: 1.5, max: 4 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.5, max: 0.9 } },
+  transitions: { S1: { S2: 0.45, S3: 0.45, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 8, hopDistM: 0.8,
+  call: { baseHz: 4500, notes: 1, noteS: 0.5, gapS: 0.1 },
+  perchTags: ['rock', 'ground', 'branch'],
+  rarity: 'rare',
+  skittish: 1.2, flushDistM: 7,
+}
+
+export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen, plainPrinia, scalyBreastedMunia, goldenHeadedCisticola, longTailedShrike, taiwanBarbet, taiwanBlueMagpie, blackNapedMonarch, taiwanYuhina, fairyPitta, crestedSerpentEagle, littleGrebe, taiwanWhistlingThrush]
 export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries(SPECIES.map((s) => [s.id, s]))
 
 /** 第一章公園草地的出現權重。 */

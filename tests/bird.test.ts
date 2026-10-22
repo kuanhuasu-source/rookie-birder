@@ -222,3 +222,31 @@ describe('flocks', () => {
     expect(sp.current).toBeNull()
   })
 })
+
+describe('soaring and diving', () => {
+  it('a soaring bird circles above its perch at height and never lands', () => {
+    const eagle = { ...spottedDove, id: 'eagle-test', soars: { heightM: 20, radiusM: 10, periodS: 20 }, dwell: { min: 30, max: 30 }, flightSpeedMs: 20 }
+    const b = new Bird(eagle, seeded(3))
+    b.enter(perch, new THREE.Vector3(30, 25, -20))
+    let t = 0
+    while (!b.isHovering && t < 20) { b.update(1 / 30, camPos); t += 1 / 30 }
+    expect(b.isHovering).toBe(true)
+    const xs: number[] = []
+    for (let i = 0; i < 20 * 30; i++) { b.update(1 / 30, camPos); if (i % 30 === 0) xs.push(b.group.position.x); expect(b.state).toBe('S5'); expect(b.group.position.y).toBeGreaterThan(perch.position.y + 17) }
+    // 繞了一圈：x 有大於 +8 也有小於 −8 的時候
+    expect(Math.max(...xs)).toBeGreaterThan(8)
+    expect(Math.min(...xs)).toBeLessThan(-8)
+  })
+  it('a diving bird goes under for a few seconds, then surfaces nearby', () => {
+    const grebe = { ...spottedDove, id: 'grebe-test', dives: { everyS: [1, 1] as [number, number], underS: [2, 2] as [number, number] }, stateDurations: { S1: { min: 50, max: 50 }, S2: { min: 0.5, max: 0.5 }, S3: { min: 0.3, max: 0.3 } }, transitions: { S1: { S2: 1 }, S2: { S1: 1 }, S3: { S1: 1 } } }
+    const b = new Bird(grebe, seeded(5))
+    b.placeOnPerch(perch, 0)
+    const timeline: boolean[] = []
+    for (let i = 0; i < 30 * 8; i++) { b.update(1 / 30, camPos); timeline.push(b.submerged) }
+    expect(timeline.slice(0, 25).every((v) => !v)).toBe(true)     // 第一秒在水面
+    expect(timeline.slice(40, 80).every((v) => v)).toBe(true)      // 1.3 到 2.7 秒在水下
+    expect(timeline.slice(100, 120).every((v) => !v)).toBe(true)   // 3.3 秒後浮上來
+    expect(b.paper.visible).toBe(true)
+    expect(b.inScene).toBe(true)
+  })
+})

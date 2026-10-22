@@ -103,9 +103,20 @@ export class Bird {
     this.applySprite(this.sprite)
   }
 
-  /** 懸停型的目標點：停棲點上空。 */
+  /** 懸停型的目標點：停棲點上空；盤旋型是圓圈上的起點。 */
   private hoverPos(): THREE.Vector3 {
+    const so = this.species.soars
+    if (so) return this.perchPos().add(new THREE.Vector3(so.radiusM, so.heightM, 0))
     return this.perchPos().add(new THREE.Vector3(0, this.species.hoverHeightM ?? 7, 0))
+  }
+
+  /** 潛水：true 表示在水下，紙片隱藏、評分不算在畫面裡 */
+  submerged = false
+  private diveTimer = 0
+  private diveLeft = 0
+  private rollDiveTimer(): void {
+    const d = this.species.dives!
+    this.diveTimer = d.everyS[0] + this.rng() * (d.everyS[1] - d.everyS[0])
   }
 
   /** 伴鳥：換到伴鳥圖層，遮罩與評分不看牠。 */
@@ -117,11 +128,14 @@ export class Bird {
   enter(perch: Perch, from: THREE.Vector3, offset?: number): void {
     this.perch = perch
     this.perchOffset = offset ?? (this.rng() - 0.5) * perch.range
-    const to = this.species.hovers ? this.hoverPos() : this.perchPos()
+    const to = this.species.hovers || this.species.soars ? this.hoverPos() : this.perchPos()
     this.inScene = true
     this.leaving = false
     this.hovering = false
     this.hoverT = 0
+    this.submerged = false
+    this.paper.visible = true
+    if (this.species.dives) this.rollDiveTimer()
     this.group.visible = true
     this.dwellLeft = pick(this.species.dwell, this.rng)
     this.flight = { from: from.clone(), to, dur: from.distanceTo(to) / this.species.flightSpeedMs, leaving: false }
@@ -141,6 +155,9 @@ export class Bird {
     this.group.visible = true
     this.dwellLeft = Infinity
     this.group.position.copy(this.perchPos())
+    this.submerged = false
+    this.paper.visible = true
+    if (this.species.dives) this.rollDiveTimer()
     this.setFacing(1)
     this.setState('S1')
     if (this.scripted) this.stateDur = Infinity
@@ -184,6 +201,28 @@ export class Bird {
   }
 
   get isHovering(): boolean { return this.hovering }
+
+  /** 潛水循環：計時到就潛下去，水下幾秒後在附近浮上來。 */
+  private updateDive(dt: number): void {
+    const d = this.species.dives!
+    if (this.submerged) {
+      this.diveLeft -= dt
+      if (this.diveLeft <= 0) {
+        this.submerged = false
+        this.paper.visible = true
+        this.perchOffset = Math.max(-this.perch!.range / 2, Math.min(this.perch!.range / 2, this.perchOffset + (this.rng() - 0.5) * this.perch!.range))
+        this.rollDiveTimer()
+        this.setState('S2')   // 浮上來甩水：動作格
+      }
+      return
+    }
+    this.diveTimer -= dt
+    if (this.diveTimer <= 0) {
+      this.submerged = true
+      this.paper.visible = false
+      this.diveLeft = d.underS[0] + this.rng() * (d.underS[1] - d.underS[0])
+    }
+  }
 
   /** 光斑裡的鳥比周圍亮：紙片顏色乘上倍率（HalfFloat 緩衝可以超過 1）。 */
   private lightMulValue = 1
@@ -272,17 +311,29 @@ export class Bird {
     switch (this.state) {
       case 'S5': {
         if (this.hovering) {
-          // 懸停：原地上下小幅起伏、快速拍翅，停留時間到了就離開
           this.hoverT += dt
           const base = this.hoverPos()
-          this.group.position.set(base.x + Math.sin(this.hoverT * 0.7) * 0.3, base.y + Math.sin(this.hoverT * 1.9) * 0.25, base.z)
-          this.paper.scale.y = this.sprite.sizeM * (0.7 + 0.3 * Math.abs(Math.sin(this.hoverT * Math.PI * 9)))
+          const so = sp.soars
+          if (so) {
+            // 盤旋：繞停棲點上空畫大圈，幾乎不拍翅；面向跟著前進方向
+            const a = (this.hoverT / so.periodS) * Math.PI * 2
+            const c = this.perchPos()
+            this.group.position.set(c.x + Math.cos(a) * so.radiusM, c.y + so.heightM + Math.sin(this.hoverT * 0.5) * 1.5, c.z + Math.sin(a) * so.radiusM)
+            const vx = -Math.sin(a)
+            if ((vx >= 0 ? 1 : -1) !== this.facing) this.setFacing(vx >= 0 ? 1 : -1)
+            this.paper.scale.y = this.sprite.sizeM * (0.97 + 0.03 * Math.sin(this.hoverT * 2.5))
+          } else {
+            // 懸停：原地上下小幅起伏、快速拍翅，停留時間到了就離開
+            this.group.position.set(base.x + Math.sin(this.hoverT * 0.7) * 0.3, base.y + Math.sin(this.hoverT * 1.9) * 0.25, base.z)
+            this.paper.scale.y = this.sprite.sizeM * (0.7 + 0.3 * Math.abs(Math.sin(this.hoverT * Math.PI * 9)))
+          }
           this.dwellLeft -= dt
           if (this.dwellLeft <= 0 && !this.leaving) {
             this.leaving = true
             this.hovering = false
             const away = new THREE.Vector3(this.facing * 12, 4, (this.rng() - 0.5) * 6)
-            this.flight = { from: this.group.position.clone(), to: base.clone().add(away), dur: away.length() / sp.flightSpeedMs, leaving: true }
+            const from = this.group.position.clone()
+            this.flight = { from, to: (sp.soars ? from : base).clone().add(away), dur: away.length() / sp.flightSpeedMs, leaving: true }
             this.stateT = 0
             this.stateDur = this.flight.dur
           }
@@ -297,7 +348,7 @@ export class Bird {
         this.paper.scale.y = this.sprite.sizeM * flap
         if (u >= 1) {
           if (f.leaving) { this.inScene = false; this.group.visible = false; this.onLeft?.() }
-          else if (this.species.hovers) { this.group.position.copy(f.to); this.hovering = true; this.hoverT = 0; this.flight = null }
+          else if (this.species.hovers || this.species.soars) { this.group.position.copy(f.to); this.hovering = true; this.hoverT = 0; this.flight = null }
           else { this.group.position.copy(f.to); this.setState('S4') }
         }
         break
@@ -324,7 +375,8 @@ export class Bird {
         this.group.position.copy(this.perchPos())
         this.paper.scale.y = this.sprite.sizeM * (1 + 0.008 * Math.sin(this.stateT * 2.2))
         this.paper.rotation.z = 0
-        if (this.stateT >= this.stateDur) this.afterPerched()
+        if (sp.dives) this.updateDive(dt)
+        if (!this.submerged && this.stateT >= this.stateDur) this.afterPerched()
         break
       }
       case 'S2': {

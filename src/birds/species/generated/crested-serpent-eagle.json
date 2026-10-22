@@ -1,0 +1,41 @@
+{
+  "id": "crested-serpent-eagle",
+  "nameZh": "大冠鷲",
+  "nameEn": "Crested Serpent Eagle",
+  "bodyLengthM": 0.65,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.876,
+        0.7181
+      ],
+      "contentW": 0.966,
+      "contentH": 0.536,
+      "albedo": 0.265,
+      "file": "birds/crested-serpent-eagle-side.png",
+      "sizeM": 0.673
+    },
+    "3q": {
+      "eyeUv": [
+        0.8642,
+        0.7122
+      ],
+      "contentW": 0.962,
+      "contentH": 0.61,
+      "albedo": 0.271,
+      "file": "birds/crested-serpent-eagle-3q.png",
+      "sizeM": 0.642
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8831,
+        0.4887
+      ],
+      "contentW": 0.959,
+      "contentH": 0.718,
+      "albedo": 0.318,
+      "file": "birds/crested-serpent-eagle-takeoff.png",
+      "sizeM": 0.983
+    }
+  }
+}
