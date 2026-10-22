@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { makeToon } from '../../render/materials/toon'
+import { markThin } from '../../render/mask'
 import type { Perch } from '../../birds/Bird'
 import type { World } from '../scene'
 import type { HideDef } from '../../levels/types'
@@ -54,6 +55,7 @@ export function buildPark(): World {
     m.rotation.y = rand() * Math.PI
     const s = 0.6 + rand() * 1.4
     m.scale.set(s, s, s)
+    markThin(m)
     scene.add(m)
   }
   const rockMat = makeToon('#a8a39a')
@@ -118,7 +120,7 @@ export function buildPark(): World {
 export function disposeScene(scene: THREE.Scene): void {
   scene.traverse((o) => {
     const m = o as THREE.Mesh
-    if (m.isMesh) {
+    if (m.isMesh || (o as THREE.Line).isLine) {
       m.geometry?.dispose()
       const mats = Array.isArray(m.material) ? m.material : [m.material]
       for (const mat of mats) mat?.dispose()

@@ -81,3 +81,20 @@ describe('scorePhoto', () => {
     expect(coinsFor(1)).toBe(0)
   })
 })
+
+describe('foreground blur discount', () => {
+  it('a sharp foreground blocks fully, a very defocused one mostly sees through', async () => {
+    const { foregroundBlockWeight, FG_MIN_BLOCK } = await import('../src/photo/stats')
+    expect(foregroundBlockWeight(0)).toBe(1)
+    expect(foregroundBlockWeight(8)).toBe(1)
+    expect(foregroundBlockWeight(24)).toBeGreaterThan(FG_MIN_BLOCK)
+    expect(foregroundBlockWeight(24)).toBeLessThan(1)
+    expect(foregroundBlockWeight(60)).toBeCloseTo(FG_MIN_BLOCK, 5)
+  })
+  it('advice distinguishes a foreground that is not blurred enough', () => {
+    const s = scorePhoto(good({ stats: { ...good().stats!, occlusion: 0.3, rawOcclusion: 0.6 } }), ctx)
+    expect(s.advice).toContain('不夠糊')
+    const t = scorePhoto(good({ stats: { ...good().stats!, occlusion: 0.3, rawOcclusion: 0.3 } }), ctx)
+    expect(t.advice).toContain('換個角度')
+  })
+})

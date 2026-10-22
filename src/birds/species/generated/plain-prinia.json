@@ -1,0 +1,41 @@
+{
+  "id": "plain-prinia",
+  "nameZh": "褐頭鷦鶯",
+  "nameEn": "Plain Prinia",
+  "bodyLengthM": 0.13,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8107,
+        0.6489
+      ],
+      "contentW": 0.969,
+      "contentH": 0.476,
+      "albedo": 0.533,
+      "file": "birds/plain-prinia-side.png",
+      "sizeM": 0.134
+    },
+    "3q": {
+      "eyeUv": [
+        0.8139,
+        0.722
+      ],
+      "contentW": 0.961,
+      "contentH": 0.624,
+      "albedo": 0.575,
+      "file": "birds/plain-prinia-3q.png",
+      "sizeM": 0.129
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8478,
+        0.499
+      ],
+      "contentW": 0.964,
+      "contentH": 0.619,
+      "albedo": 0.531,
+      "file": "birds/plain-prinia-takeoff.png",
+      "sizeM": 0.196
+    }
+  }
+}

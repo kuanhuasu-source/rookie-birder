@@ -52,6 +52,26 @@ describe('levels', () => {
     expect(lowIso.check(photo({}, { stars: 3 }, { iso: 1600 }))).toBe(true)
     expect(lowIso.check(photo({}, { stars: 3 }, { iso: 3200 }))).toBe(false)
   })
+  it('chapter 4 field quests check occlusion, see-through foreground and background separation', () => {
+    const morning = LEVELS.find((l) => l.id === 'field-morning')!
+    const dusk = LEVELS.find((l) => l.id === 'field-dusk')!
+    expect(morning.sceneId).toBe('field')
+    const stats = (occlusion: number, rawOcclusion: number, bgSep: number) => ({ occlusion, rawOcclusion, bgSep, subjectMean: 0.3, clippedFrac: 0, crushedFrac: 0, bgVariance: 0.01 })
+    const [prinia, munia, shrike] = morning.quests
+    expect(prinia.check(photo({ species: 'plain-prinia', stats: stats(0.05, 0.05, 1) }, { stars: 3 }))).toBe(true)
+    expect(prinia.check(photo({ species: 'plain-prinia', stats: stats(0.3, 0.3, 1) }, { stars: 3 }))).toBe(false)
+    expect(munia.check(photo({ species: 'scaly-breasted-munia', stats: stats(0, 0, 0.9) }, {}, { fNumber: 5.6 }))).toBe(true)
+    expect(munia.check(photo({ species: 'scaly-breasted-munia', stats: stats(0, 0, 0.9) }, {}, { fNumber: 8 }))).toBe(false)
+    expect(munia.check(photo({ species: 'scaly-breasted-munia', stats: stats(0, 0, 0.5) }, {}, { fNumber: 5.6 }))).toBe(false)
+    expect(shrike.check(photo({ species: 'long-tailed-shrike' }, { composition: 17 }))).toBe(true)
+    const [through, cisticola, iso] = dusk.quests
+    expect(through.check(photo({ stats: stats(0.08, 0.5, 1) }, { stars: 3 }))).toBe(true)
+    expect(through.check(photo({ stats: stats(0.08, 0.1, 1) }, { stars: 3 }))).toBe(false)
+    expect(through.check(photo({ stats: stats(0.3, 0.5, 1) }, { stars: 3 }))).toBe(false)
+    expect(cisticola.check(photo({ species: 'golden-headed-cisticola', birdState: 'S2' }, { stars: 2 }))).toBe(true)
+    expect(iso.check(photo({}, { stars: 4 }, { iso: 3200 }))).toBe(true)
+    expect(iso.check(photo({}, { stars: 3 }, { iso: 3200 }))).toBe(false)
+  })
   it('a level can override the sun azimuth to put the sun in front of the camera', async () => {
     const { lightingPreset } = await import('../src/world/lighting')
     const def = lightingPreset('dusk', 'sunny')

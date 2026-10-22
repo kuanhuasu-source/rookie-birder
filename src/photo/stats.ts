@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { BIRD_LAYER } from '../render/mask'
+import { BIRD_LAYER, THIN_LAYER } from '../render/mask'
+import { foregroundBlockWeight } from '../camera/optics'
 import type { ImageStats } from './types'
 
 const SW = 480
@@ -14,6 +15,17 @@ uniform sampler2D map;
 varying vec2 vUv;
 void main() { if (texture2D(map, vUv).a < 0.5) discard; gl_FragColor = vec4(1.0); }
 `
+/** 場景深度編碼：R = 距離 / DEPTH_RANGE_M，B = 1 表示細長的前景（草、蘆葦），G = 0（鳥用白色寫 G = 1 區分）。 */
+export const DEPTH_RANGE_M = 64
+const depthVert = /* glsl */ `
+varying float vDist;
+void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); vDist = -mv.z; gl_Position = projectionMatrix * mv; }
+`
+const depthFrag = (thin: boolean) => /* glsl */ `
+varying float vDist;
+void main() { gl_FragColor = vec4(clamp(vDist / ${DEPTH_RANGE_M.toFixed(1)}, 0.0, 1.0), 0.0, ${thin ? '1.0' : '0.0'}, 1.0); }
+`
+export { foregroundBlockWeight, FG_BLUR_START_PX, FG_SOFT_PX, FG_MIN_BLOCK } from '../camera/optics'
 
 /**
  * 拍照時的影像統計：小尺寸遮罩（有遮擋 / 無遮擋）讀回 CPU，
@@ -22,7 +34,8 @@ void main() { if (texture2D(map, vUv).a < 0.5) discard; gl_FragColor = vec4(1.0)
 export class PhotoStats {
   private rtOcc = new THREE.WebGLRenderTarget(SW, SH, { type: THREE.UnsignedByteType, depthBuffer: true })
   private rtFree = new THREE.WebGLRenderTarget(SW, SH, { type: THREE.UnsignedByteType, depthBuffer: true })
-  private black = new THREE.MeshBasicMaterial({ color: 0x000000 })
+  private depth = new THREE.ShaderMaterial({ vertexShader: depthVert, fragmentShader: depthFrag(false), side: THREE.DoubleSide })
+  private depthThin = new THREE.ShaderMaterial({ vertexShader: depthVert, fragmentShader: depthFrag(true), side: THREE.DoubleSide })
   private white = new THREE.ShaderMaterial({ uniforms: { map: { value: null } }, vertexShader: maskVert, fragmentShader: maskFrag, side: THREE.DoubleSide })
   private bufOcc = new Uint8Array(SW * SH * 4)
   private bufFree = new Uint8Array(SW * SH * 4)
@@ -31,7 +44,7 @@ export class PhotoStats {
   constructor(private renderer: THREE.WebGLRenderer) {}
 
   /** 第一階段：渲染兩張遮罩並讀回，回傳之後對照照片用的資料。 */
-  prepare(scene: THREE.Scene, camera: THREE.PerspectiveCamera, birdPapers: THREE.Mesh[], birdDistM: number): PreparedStats | null {
+  prepare(scene: THREE.Scene, camera: THREE.PerspectiveCamera, birdPapers: THREE.Mesh[], birdDistM: number, cocAt?: (distM: number) => number): PreparedStats | null {
     if (birdPapers.length === 0) return null
     const r = this.renderer
     const prevBg = scene.background, prevFog = scene.fog, prevAuto = r.autoClear
@@ -52,15 +65,18 @@ export class PhotoStats {
     r.clear()
     camera.layers.set(BIRD_LAYER)
     r.render(scene, camera)
-    // 有遮擋：場景（不含鳥）黑色寫深度，再畫鳥
+    // 有遮擋：場景（不含鳥）寫距離編碼與深度，再畫鳥
     camera.layers.set(0)
-    scene.overrideMaterial = this.black
+    scene.overrideMaterial = this.depth
     r.setRenderTarget(this.rtOcc)
     r.clear()
     r.render(scene, camera)
+    r.autoClear = false
+    camera.layers.set(THIN_LAYER)
+    scene.overrideMaterial = this.depthThin
+    r.render(scene, camera)
     scene.overrideMaterial = null
     camera.layers.set(BIRD_LAYER)
-    r.autoClear = false
     r.render(scene, camera)
     r.autoClear = prevAuto
     camera.layers.mask = prevLayers
@@ -73,20 +89,29 @@ export class PhotoStats {
     r.setRenderTarget(null)
 
     // 遮罩統計與外框
-    let free = 0, occ = 0
+    let free = 0, occ = 0, blocked = 0
     let minX = SW, maxX = -1, minY = SH, maxY = -1
     const freeMask = new Uint8Array(SW * SH)
     const occMask = new Uint8Array(SW * SH)
     for (let y = 0; y < SH; y++) for (let x = 0; x < SW; x++) {
       const i = y * SW + x
-      if (this.bufFree[i * 4] > 127) {
+      const isFree = this.bufFree[i * 4] > 127
+      if (isFree) {
         free++; freeMask[i] = 1
         if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y
       }
-      if (this.bufOcc[i * 4] > 127) { occ++; occMask[i] = 1 }
+      // G 通道只有鳥會寫 1；R 通道是擋住牠的場景距離
+      if (this.bufOcc[i * 4 + 1] > 127) { occ++; occMask[i] = 1 }
+      else if (isFree) {
+        // 只有細長的前景（B = 1）才會因為糊而變透明；大東西擋住就是擋住
+        const thin = this.bufOcc[i * 4 + 2] > 127
+        const dist = (this.bufOcc[i * 4] / 255) * DEPTH_RANGE_M
+        blocked += thin && cocAt ? foregroundBlockWeight(cocAt(dist)) : 1
+      }
     }
     if (free === 0) return null
-    const occlusion = 1 - occ / free
+    const rawOcclusion = 1 - occ / free
+    const occlusion = Math.min(rawOcclusion, blocked / free)
 
     // 背景距離：沿外框外一圈射線
     const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2
@@ -100,14 +125,15 @@ export class PhotoStats {
       if (px < 0 || px >= SW || py < 0 || py >= SH) continue
       const ndc = new THREE.Vector2((px / SW) * 2 - 1, (py / SH) * 2 - 1)
       this.raycaster.setFromCamera(ndc, camera)
-      const hit = this.raycaster.intersectObjects(targets, false)[0]
+      // 比鳥近的是前景，不算背景；找第一個在鳥後面的東西
+      const hit = this.raycaster.intersectObjects(targets, false).find((h) => h.distance > birdDistM)
       dists.push(hit ? hit.distance : Infinity)
     }
     dists.sort((a, b) => a - b)
     const med = dists.length ? dists[Math.floor(dists.length / 2)] : Infinity
     const bgSep = med === Infinity ? 1 : Math.min(1, Math.max(0, (med - birdDistM) / birdDistM))
 
-    return { occMask, freeMask, bbox: { minX, maxX, minY, maxY }, occlusion, bgSep }
+    return { occMask, freeMask, bbox: { minX, maxX, minY, maxY }, occlusion, rawOcclusion, bgSep }
   }
 
   /** 第二階段：拿到最終照片像素後算主體亮度與背景雜亂。photo 為由下往上的 RGBA。 */
@@ -136,7 +162,7 @@ export class PhotoStats {
     }
     const subjectMean = n ? sum / n : 0
     const bgVariance = bn ? Math.max(0, bsum2 / bn - (bsum / bn) ** 2) : 0
-    return { occlusion: pre.occlusion, subjectMean, clippedFrac: n ? clipped / n : 0, crushedFrac: n ? crushed / n : 0, bgVariance, bgSep: pre.bgSep }
+    return { occlusion: pre.occlusion, rawOcclusion: pre.rawOcclusion, subjectMean, clippedFrac: n ? clipped / n : 0, crushedFrac: n ? crushed / n : 0, bgVariance, bgSep: pre.bgSep }
   }
 }
 
@@ -145,6 +171,7 @@ export interface PreparedStats {
   freeMask: Uint8Array
   bbox: { minX: number; maxX: number; minY: number; maxY: number }
   occlusion: number
+  rawOcclusion: number
   bgSep: number
 }
 

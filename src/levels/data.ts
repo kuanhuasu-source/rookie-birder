@@ -78,6 +78,28 @@ export const LEVELS: LevelDef[] = [
     ],
     durationS: 540, cardCapacity: 60, intervalMul: 1.0,
   },
+  {
+    id: 'field-morning', chapter: 4, title: '田野草叢 · 上午', subtitle: '晴，前景的草與背後的樹籬',
+    sceneId: 'field', time: 'morning', weather: 'sunny',
+    species: { 'plain-prinia': 0.35, 'scaly-breasted-munia': 0.3, 'long-tailed-shrike': 0.25, 'golden-headed-cisticola': 0.1 },
+    quests: [
+      q('f1-prinia', '拍到褐頭鷦鶯，沒被草擋住（遮擋 10% 以下），三星以上', '牠停的草穗一直在晃，等牠晃到空隙裡', 25, (p) => is(p, 'plain-prinia') && (p.metrics.stats?.occlusion ?? 1) <= 0.1 && p.score.stars >= 3),
+      q('f1-munia', 'f/5.6 以下拍斑文鳥，背景分離 0.8 以上', '竹竿背後是整片田，開大光圈就化開了', 25, (p) => is(p, 'scaly-breasted-munia') && p.settings.fNumber <= 5.6 && (p.metrics.stats?.bgSep ?? 0) >= 0.8),
+      q('f1-shrike', '拍到棕背伯勞，構圖 17 分以上', '電線後面的樹籬很近，想辦法讓背景乾淨', 30, (p) => is(p, 'long-tailed-shrike') && p.score.composition >= 17),
+    ],
+    durationS: 540, cardCapacity: 60, intervalMul: 0.9,
+  },
+  {
+    id: 'field-dusk', chapter: 4, title: '田野草叢 · 黃昏', subtitle: '晴，前景虛化與低光',
+    sceneId: 'field', time: 'dusk', weather: 'sunny',
+    species: { 'plain-prinia': 0.3, 'scaly-breasted-munia': 0.25, 'long-tailed-shrike': 0.25, 'golden-headed-cisticola': 0.2 },
+    quests: [
+      q('f2-through', '隔著前景的草拍：草擋住 25% 以上但糊到幾乎看不見（有效遮擋 15% 以下），三星', '趴低、貼近前景、光圈開到底，草就化成一層顏色', 35, (p) => inFrame(p) && (p.metrics.stats?.rawOcclusion ?? 0) >= 0.25 && (p.metrics.stats?.occlusion ?? 1) <= 0.15 && p.score.stars >= 3),
+      q('f2-cisticola', '黃頭扇尾鶯的動作格，兩星以上', '牠最小也最不安分，先對好草穗等牠', 30, (p) => is(p, 'golden-headed-cisticola') && slot(p) === 'action' && p.score.stars >= 2),
+      q('f2-iso', 'ISO 3200 以下拍到四星', '黃昏在草叢裡光很弱，支撐和光圈都要用上', 30, (p) => inFrame(p) && p.settings.iso <= 3200 && p.score.stars >= 4),
+    ],
+    durationS: 540, cardCapacity: 60, intervalMul: 0.9,
+  },
 ]
 
 export const LEVEL_BY_ID: Record<string, LevelDef> = Object.fromEntries(LEVELS.map((l) => [l.id, l]))

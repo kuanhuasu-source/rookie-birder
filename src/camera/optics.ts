@@ -62,3 +62,25 @@ export function lensSoftPx(softWideOpenPx: number, fNumber: number, maxApertureF
 export function totalBlurPx(parts: { coc: number; motion: number; shake: number; soft: number }): number {
   return Math.sqrt(parts.coc ** 2 + parts.motion ** 2 + parts.shake ** 2 + parts.soft ** 2)
 }
+
+/** 前景糊到這個 CoC（照片像素）以上就開始「透」過去；到 FG_SOFT_PX 時只剩 FG_MIN_BLOCK 的遮擋。 */
+export const FG_BLUR_START_PX = 8
+export const FG_SOFT_PX = 40
+export const FG_MIN_BLOCK = 0.2
+/** 前景虛化的 CoC 以這個寬度（照片）為準，觀景窗與照片才一致。 */
+export const FG_REF_WIDTH_PX = 1920
+
+/** 細長失焦前景（草、蘆葦）的遮擋權重：越糊越透明。 */
+export function foregroundBlockWeight(cocPxAtOccluder: number): number {
+  const t = Math.min(1, Math.max(0, (cocPxAtOccluder - FG_BLUR_START_PX) / (FG_SOFT_PX - FG_BLUR_START_PX)))
+  const smooth = t * t * (3 - 2 * t)
+  return 1 - smooth * (1 - FG_MIN_BLOCK)
+}
+
+/** 比對焦距離近、模糊圈剛好等於 cocPxTarget 的距離（m）；再近的前景都比這更糊。 */
+export function nearDistForCocM(focalMm: number, fNumber: number, focusM: number, cocPxTarget: number, sensor: SensorDef, imageW: number): number {
+  const s = focusM * 1000
+  const K = (focalMm / fNumber) * (focalMm / Math.max(1, s - focalMm))
+  const C = (cocPxTarget / imageW) * sensor.widthMm
+  return (s / (1 + C / K)) / 1000
+}

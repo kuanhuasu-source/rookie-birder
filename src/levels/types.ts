@@ -1,7 +1,7 @@
 import type { PhotoRecord } from '../photo/types'
 import type { TimeOfDay, Weather } from '../world/lighting'
 
-export type SceneId = 'park' | 'stream' | 'wetland'
+export type SceneId = 'park' | 'stream' | 'wetland' | 'field'
 
 export interface HideDef {
   id: string

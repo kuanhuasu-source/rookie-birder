@@ -28,8 +28,10 @@ export interface PhotoMetrics {
 }
 
 export interface ImageStats {
-  /** 鳥被前景遮住的比例 0 到 1 */
+  /** 鳥被前景遮住的有效比例 0 到 1：失焦很糊的前景算成半透明 */
   occlusion: number
+  /** 不管糊不糊，幾何上被前景擋住的比例 */
+  rawOcclusion?: number
   /** 主體在最終照片上的平均亮度（sRGB 解碼後的線性值） */
   subjectMean: number
   clippedFrac: number

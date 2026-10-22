@@ -28,7 +28,7 @@ import { AlbumView } from './ui/album'
 import { PhotoCapture, PHOTO_W } from './photo/capture'
 import type { PhotoMetrics } from './photo/types'
 import { Bird } from './birds/Bird'
-import { BIRD_LAYER } from './render/mask'
+import { BIRD_LAYER, THIN_LAYER } from './render/mask'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
@@ -55,6 +55,7 @@ let world: World = buildScene('park')
 const camera = new THREE.PerspectiveCamera(10, 1.5, 0.3, 600)
 camera.position.set(...world.hides[0].position)
 camera.layers.enable(BIRD_LAYER)
+camera.layers.enable(THIN_LAYER)
 
 // 鳥：每種一隻，同時只有一隻在場
 const birds: Bird[] = SPECIES.map((sp) => new Bird(sp))
@@ -386,6 +387,7 @@ function takePhoto(m: PhotoMetrics): void {
     noiseSigma: noiseSigma(cam.body.kNoise, s.iso),
     camOmega: new THREE.Vector2(rig.shake.omegaYaw + rig.panOmegaYaw, rig.shake.omegaPitch + rig.panOmegaPitch),
     birdVelPx: birdVelPx.clone(),
+    cocAt: (d: number) => cocPx(cam.optics.focalMm, cam.optics.fNumber, cam.settings.focusM, d, cam.sensor, PHOTO_W),
   })
   if (rec) {
     flashT = 0.08
@@ -607,7 +609,7 @@ else levelView.show()
 ;(window as unknown as { __game: unknown }).__game = {
   cam, rig, camera, capture, album, guide, gearView, levelView, summaryView, knowledge, save, af, alert,
   setHalfPress: (v: boolean) => { halfPress = v },
-  applyEquipped, birds, dove, activeBird, shooting: () => shooting,
+  applyEquipped, Pipeline, birds, dove, activeBird, shooting: () => shooting,
   world: () => world, spawner: () => spawner, session: () => session, startLevel, endLevel, levels: LEVELS, levelById: LEVEL_BY_ID,
   setLighting: (t: TimeOfDay, w: Weather) => { time = t; weather = w; setLighting() },
   setOverview: (v: boolean) => { overview = v },

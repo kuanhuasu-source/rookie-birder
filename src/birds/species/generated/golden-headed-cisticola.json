@@ -1,0 +1,41 @@
+{
+  "id": "golden-headed-cisticola",
+  "nameZh": "黃頭扇尾鶯",
+  "nameEn": "Golden-headed Cisticola",
+  "bodyLengthM": 0.1,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.819,
+        0.6534
+      ],
+      "contentW": 0.969,
+      "contentH": 0.484,
+      "albedo": 0.461,
+      "file": "birds/golden-headed-cisticola-side.png",
+      "sizeM": 0.103
+    },
+    "3q": {
+      "eyeUv": [
+        0.7998,
+        0.7386
+      ],
+      "contentW": 0.957,
+      "contentH": 0.709,
+      "albedo": 0.467,
+      "file": "birds/golden-headed-cisticola-3q.png",
+      "sizeM": 0.099
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8296,
+        0.5872
+      ],
+      "contentW": 0.961,
+      "contentH": 0.668,
+      "albedo": 0.404,
+      "file": "birds/golden-headed-cisticola-takeoff.png",
+      "sizeM": 0.151
+    }
+  }
+}

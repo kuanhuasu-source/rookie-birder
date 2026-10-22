@@ -1,6 +1,13 @@
 import * as THREE from 'three'
 
 const BIRD_LAYER = 1
+/** 細長的前景物（草莖、蘆葦、葉片）：失焦時會變半透明，獨立圖層另外畫。 */
+const THIN_LAYER = 2
+
+/** 把物件（含子物件）標成細長前景。 */
+export function markThin(obj: THREE.Object3D): void {
+  obj.traverse((o) => { o.layers.set(THIN_LAYER) })
+}
 
 const maskVert = /* glsl */ `
 varying vec2 vUv;
@@ -36,6 +43,7 @@ export class BirdMask {
     const prevMask = camera.layers.mask
     // 場景（不含鳥）用黑色寫入深度
     camera.layers.set(0)
+    camera.layers.enable(THIN_LAYER)
     scene.overrideMaterial = this.black
     renderer.setRenderTarget(this.target)
     renderer.setClearColor(0x000000, 1)
@@ -65,4 +73,4 @@ export class BirdMask {
   }
 }
 
-export { BIRD_LAYER }
+export { BIRD_LAYER, THIN_LAYER }

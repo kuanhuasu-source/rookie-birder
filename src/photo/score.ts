@@ -105,7 +105,8 @@ export function scorePhoto(m: PhotoMetrics, ctx: ScoreContext): PhotoScore {
   const composition = 25 * compRaw * (1 - occlusion)
   Object.assign(detail, { size, thirds, lead, bgSep, bgClean, eyeLevel, occlusion })
   if (occlusion > 0.5) caps.push('鳥被遮住超過一半')
-  if (occlusion > 0.2) losses.push({ key: 'occ', loss: 25 * compRaw * occlusion, advice: '前景擋到鳥了，換個角度或等牠跳出來' })
+  const rawOcc = m.stats?.rawOcclusion ?? occlusion
+  if (occlusion > 0.2) losses.push({ key: 'occ', loss: 25 * compRaw * occlusion, advice: rawOcc > occlusion + 0.1 ? '前景還不夠糊，擋到鳥了；光圈再開大、或離前景更近讓它化開' : '前景擋到鳥了，換個角度或等牠跳出來' })
   if (size < 0.6) losses.push({ key: 'size', loss: 25 * 0.25 * (1 - size), advice: m.birdHeightFrac < 0.25 ? '鳥佔畫面太小，拉近一點' : '太滿了，退一點焦距給牠留空間' })
   if (thirds < 0.5) losses.push({ key: 'thirds', loss: 25 * 0.15 * (1 - thirds), advice: '把鳥眼放到三分線的交點附近' })
   if (lead < 0.5) losses.push({ key: 'lead', loss: 25 * 0.15 * (1 - lead), advice: '視線前方留點空間，別讓牠看著畫框' })

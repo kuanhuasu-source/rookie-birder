@@ -7,6 +7,8 @@ export interface Perch {
   /** 可以沿著跳動的方向（單位向量）與範圍（m） */
   along: THREE.Vector3
   range: number
+  /** 草莖搖晃幅度（m）：停在上面的鳥會跟著晃，對焦與構圖都更難 */
+  swayM?: number
 }
 
 export type Rng = () => number
@@ -159,9 +161,18 @@ export class Bird {
 
   get isHovering(): boolean { return this.hovering }
 
+  private swayT = 0
+
   private perchPos(): THREE.Vector3 {
     const p = this.perch!
-    return p.position.clone().addScaledVector(p.along, this.perchOffset)
+    const pos = p.position.clone().addScaledVector(p.along, this.perchOffset)
+    if (p.swayM) {
+      // 風吹草動：兩個不同頻率疊起來，主要是左右，少量上下
+      const a = p.swayM * (Math.sin(this.swayT * 1.3) * 0.7 + Math.sin(this.swayT * 3.1) * 0.3)
+      pos.x += a
+      pos.y += Math.abs(a) * -0.35
+    }
+    return pos
   }
 
   private setState(s: BirdState): void {
@@ -221,6 +232,7 @@ export class Bird {
   }
 
   update(dt: number, cameraPos: THREE.Vector3): void {
+    this.swayT += dt
     if (!this.inScene) return
     this.stateT += dt
     const sp = this.species

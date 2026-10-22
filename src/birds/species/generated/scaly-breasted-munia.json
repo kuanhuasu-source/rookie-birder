@@ -1,0 +1,41 @@
+{
+  "id": "scaly-breasted-munia",
+  "nameZh": "斑文鳥",
+  "nameEn": "Scaly-breasted Munia",
+  "bodyLengthM": 0.11,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.7932,
+        0.711
+      ],
+      "contentW": 0.963,
+      "contentH": 0.597,
+      "albedo": 0.367,
+      "file": "birds/scaly-breasted-munia-side.png",
+      "sizeM": 0.114
+    },
+    "3q": {
+      "eyeUv": [
+        0.818,
+        0.7662
+      ],
+      "contentW": 0.958,
+      "contentH": 0.676,
+      "albedo": 0.362,
+      "file": "birds/scaly-breasted-munia-3q.png",
+      "sizeM": 0.109
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8286,
+        0.5851
+      ],
+      "contentW": 0.959,
+      "contentH": 0.713,
+      "albedo": 0.372,
+      "file": "birds/scaly-breasted-munia-takeoff.png",
+      "sizeM": 0.166
+    }
+  }
+}

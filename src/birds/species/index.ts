@@ -11,6 +11,10 @@ import nightHeronGen from './generated/night-heron.json'
 import stiltGen from './generated/black-winged-stilt.json'
 import kiteGen from './generated/black-winged-kite.json'
 import moorhenGen from './generated/common-moorhen.json'
+import priniaGen from './generated/plain-prinia.json'
+import muniaGen from './generated/scaly-breasted-munia.json'
+import cisticolaGen from './generated/golden-headed-cisticola.json'
+import shrikeGen from './generated/long-tailed-shrike.json'
 
 interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number }
 interface Generated { id: string; nameZh: string; nameEn: string; bodyLengthM: number; sprites: Record<'side' | '3q' | 'takeoff', GeneratedSprite> }
@@ -178,7 +182,63 @@ export const commonMoorhen: SpeciesDef = {
   skittish: 1.0, flushDistM: 9,
 }
 
-export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen]
+/** 褐頭鷦鶯：停在芒草穗上跟著風晃，尾巴翹得高，停留不長。 */
+export const plainPrinia: SpeciesDef = {
+  id: 'plain-prinia', nameZh: '褐頭鷦鶯', nameEn: 'Plain Prinia',
+  bodyHeightM: 0.07, albedo: priniaGen.sprites.side.albedo,
+  sprites: sprites(priniaGen as Generated),
+  dwell: { min: 8, max: 18 }, interval: { min: 8, max: 18 },
+  stateDurations: { S1: { min: 1, max: 3 }, S2: { min: 0.8, max: 2 }, S3: { min: 0.3, max: 0.5 } },
+  transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 6, hopDistM: 0.2,
+  call: { baseHz: 4200, notes: 4, noteS: 0.06, gapS: 0.05 },
+  rarity: 'common',
+  skittish: 1.0, flushDistM: 4,
+}
+
+/** 斑文鳥：成群停在竹竿上，很安分，背後是整片田。 */
+export const scalyBreastedMunia: SpeciesDef = {
+  id: 'scaly-breasted-munia', nameZh: '斑文鳥', nameEn: 'Scaly-breasted Munia',
+  bodyHeightM: 0.07, albedo: muniaGen.sprites.side.albedo,
+  sprites: sprites(muniaGen as Generated),
+  dwell: { min: 14, max: 30 }, interval: { min: 10, max: 22 },
+  stateDurations: { S1: { min: 2, max: 5 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.3, max: 0.5 } },
+  transitions: { S1: { S2: 0.55, S3: 0.35, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
+  flightSpeedMs: 7, hopDistM: 0.3,
+  call: { baseHz: 3000, notes: 2, noteS: 0.08, gapS: 0.1 },
+  rarity: 'common',
+  skittish: 0.9, flushDistM: 5,
+}
+
+/** 黃頭扇尾鶯：最小、最不安分，一直在草穗間跳。 */
+export const goldenHeadedCisticola: SpeciesDef = {
+  id: 'golden-headed-cisticola', nameZh: '黃頭扇尾鶯', nameEn: 'Golden-headed Cisticola',
+  bodyHeightM: 0.06, albedo: cisticolaGen.sprites.side.albedo,
+  sprites: sprites(cisticolaGen as Generated),
+  dwell: { min: 6, max: 14 }, interval: { min: 12, max: 26 },
+  stateDurations: { S1: { min: 0.6, max: 1.8 }, S2: { min: 0.6, max: 1.5 }, S3: { min: 0.25, max: 0.45 } },
+  transitions: { S1: { S2: 0.35, S3: 0.55, S4: 0.1 }, S2: { S1: 0.3, S3: 0.6, S4: 0.1 }, S3: { S1: 0.4, S2: 0.3, S3: 0.3 } },
+  flightSpeedMs: 6, hopDistM: 0.25,
+  call: { baseHz: 5000, notes: 3, noteS: 0.05, gapS: 0.04 },
+  rarity: 'rare',
+  skittish: 1.1, flushDistM: 4,
+}
+
+/** 棕背伯勞：站在電線上守著，背後是近的樹籬，背景分離的考題。 */
+export const longTailedShrike: SpeciesDef = {
+  id: 'long-tailed-shrike', nameZh: '棕背伯勞', nameEn: 'Long-tailed Shrike',
+  bodyHeightM: 0.14, albedo: shrikeGen.sprites.side.albedo,
+  sprites: sprites(shrikeGen as Generated),
+  dwell: { min: 16, max: 35 }, interval: { min: 14, max: 30 },
+  stateDurations: { S1: { min: 2.5, max: 6 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.5, max: 0.9 } },
+  transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
+  flightSpeedMs: 9, hopDistM: 1.2,
+  call: { baseHz: 2600, notes: 3, noteS: 0.1, gapS: 0.07 },
+  rarity: 'common',
+  skittish: 0.8, flushDistM: 7,
+}
+
+export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen, plainPrinia, scalyBreastedMunia, goldenHeadedCisticola, longTailedShrike]
 export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries(SPECIES.map((s) => [s.id, s]))
 
 /** 第一章公園草地的出現權重。 */

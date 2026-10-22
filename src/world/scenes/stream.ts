@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { makeToon } from '../../render/materials/toon'
+import { markThin } from '../../render/mask'
 import type { Perch } from '../../birds/Bird'
 import type { World } from '../scene'
 import type { HideDef } from '../../levels/types'
@@ -71,6 +72,7 @@ export function buildStream(): World {
     m.position.set(x, 0.35 + 0.8, z)
     m.rotation.z = (rand() - 0.5) * 0.25
     m.scale.setScalar(0.7 + rand() * 0.8)
+    markThin(m)
     scene.add(m)
   }
   // 前景草：機位附近

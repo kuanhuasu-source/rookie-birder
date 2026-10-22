@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { makeToon } from '../../render/materials/toon'
+import { markThin } from '../../render/mask'
 import type { Perch } from '../../birds/Bird'
 import type { World } from '../scene'
 import type { HideDef } from '../../levels/types'
@@ -54,6 +55,7 @@ export function buildWetland(): World {
     const z = -(48 + rand() * 10)
     m.position.set(x, 0.75, z)
     m.scale.setScalar(0.8 + rand() * 0.7)
+    markThin(m)
     scene.add(m)
   }
   for (let i = 0; i < 18; i++) {

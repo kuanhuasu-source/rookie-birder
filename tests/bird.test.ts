@@ -127,3 +127,16 @@ describe('hovering species', () => {
     expect(left).toBe(true)
   })
 })
+
+describe('swaying perch', () => {
+  it('a bird on a swaying grass stem moves sideways over time, a rigid perch does not', () => {
+    const sway = { position: new THREE.Vector3(0, 1, -10), along: new THREE.Vector3(1, 0, 0), range: 0, swayM: 0.15 }
+    const rigid = { ...sway, swayM: undefined }
+    const a = new Bird(spottedDove, seeded(3)); a.placeOnPerch(sway)
+    const b = new Bird(spottedDove, seeded(3)); b.placeOnPerch(rigid)
+    const xs = new Set<number>()
+    for (let i = 0; i < 120; i++) { a.update(1 / 30, camPos); b.update(1 / 30, camPos); xs.add(+a.group.position.x.toFixed(3)); expect(b.group.position.x).toBe(0) }
+    expect(xs.size).toBeGreaterThan(10)
+    expect(Math.max(...xs)).toBeLessThanOrEqual(0.15)
+  })
+})

@@ -1,0 +1,41 @@
+{
+  "id": "long-tailed-shrike",
+  "nameZh": "棕背伯勞",
+  "nameEn": "Long-tailed Shrike",
+  "bodyLengthM": 0.25,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8289,
+        0.6703
+      ],
+      "contentW": 0.969,
+      "contentH": 0.475,
+      "albedo": 0.367,
+      "file": "birds/long-tailed-shrike-side.png",
+      "sizeM": 0.258
+    },
+    "3q": {
+      "eyeUv": [
+        0.8482,
+        0.6924
+      ],
+      "contentW": 0.967,
+      "contentH": 0.513,
+      "albedo": 0.368,
+      "file": "birds/long-tailed-shrike-3q.png",
+      "sizeM": 0.246
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8613,
+        0.5049
+      ],
+      "contentW": 0.96,
+      "contentH": 0.693,
+      "albedo": 0.3,
+      "file": "birds/long-tailed-shrike-takeoff.png",
+      "sizeM": 0.378
+    }
+  }
+}

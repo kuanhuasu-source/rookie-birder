@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Pipeline } from '../render/pipeline'
-import { BirdMask, BIRD_LAYER } from '../render/mask'
+import { BirdMask, BIRD_LAYER, THIN_LAYER } from '../render/mask'
 import type { PhotoRecord, PhotoMetrics } from './types'
 import { savePhoto } from './album'
 import { PhotoStats } from './stats'
@@ -24,6 +24,8 @@ export interface CaptureInput {
   camOmega: THREE.Vector2
   /** 鳥眼在照片像素座標下的速度（px/s） */
   birdVelPx: THREE.Vector2
+  /** 任一距離的模糊圈（照片像素），給前景虛化的遮擋折扣用 */
+  cocAt?: (distM: number) => number
 }
 
 /** 照片成像：高解析渲染、非同步讀回、WebP 編碼、存進相簿。 */
@@ -56,13 +58,14 @@ export class PhotoCapture {
     cam.far = input.camera.far
     cam.aspect = PHOTO_W / PHOTO_H
     cam.layers.enable(BIRD_LAYER)
+    cam.layers.enable(THIN_LAYER)
     cam.updateProjectionMatrix()
     cam.position.copy(input.camera.position)
     cam.quaternion.copy(input.camera.quaternion)
     cam.updateMatrixWorld()
 
     this.mask.render(this.renderer, input.scene, cam, input.birdPapers)
-    const pre = input.metrics.birdInFrame ? this.stats.prepare(input.scene, cam, input.birdPapers, input.metrics.distM) : null
+    const pre = input.metrics.birdInFrame ? this.stats.prepare(input.scene, cam, input.birdPapers, input.metrics.distM, input.cocAt) : null
 
     const t = input.settings.shutterS
     const focalPx = (input.settings.focalMm / input.sensorWmm) * PHOTO_W
