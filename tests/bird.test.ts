@@ -140,3 +140,15 @@ describe('swaying perch', () => {
     expect(Math.max(...xs)).toBeLessThanOrEqual(0.15)
   })
 })
+
+describe('lore', () => {
+  it('every species has complete guide information', async () => {
+    const { SPECIES } = await import('../src/birds/species')
+    const { LORE } = await import('../src/birds/lore')
+    for (const sp of SPECIES) {
+      const l = LORE[sp.id]
+      expect(l, sp.id).toBeDefined()
+      for (const k of ['latin', 'lengthCm', 'status', 'habitat', 'features', 'habits', 'voice', 'tip'] as const) expect(l[k].length, `${sp.id}.${k}`).toBeGreaterThan(1)
+    }
+  })
+})

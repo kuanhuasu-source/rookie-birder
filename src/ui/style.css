@@ -176,7 +176,7 @@ body.touch .album-photo img { max-height: 42vh; }
 .guide, .gearview { position: fixed; inset: 0; background: var(--cream); z-index: 10; overflow: auto; padding: 24px; }
 .guide.hidden, .gearview.hidden { display: none; }
 .guide-progress, .gear-coins { font-size: 20px; opacity: 0.75; }
-.guide-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
+.guide-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 18px; align-items: start; }
 .guide-page { background: #fffdf7; border: 2px solid var(--pencil); border-radius: 6px; padding: 12px; transform: rotate(-0.4deg); box-shadow: 3px 3px 0 rgba(74,74,74,0.2); background-image: repeating-linear-gradient(transparent 0 27px, rgba(29,111,184,0.12) 27px 28px); }
 .guide-page:nth-child(even) { transform: rotate(0.5deg); }
 .guide-page.unseen { opacity: 0.75; }
@@ -190,6 +190,15 @@ body.touch .album-photo img { max-height: 42vh; }
 .guide-slot.empty .guide-slot-img { background: repeating-linear-gradient(45deg, #efe8d6 0 6px, #e4dcc8 6px 12px); border-style: dashed; }
 .guide-slot-cap { font-size: 14px; text-align: center; margin-top: 4px; }
 .guide-slot-cap .stars { color: var(--orange); }
+.guide-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.guide-tag { font-size: 13px; line-height: 1; padding: 4px 8px; border: 2px solid var(--pencil); border-radius: 999px; background: #fff; }
+.guide-info { margin: 10px 0 0; display: grid; grid-template-columns: 3.2em 1fr; gap: 4px 8px; font-size: 15px; line-height: 1.55; }
+.guide-info dt { color: var(--blue); font-weight: bold; }
+.guide-info dd { margin: 0; }
+.guide-info .guide-tip { background: rgba(242,106,27,0.1); border-left: 3px solid var(--orange); padding: 2px 8px; }
+.guide-info .guide-locked { grid-column: 1 / -1; opacity: 0.6; font-style: italic; }
+.guide-call { font: inherit; font-size: 13px; padding: 2px 8px; margin-left: 4px; border: 2px solid var(--pencil); border-radius: 999px; background: var(--cream); cursor: pointer; }
+.guide-call:active { background: var(--orange); color: #fff; }
 
 /* 扭蛋與裝備 */
 .gear-cols { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }

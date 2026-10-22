@@ -102,6 +102,14 @@ export const LEVELS: LevelDef[] = [
   },
 ]
 
+/** 章節名稱 */
+export const CHAPTER_NAME: Record<number, string> = { 1: '公園草地', 2: '溪流', 3: '濕地', 4: '田野草叢' }
+
+/** 這種鳥會出現在哪些章節。 */
+export function chaptersOf(speciesId: string): number[] {
+  return [...new Set(LEVELS.filter((l) => (l.species[speciesId] ?? 0) > 0).map((l) => l.chapter))]
+}
+
 export const LEVEL_BY_ID: Record<string, LevelDef> = Object.fromEntries(LEVELS.map((l) => [l.id, l]))
 
 /** 第一關永遠開；之後的關卡要前一關至少完成一個任務。 */
