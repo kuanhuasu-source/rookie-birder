@@ -92,10 +92,10 @@ export function buildWetland(): World {
   scene.add(lower, upper, leftPost, rightPost)
 
   const perches: Perch[] = [
-    { position: new THREE.Vector3(6, 1.3, -19), along: new THREE.Vector3(1, 0, 0), range: 0.2 },          // 木樁（夜鷺）
-    { position: new THREE.Vector3(-4, 0.23, -24), along: new THREE.Vector3(1, 0, 0), range: 7 },           // 泥灘（高蹺鴴走動）
-    { position: new THREE.Vector3(10, 0.23, -30), along: new THREE.Vector3(1, 0, 0.2).normalize(), range: 10 }, // 遠泥灘
-    { position: new THREE.Vector3(-14, 0.05, -28), along: new THREE.Vector3(1, 0, 0), range: 6 },          // 水面（紅冠水雞）
+    { position: new THREE.Vector3(6, 1.3, -19), along: new THREE.Vector3(1, 0, 0), range: 0.2 , tags: ['post'] },          // 木樁（夜鷺）
+    { position: new THREE.Vector3(-4, 0.23, -24), along: new THREE.Vector3(1, 0, 0), range: 7 , tags: ['mud', 'ground'] },           // 泥灘（高蹺鴴走動）
+    { position: new THREE.Vector3(10, 0.23, -30), along: new THREE.Vector3(1, 0, 0.2).normalize(), range: 10 , tags: ['mud', 'ground'] }, // 遠泥灘
+    { position: new THREE.Vector3(-14, 0.05, -28), along: new THREE.Vector3(1, 0, 0), range: 6 , tags: ['water'] },          // 水面（紅冠水雞）
   ]
   const hides: HideDef[] = [
     { id: 'wall', name: '賞鳥牆', description: '從牆上的窗口看出去，鳥在二十公尺外，正面逆著下午的光', position: [0, 1.5, -0.6], yawDeg: 0 },

@@ -101,3 +101,31 @@ describe('gacha', () => {
     expect(s.pity).toBe(0)
   })
 })
+
+describe('achievements', () => {
+  it('unlock once, in order, and give a title', async () => {
+    const { checkAchievements, currentTitle, ACHIEVEMENTS } = await import('../src/progress/achievements')
+    const s = defaultSave()
+    expect(checkAchievements(s)).toEqual([])
+    expect(currentTitle(s)).toBeNull()
+    s.guide['spotted-dove'] = { perched: { photoId: 'a', stars: 4, total: 80, takenAt: 1 } }
+    const fresh = checkAchievements(s)
+    expect(fresh.map((a) => a.id)).toEqual(['first-three'])
+    expect(currentTitle(s)).toBe('新手上路')
+    expect(checkAchievements(s)).toEqual([])
+    for (const id of ['spotted-dove', 'light-vented-bulbul', 'tree-sparrow', 'swinhoes-white-eye', 'black-bulbul']) s.guide[id] = { perched: { photoId: 'x', stars: 3, total: 60, takenAt: 1 } }
+    expect(checkAchievements(s).map((a) => a.id)).toContain('park-regular')
+    s.guide['fairy-pitta'] = { flight: { photoId: 'p', stars: 1, total: 30, takenAt: 1 } }
+    expect(checkAchievements(s).map((a) => a.id)).toContain('legend')
+    expect(ACHIEVEMENTS.length).toBeGreaterThan(10)
+  })
+  it('loading an old save without achievements gives an empty list', async () => {
+    const { loadSave } = await import('../src/progress/save')
+    const store: Record<string, string> = { 'rookie-birder.save': JSON.stringify({ version: 1, coins: 5, questsDone: [] }) }
+    ;(globalThis as { localStorage?: unknown }).localStorage = { getItem: (k: string) => store[k] ?? null, setItem: (k: string, v: string) => { store[k] = v }, removeItem: (k: string) => { delete store[k] } }
+    const s = loadSave()
+    expect(s.achievements).toEqual([])
+    expect(s.coins).toBe(5)
+    delete (globalThis as { localStorage?: unknown }).localStorage
+  })
+})

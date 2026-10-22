@@ -54,4 +54,6 @@ export interface SpeciesDef {
   hovers?: boolean
   /** 懸停高度（m） */
   hoverHeightM?: number
+  /** 會停的停棲點類型；沒給就什麼都停 */
+  perchTags?: import('./Bird').PerchTag[]
 }

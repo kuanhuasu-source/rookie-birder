@@ -14,6 +14,7 @@ import { Input, isTouchDevice } from './core/input'
 import { TouchControls, TOUCH_COLUMN_PX } from './ui/touch'
 import { loadSave, storeSave } from './progress/save'
 import { updateGuide } from './progress/guide'
+import { checkAchievements } from './progress/achievements'
 import { GuideView } from './ui/guide'
 import { GearView } from './ui/gear'
 import { LevelView } from './ui/levels'
@@ -166,7 +167,7 @@ let guideReturn = false
 let gearReturn = false
 const summaryView = new SummaryView(() => startLevel(currentLevel, currentHide), () => levelView.show())
 const guide = new GuideView(() => save, () => { if (guideReturn) { guideReturn = false; levelView.show() } })
-const gearView = new GearView(() => save, () => { storeSave(save); applyEquipped() }, () => { if (gearReturn) { gearReturn = false; levelView.show() } })
+const gearView = new GearView(() => save, () => { checkAchievements(save); storeSave(save); applyEquipped() }, () => { if (gearReturn) { gearReturn = false; levelView.show() } })
 /** 任一全螢幕頁打開時暫停拍攝輸入。 */
 function overlayOpen(): boolean { return album.open || guide.open || gearView.open || levelView.open || summaryView.open || knowledge.open }
 function applyEquipped(): void {
@@ -403,7 +404,9 @@ function takePhoto(m: PhotoMetrics): void {
       const fresh = session?.onPhoto(p, earned + (gu?.bonus ?? 0)) ?? []
       for (const qq of fresh) save.coins += qq.reward
       save.questsDone = [...questsDone]
+      const unlocked = checkAchievements(save)
       storeSave(save)
+      if (unlocked.length) { toast = `成就解鎖：「${unlocked[0].title}」${unlocked[0].desc}`; toastT = 4; return }
       if (fresh.length) { toast = `任務完成：${fresh[0].title} +${fresh[0].reward} 代幣`; toastT = 3.5; return }
       if (gu?.bonus) { toast = `圖鑑：${speciesName(gu.species)}${gu.newSpecies ? '新鳥種' : '新格子'} +${gu.bonus} 代幣`; toastT = 3; return }
       const who = p.metrics.birdInFrame ? `${speciesName(p.metrics.species)}  ` : ''

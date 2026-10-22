@@ -11,6 +11,16 @@ export interface Perch {
   swayM?: number
   /** 光斑：樹冠縫隙的陽光週期性照到這個停棲點（秒） */
   sunSpot?: { periodS: number; onS: number; phaseS: number }
+  /** 停棲點類型：branch 枝 / rock 石 / ground 地面 / mud 泥灘 / water 水面 / post 樁 / wire 電線 / grass 草穗 / bamboo 竹竿 / log 倒木 */
+  tags?: PerchTag[]
+}
+
+export type PerchTag = 'branch' | 'rock' | 'ground' | 'mud' | 'water' | 'post' | 'wire' | 'grass' | 'bamboo' | 'log'
+
+/** 這隻鳥能不能停這個停棲點：鳥沒有偏好或停棲點沒有標籤就都可以。 */
+export function perchFits(perch: Perch, prefs?: PerchTag[]): boolean {
+  if (!prefs || !prefs.length || !perch.tags || !perch.tags.length) return true
+  return perch.tags.some((t) => prefs.includes(t))
 }
 
 /** 這個停棲點在時間 t 是否被光斑照到。 */

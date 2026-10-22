@@ -125,10 +125,10 @@ export function buildForest(): World {
   }
 
   const perches: Perch[] = [
-    { position: new THREE.Vector3(6.0, 3.95, -11), along: new THREE.Vector3(1, 0, -0.1).normalize(), range: 1.0, sunSpot: { periodS: 70, onS: 28, phaseS: 0 } },   // 果樹橫枝末端（五色鳥）
-    { position: new THREE.Vector3(-6, 2.9, -15), along: new THREE.Vector3(1, 0, 0), range: 3.2, sunSpot: { periodS: 70, onS: 28, phaseS: 35 } },                  // 枯枝（藍鵲、鶲）
-    { position: new THREE.Vector3(-3, 0.66, -12), along: new THREE.Vector3(1, 0, 0.3).normalize(), range: 2.4, sunSpot: { periodS: 90, onS: 30, phaseS: 60 } }, // 倒木（八色鳥、畫眉）
-    { position: new THREE.Vector3(1.5, 1.6, -19), along: new THREE.Vector3(1, 0, 0), range: 0.6 },                                                            // 陰影裡的矮枝
+    { position: new THREE.Vector3(6.0, 3.95, -11), along: new THREE.Vector3(1, 0, -0.1).normalize(), range: 1.0, sunSpot: { periodS: 70, onS: 28, phaseS: 0 }, tags: ['branch'] },   // 果樹橫枝末端（五色鳥）
+    { position: new THREE.Vector3(-6, 2.9, -15), along: new THREE.Vector3(1, 0, 0), range: 3.2, sunSpot: { periodS: 70, onS: 28, phaseS: 35 }, tags: ['branch'] },                  // 枯枝（藍鵲、鶲）
+    { position: new THREE.Vector3(-3, 0.66, -12), along: new THREE.Vector3(1, 0, 0.3).normalize(), range: 2.4, sunSpot: { periodS: 90, onS: 30, phaseS: 60 }, tags: ['log', 'ground'] }, // 倒木（八色鳥、畫眉）
+    { position: new THREE.Vector3(1.5, 1.6, -19), along: new THREE.Vector3(1, 0, 0), range: 0.6 , tags: ['branch'] },                                                            // 陰影裡的矮枝
   ]
   // 光斑的視覺：一道從樹冠下來的光柱與一盞聚光燈，照到的時候才亮
   const beams: { light: THREE.SpotLight; mesh: THREE.Mesh; perch: Perch }[] = []

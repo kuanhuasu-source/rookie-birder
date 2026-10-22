@@ -105,8 +105,8 @@ export function buildPark(): World {
   scene.add(bigRock)
 
   const perches: Perch[] = [
-    { position: new THREE.Vector3(0.9, 2.10, -12.0), along: new THREE.Vector3(1, 0.12, 0).normalize(), range: 1.6 },
-    { position: new THREE.Vector3(-1.6, 1.13, -9.2), along: new THREE.Vector3(1, 0, 0), range: 0.6 },
+    { position: new THREE.Vector3(0.9, 2.10, -12.0), along: new THREE.Vector3(1, 0.12, 0).normalize(), range: 1.6 , tags: ['branch'] },
+    { position: new THREE.Vector3(-1.6, 1.13, -9.2), along: new THREE.Vector3(1, 0, 0), range: 0.6 , tags: ['rock'] },
   ]
 
   const hides: HideDef[] = [

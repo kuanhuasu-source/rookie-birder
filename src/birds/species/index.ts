@@ -42,6 +42,7 @@ export const lightVentedBulbul: SpeciesDef = {
   transitions: { S1: { S2: 0.45, S3: 0.45, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 8, hopDistM: 0.5,
   call: { baseHz: 2300, notes: 4, noteS: 0.13, gapS: 0.07 },
+  perchTags: ['branch', 'grass', 'wire', 'post', 'bamboo'],
   rarity: 'common',
   skittish: 0.8, flushDistM: 6,
 }
@@ -56,6 +57,7 @@ export const treeSparrow: SpeciesDef = {
   transitions: { S1: { S2: 0.35, S3: 0.55, S4: 0.1 }, S2: { S1: 0.4, S3: 0.5, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 9, hopDistM: 0.4,
   call: { baseHz: 3000, notes: 3, noteS: 0.1, gapS: 0.06 },
+  perchTags: ['branch', 'rock', 'ground', 'grass', 'wire', 'post', 'bamboo'],
   rarity: 'common',
   skittish: 1.0, flushDistM: 5,
 }
@@ -70,6 +72,7 @@ export const swinhoesWhiteEye: SpeciesDef = {
   transitions: { S1: { S2: 0.3, S3: 0.6, S4: 0.1 }, S2: { S1: 0.3, S3: 0.6, S4: 0.1 }, S3: { S1: 0.4, S2: 0.6 } },
   flightSpeedMs: 9, hopDistM: 0.35,
   call: { baseHz: 4000, notes: 5, noteS: 0.08, gapS: 0.05 },
+  perchTags: ['branch', 'grass'],
   rarity: 'common',
   skittish: 1.2, flushDistM: 5,
 }
@@ -84,6 +87,7 @@ export const blackBulbul: SpeciesDef = {
   transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
   flightSpeedMs: 8, hopDistM: 0.5,
   call: { baseHz: 1900, notes: 2, noteS: 0.25, gapS: 0.12 },
+  perchTags: ['branch', 'post'],
   rarity: 'rare',
   skittish: 1.0, flushDistM: 8,
 }
@@ -98,6 +102,7 @@ export const commonKingfisher: SpeciesDef = {
   transitions: { S1: { S2: 0.6, S3: 0.25, S4: 0.15 }, S2: { S1: 0.75, S3: 0.15, S4: 0.1 }, S3: { S1: 0.7, S2: 0.3 } },
   flightSpeedMs: 11, hopDistM: 0.3,
   call: { baseHz: 5200, notes: 2, noteS: 0.09, gapS: 0.05 },
+  perchTags: ['branch', 'rock', 'post'],
   rarity: 'rare',
   skittish: 1.3, flushDistM: 9,
 }
@@ -112,6 +117,7 @@ export const whiteWagtail: SpeciesDef = {
   transitions: { S1: { S2: 0.3, S3: 0.6, S4: 0.1 }, S2: { S1: 0.3, S3: 0.6, S4: 0.1 }, S3: { S1: 0.4, S2: 0.6 } },
   flightSpeedMs: 9, hopDistM: 0.5,
   call: { baseHz: 3600, notes: 2, noteS: 0.1, gapS: 0.08 },
+  perchTags: ['rock', 'ground', 'mud', 'log'],
   rarity: 'common',
   skittish: 0.9, flushDistM: 6,
 }
@@ -126,6 +132,7 @@ export const littleEgret: SpeciesDef = {
   transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
   flightSpeedMs: 6, hopDistM: 0.8,
   call: { baseHz: 700, notes: 1, noteS: 0.35, gapS: 0.1 },
+  perchTags: ['ground', 'mud', 'water', 'rock'],
   rarity: 'common',
   skittish: 1.1, flushDistM: 12,
 }
@@ -140,6 +147,7 @@ export const nightHeron: SpeciesDef = {
   transitions: { S1: { S2: 0.7, S3: 0.25, S4: 0.05 }, S2: { S1: 0.8, S3: 0.15, S4: 0.05 }, S3: { S1: 0.8, S2: 0.2 } },
   flightSpeedMs: 7, hopDistM: 0.6,
   call: { baseHz: 500, notes: 1, noteS: 0.25, gapS: 0.1 },
+  perchTags: ['post', 'branch', 'rock', 'log'],
   rarity: 'common',
   skittish: 0.8, flushDistM: 14,
 }
@@ -154,6 +162,7 @@ export const blackWingedStilt: SpeciesDef = {
   transitions: { S1: { S2: 0.3, S3: 0.65, S4: 0.05 }, S2: { S1: 0.2, S3: 0.75, S4: 0.05 }, S3: { S1: 0.3, S2: 0.3, S3: 0.4 } },
   flightSpeedMs: 9, hopDistM: 1.2,
   call: { baseHz: 2400, notes: 3, noteS: 0.08, gapS: 0.06 },
+  perchTags: ['mud', 'ground', 'water'],
   rarity: 'common',
   skittish: 1.2, flushDistM: 12,
 }
@@ -168,6 +177,7 @@ export const blackWingedKite: SpeciesDef = {
   transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 10, hopDistM: 0.5,
   call: { baseHz: 1800, notes: 2, noteS: 0.15, gapS: 0.1 },
+  perchTags: ['mud', 'post', 'water', 'ground'],
   rarity: 'rare',
   skittish: 0.7, flushDistM: 20,
   hovers: true, hoverHeightM: 8,
@@ -183,6 +193,7 @@ export const commonMoorhen: SpeciesDef = {
   transitions: { S1: { S2: 0.5, S3: 0.45, S4: 0.05 }, S2: { S1: 0.5, S3: 0.45, S4: 0.05 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 6, hopDistM: 0.9,
   call: { baseHz: 1200, notes: 1, noteS: 0.2, gapS: 0.1 },
+  perchTags: ['water', 'mud', 'ground'],
   rarity: 'common',
   skittish: 1.0, flushDistM: 9,
 }
@@ -197,6 +208,7 @@ export const plainPrinia: SpeciesDef = {
   transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 6, hopDistM: 0.2,
   call: { baseHz: 4200, notes: 4, noteS: 0.06, gapS: 0.05 },
+  perchTags: ['grass', 'bamboo'],
   rarity: 'common',
   skittish: 1.0, flushDistM: 4,
 }
@@ -211,6 +223,7 @@ export const scalyBreastedMunia: SpeciesDef = {
   transitions: { S1: { S2: 0.55, S3: 0.35, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
   flightSpeedMs: 7, hopDistM: 0.3,
   call: { baseHz: 3000, notes: 2, noteS: 0.08, gapS: 0.1 },
+  perchTags: ['bamboo', 'grass', 'wire'],
   rarity: 'common',
   skittish: 0.9, flushDistM: 5,
 }
@@ -225,6 +238,7 @@ export const goldenHeadedCisticola: SpeciesDef = {
   transitions: { S1: { S2: 0.35, S3: 0.55, S4: 0.1 }, S2: { S1: 0.3, S3: 0.6, S4: 0.1 }, S3: { S1: 0.4, S2: 0.3, S3: 0.3 } },
   flightSpeedMs: 6, hopDistM: 0.25,
   call: { baseHz: 5000, notes: 3, noteS: 0.05, gapS: 0.04 },
+  perchTags: ['grass'],
   rarity: 'rare',
   skittish: 1.1, flushDistM: 4,
 }
@@ -239,6 +253,7 @@ export const longTailedShrike: SpeciesDef = {
   transitions: { S1: { S2: 0.5, S3: 0.4, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
   flightSpeedMs: 9, hopDistM: 1.2,
   call: { baseHz: 2600, notes: 3, noteS: 0.1, gapS: 0.07 },
+  perchTags: ['wire', 'post', 'branch', 'bamboo'],
   rarity: 'common',
   skittish: 0.8, flushDistM: 7,
 }
@@ -253,6 +268,7 @@ export const taiwanBarbet: SpeciesDef = {
   transitions: { S1: { S2: 0.55, S3: 0.35, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
   flightSpeedMs: 7, hopDistM: 0.5,
   call: { baseHz: 900, notes: 4, noteS: 0.12, gapS: 0.1 },
+  perchTags: ['branch'],
   rarity: 'common',
   skittish: 0.9, flushDistM: 7,
 }
@@ -267,6 +283,7 @@ export const taiwanBlueMagpie: SpeciesDef = {
   transitions: { S1: { S2: 0.45, S3: 0.4, S4: 0.15 }, S2: { S1: 0.5, S3: 0.35, S4: 0.15 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 8, hopDistM: 1.0,
   call: { baseHz: 1400, notes: 3, noteS: 0.1, gapS: 0.06 },
+  perchTags: ['branch', 'log'],
   rarity: 'rare',
   skittish: 1.0, flushDistM: 9,
 }
@@ -281,6 +298,7 @@ export const blackNapedMonarch: SpeciesDef = {
   transitions: { S1: { S2: 0.35, S3: 0.55, S4: 0.1 }, S2: { S1: 0.35, S3: 0.55, S4: 0.1 }, S3: { S1: 0.5, S2: 0.3, S3: 0.2 } },
   flightSpeedMs: 7, hopDistM: 0.5,
   call: { baseHz: 3200, notes: 5, noteS: 0.06, gapS: 0.04 },
+  perchTags: ['branch'],
   rarity: 'common',
   skittish: 1.1, flushDistM: 6,
 }
@@ -295,6 +313,7 @@ export const taiwanYuhina: SpeciesDef = {
   transitions: { S1: { S2: 0.4, S3: 0.5, S4: 0.1 }, S2: { S1: 0.4, S3: 0.5, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 7, hopDistM: 0.4,
   call: { baseHz: 2600, notes: 3, noteS: 0.08, gapS: 0.05 },
+  perchTags: ['branch', 'grass'],
   rarity: 'common',
   skittish: 1.0, flushDistM: 5,
 }
@@ -309,6 +328,7 @@ export const fairyPitta: SpeciesDef = {
   transitions: { S1: { S2: 0.4, S3: 0.5, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
   flightSpeedMs: 7, hopDistM: 0.6,
   call: { baseHz: 2000, notes: 2, noteS: 0.18, gapS: 0.12 },
+  perchTags: ['ground', 'log'],
   rarity: 'legendary',
   skittish: 1.4, flushDistM: 8,
 }

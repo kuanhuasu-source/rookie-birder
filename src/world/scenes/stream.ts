@@ -115,9 +115,9 @@ export function buildStream(): World {
   scene.add(stump)
 
   const perches: Perch[] = [
-    { position: new THREE.Vector3(0.6, 1.45, -10.2), along: new THREE.Vector3(1, 0.17, -0.35).normalize(), range: 1.8 },   // 枯枝
-    { position: new THREE.Vector3(-2.5, 1.06, -10.0), along: new THREE.Vector3(1, 0, 0), range: 0.6 },                     // 溪中石（石頂）
-    { position: new THREE.Vector3(4.0, 0.36, -12.6), along: new THREE.Vector3(1, 0, 0), range: 2.5 },                     // 對岸卵石灘
+    { position: new THREE.Vector3(0.6, 1.45, -10.2), along: new THREE.Vector3(1, 0.17, -0.35).normalize(), range: 1.8 , tags: ['branch'] },   // 枯枝
+    { position: new THREE.Vector3(-2.5, 1.06, -10.0), along: new THREE.Vector3(1, 0, 0), range: 0.6 , tags: ['rock'] },                     // 溪中石（石頂）
+    { position: new THREE.Vector3(4.0, 0.36, -12.6), along: new THREE.Vector3(1, 0, 0), range: 2.5 , tags: ['ground'] },                     // 對岸卵石灘
   ]
   const hides: HideDef[] = [
     { id: 'rock', name: '溪邊大石', description: '正對枯枝與溪中石，距離十公尺，視線略高於水面', position: [0, 1.4, 0], yawDeg: 0 },

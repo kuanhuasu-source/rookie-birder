@@ -7,6 +7,7 @@ import { LORE } from '../birds/lore'
 import { RARITY_LABEL } from '../progress/gacha'
 import { CHAPTER_NAME, chaptersOf } from '../levels/data'
 import { playCall, unlockAudio } from '../audio/call'
+import { ACHIEVEMENTS } from '../progress/achievements'
 
 /** 圖鑑：一本課本，每種鳥一頁四格，貼上最高分的照片。 */
 export class GuideView {
@@ -39,7 +40,7 @@ export class GuideView {
   async refresh(): Promise<void> {
     const save = this.getSave()
     const c = guideCompletion(save, SPECIES.map((s) => s.id))
-    ;(this.root.querySelector('.guide-progress') as HTMLElement).textContent = `${c.filled} / ${c.total} 格 · ${Math.round((c.filled / c.total) * 100)}%`
+    ;(this.root.querySelector('.guide-progress') as HTMLElement).textContent = `${c.filled} / ${c.total} 格 · ${Math.round((c.filled / c.total) * 100)}% · 成就 ${save.achievements.length} / ${ACHIEVEMENTS.length}`
     const pages = this.root.querySelector('.guide-pages') as HTMLElement
     pages.innerHTML = ''
     for (const sp of SPECIES) {

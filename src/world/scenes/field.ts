@@ -143,11 +143,11 @@ export function buildField(): World {
   scene.add(pole)
 
   const perches: Perch[] = [
-    { position: new THREE.Vector3(1.5, 1.55, -12), along: new THREE.Vector3(1, 0, 0), range: 0.3, swayM: 0.08 },   // 芒草穗（鷦鶯、扇尾鶯）
-    { position: new THREE.Vector3(-3, 1.45, -11), along: new THREE.Vector3(1, 0, 0), range: 0.3, swayM: 0.1 },     // 芒草穗
-    { position: new THREE.Vector3(12, 1.42, -14), along: new THREE.Vector3(1, 0, 0), range: 5 },                   // 電線（伯勞）
-    { position: new THREE.Vector3(-9, 1.9, -12), along: new THREE.Vector3(1, 0, 0), range: 1.0 },                  // 竹竿頂（斑文鳥）
-    { position: new THREE.Vector3(3.5, 1.7, -15), along: new THREE.Vector3(1, 0, 0), range: 0.3, swayM: 0.09 },    // 芒草穗（遠一點）
+    { position: new THREE.Vector3(1.5, 1.55, -12), along: new THREE.Vector3(1, 0, 0), range: 0.3, swayM: 0.08 , tags: ['grass'] },   // 芒草穗（鷦鶯、扇尾鶯）
+    { position: new THREE.Vector3(-3, 1.45, -11), along: new THREE.Vector3(1, 0, 0), range: 0.3, swayM: 0.1 , tags: ['grass'] },     // 芒草穗
+    { position: new THREE.Vector3(12, 1.42, -14), along: new THREE.Vector3(1, 0, 0), range: 5 , tags: ['wire'] },                   // 電線（伯勞）
+    { position: new THREE.Vector3(-9, 1.9, -12), along: new THREE.Vector3(1, 0, 0), range: 1.0 , tags: ['bamboo'] },                  // 竹竿頂（斑文鳥）
+    { position: new THREE.Vector3(3.5, 1.7, -15), along: new THREE.Vector3(1, 0, 0), range: 0.3, swayM: 0.09 , tags: ['grass'] },    // 芒草穗（遠一點）
   ]
   const hides: HideDef[] = [
     { id: 'bund', name: '田埂趴低', description: '趴在田埂後面，鳥離你最近，但田埂上的芒草就在鏡頭前面', position: [0, 0.75, -1.6], yawDeg: 0 },

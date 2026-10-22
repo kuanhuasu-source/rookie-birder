@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Bird, type Perch, type Rng } from './Bird'
+import { Bird, perchFits, type Perch, type Rng } from './Bird'
 
 /** 出現機制：等待間隔 → 提前鳴叫 → 從畫面外飛入 → 離開後再等。多鳥種時依權重挑一隻，同時只有一隻在場。 */
 export class Spawner {
@@ -40,8 +40,15 @@ export class Spawner {
   }
 
   /** 比目前更遠離相機的停棲點（被嚇到時飛過去）；沒有就回 null，讓鳥直接離場。 */
+  /** 這隻鳥能停的停棲點；場景裡一個都沒有就退回全部。 */
+  perchesFor(bird: Bird): Perch[] {
+    const ok = this.perches.filter((p) => perchFits(p, bird.species.perchTags))
+    return ok.length ? ok : this.perches
+  }
+
   fartherPerch(from: Perch | null, cameraPos: THREE.Vector3): Perch | null {
-    const others = this.perches.filter((p) => p !== from)
+    const pool = this.current ? this.perchesFor(this.current) : this.perches
+    const others = pool.filter((p) => p !== from)
     if (!others.length) return null
     const cur = from ? from.position.distanceTo(cameraPos) : 0
     const far = others.filter((p) => p.position.distanceTo(cameraPos) > cur + 1)
@@ -52,7 +59,8 @@ export class Spawner {
   /** 立刻出現（除錯用）。 */
   spawnNow(): void {
     if (this.current) return
-    const perch = this.perches[Math.floor(this.rng() * this.perches.length)]
+    const pool = this.perchesFor(this.next)
+    const perch = pool[Math.floor(this.rng() * pool.length)]
     const side = this.rng() < 0.5 ? -1 : 1
     const from = perch.position.clone().add(new THREE.Vector3(side * 10, 4 + this.rng() * 2, -3 - this.rng() * 4))
     this.current = this.next

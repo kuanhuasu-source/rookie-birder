@@ -1,4 +1,6 @@
 import { LEVELS, isLevelUnlocked, CHAPTER_NAME } from '../levels/data'
+import { ACHIEVEMENTS, currentTitle } from '../progress/achievements'
+import { loadSave } from '../progress/save'
 import type { LevelDef, HideDef } from '../levels/types'
 import { buildScene } from '../world/scene'
 
@@ -15,6 +17,7 @@ export class LevelView {
       <div class="album-bar"><span class="tape"></span><strong class="levels-title">小白打鳥</strong><span class="levels-sub"></span>
         <div class="levels-menu"><button data-menu="guide">賞鳥圖鑑</button><button data-menu="gear">裝備與扭蛋</button><button data-menu="knowledge">攝影知識</button><button data-menu="tutorial">重上第零課</button><button class="levels-back hidden">回上一頁</button></div>
       </div>
+      <div class="levels-titles"></div>
       <div class="levels-body"></div>`
     document.body.appendChild(this.root)
     this.root.querySelector('.levels-back')!.addEventListener('click', () => { this.picked = null; this.render() })
@@ -30,7 +33,11 @@ export class LevelView {
     const title = this.root.querySelector('.levels-title') as HTMLElement
     const sub = this.root.querySelector('.levels-sub') as HTMLElement
     const done = this.questsDone()
+    const titles = this.root.querySelector('.levels-titles') as HTMLElement
     if (!this.picked) {
+      const save = loadSave()
+      const cur = currentTitle(save)
+      titles.innerHTML = `<span class="titles-current">${cur ? `稱號：${cur}` : '還沒有稱號'}</span>` + ACHIEVEMENTS.map((a) => `<span class="achv ${save.achievements.includes(a.id) ? 'got' : ''}" title="${a.desc}">${save.achievements.includes(a.id) ? '★' : '☆'} ${a.title}</span>`).join('')
       back.classList.add('hidden')
       title.textContent = '小白打鳥'
       sub.textContent = '選一關出發。完成前一關的任何一個任務就能解鎖下一關'
@@ -49,6 +56,7 @@ export class LevelView {
         b.addEventListener('click', () => { this.picked = LEVELS.find((l) => l.id === b.dataset.id)!; this.render() })
       }
     } else {
+      titles.innerHTML = ''
       back.classList.remove('hidden')
       title.textContent = this.picked.title
       sub.textContent = '選一個機位。描述是中性的，光線與距離要自己判斷'

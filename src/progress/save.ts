@@ -20,6 +20,8 @@ export interface SaveData {
   pulls: number
   pity: number
   questsDone: string[]
+  /** 已解鎖的成就 id，依解鎖順序 */
+  achievements: string[]
 }
 
 const KEY = 'rookie-birder.save'
@@ -34,6 +36,7 @@ export function defaultSave(): SaveData {
     pulls: 0,
     pity: 0,
     questsDone: [],
+    achievements: [],
   }
 }
 
@@ -49,6 +52,7 @@ export function loadSave(): SaveData {
       equipped: { ...base.equipped, ...(d.equipped ?? {}) },
       guide: d.guide ?? {},
       questsDone: d.questsDone ?? [],
+      achievements: d.achievements ?? [],
     }
   } catch {
     return defaultSave()

@@ -173,3 +173,23 @@ describe('sun spots', () => {
     expect(b.paper.material.color.g).toBe(1)
   })
 })
+
+describe('perch preferences', () => {
+  it('a bird only lands on perches whose tags it accepts, and falls back when none fit', async () => {
+    const { perchFits } = await import('../src/birds/Bird')
+    const grass: Perch = { position: new THREE.Vector3(0, 1, -10), along: new THREE.Vector3(1, 0, 0), range: 1, tags: ['grass'] }
+    const wire: Perch = { position: new THREE.Vector3(5, 1.4, -14), along: new THREE.Vector3(1, 0, 0), range: 1, tags: ['wire'] }
+    expect(perchFits(grass, ['grass', 'bamboo'])).toBe(true)
+    expect(perchFits(wire, ['grass', 'bamboo'])).toBe(false)
+    expect(perchFits(wire, undefined)).toBe(true)
+    expect(perchFits({ ...wire, tags: undefined }, ['grass'])).toBe(true)
+    const shrike = new Bird({ ...spottedDove, id: 'shrike-test', perchTags: ['wire', 'post'] }, seeded(4))
+    const prinia = new Bird({ ...spottedDove, id: 'prinia-test', perchTags: ['grass'] }, seeded(5))
+    const sp = new Spawner([shrike, prinia], [grass, wire], seeded(6), { 'shrike-test': 1, 'prinia-test': 1 })
+    expect(sp.perchesFor(shrike)).toEqual([wire])
+    expect(sp.perchesFor(prinia)).toEqual([grass])
+    const egret = new Bird({ ...spottedDove, id: 'egret-test', perchTags: ['water'] }, seeded(7))
+    expect(new Spawner([egret], [grass, wire], seeded(8)).perchesFor(egret)).toEqual([grass, wire])
+    for (let i = 0; i < 6; i++) { sp.next = shrike; sp.spawnNow(); expect(shrike.currentPerch).toBe(wire); shrike.inScene = false; sp.current = null }
+  })
+})
