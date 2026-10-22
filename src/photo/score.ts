@@ -53,15 +53,16 @@ export function scorePhoto(m: PhotoMetrics, ctx: ScoreContext): PhotoScore {
   const blur = m.totalBlurPx
   const sharp = clamp01(1 - (blur - 1.5) / 10.5)
   const birdHeightPx = m.birdHeightFrac * ctx.imageH
-  const detailF = clamp01(birdHeightPx / 300)
-  const focus = 30 * sharp * (0.6 + 0.4 * detailF)
+  // 鳥在畫面上越小，可解析的細節越少：320 px 高以上才算滿分，8% 高只剩六成
+  const detailF = clamp01(birdHeightPx / 320)
+  const focus = 30 * sharp * (0.4 + 0.6 * detailF)
   detail.sharp = sharp; detail.detail = detailF
   if (m.cocPx > 12) caps.push('鳥眼完全脫焦')
   if (m.cocPx > 3) losses.push({ key: 'coc', loss: 30 * (1 - sharp) * (m.cocPx / Math.max(blur, 0.01)), advice: `焦點沒落在鳥眼上，模糊圈 ${m.cocPx.toFixed(0)}px，對焦環再轉一點` })
   if (m.motionPx > 3) losses.push({ key: 'motion', loss: 30 * (1 - sharp) * (m.motionPx / Math.max(blur, 0.01)), advice: `快門太慢，主體動態模糊 ${m.motionPx.toFixed(0)}px，試試更快的快門` })
   if (m.shakePx > 3) losses.push({ key: 'shake', loss: 30 * (1 - sharp) * (m.shakePx / Math.max(blur, 0.01)), advice: `手震 ${m.shakePx.toFixed(0)}px，快門至少 1/等效焦距，或換腳架` })
   if (m.softPx > 1 && blur < 4) losses.push({ key: 'soft', loss: 30 * (1 - sharp), advice: '鏡頭全開有點鬆，縮一到兩格光圈會更銳利' })
-  if (detailF < 0.6) losses.push({ key: 'detail', loss: 30 * sharp * 0.4 * (1 - detailF), advice: '鳥在畫面裡太小，拉長焦距或等牠靠近' })
+  if (detailF < 0.6) losses.push({ key: 'detail', loss: 30 * sharp * 0.6 * (1 - detailF), advice: '鳥在畫面裡太小，拉長焦距或等牠靠近' })
 
   // ---- 曝光（25）
   const albedo = m.albedo ?? 0.42

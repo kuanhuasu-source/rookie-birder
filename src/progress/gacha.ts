@@ -6,12 +6,12 @@ export type GearKind = 'lens' | 'body' | 'support' | 'accessory'
 
 export interface GachaItem { kind: GearKind; id: string; name: string; rarity: Rarity }
 
-export const PULL_COST = 30
-export const PITY_RARE_AT = 8
+export const PULL_COST = 50
+export const PITY_RARE_AT = 10
 export const RARITY_LABEL: Record<Rarity, string> = { common: '普通', rare: '稀有', epic: '史詩', legendary: '傳說' }
-export const RARITY_WEIGHT: Record<Rarity, number> = { common: 60, rare: 28, epic: 10, legendary: 2 }
+export const RARITY_WEIGHT: Record<Rarity, number> = { common: 68, rare: 24, epic: 6.5, legendary: 1.5 }
 /** 重複時退回的代幣 */
-export const REFUND: Record<Rarity, number> = { common: 10, rare: 20, epic: 40, legendary: 80 }
+export const REFUND: Record<Rarity, number> = { common: 15, rare: 30, epic: 60, legendary: 120 }
 
 const RARITY_OF: Record<string, Rarity> = {
   L1: 'common', L2: 'common', L3: 'rare', L4: 'epic', L5: 'legendary',

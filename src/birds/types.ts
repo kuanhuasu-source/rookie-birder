@@ -1,5 +1,11 @@
 export type BirdState = 'S1' | 'S2' | 'S3' | 'S4' | 'S5'
 
+/**
+ * 各狀態的最小「微動」速度（m/s）：就算看起來靜止，鳥的頭與身體也一直在動，
+ * 慢速快門拍不出完全清楚的鳥。用來當動態模糊的下限，讓三腳架不能用 1/3 秒換低 ISO。
+ */
+export const FIDGET_MS: Record<BirdState, number> = { S1: 0.02, S2: 0.08, S3: 0.3, S4: 0.5, S5: 0.5 }
+
 export type SpriteView = 'side' | '3q' | 'front' | 'takeoff'
 
 export interface SpriteDef {

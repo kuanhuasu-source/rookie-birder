@@ -65,7 +65,7 @@ export const LEVELS: LevelDef[] = [
       q('w1-stilt', '高蹺鴴的動作格，兩星以上', '牠一直在走，快門要跟上腳步', 25, (p) => is(p, 'black-winged-stilt') && slot(p) === 'action' && p.score.stars >= 2),
       q('w1-kite', '黑翅鳶懸停的飛行格，兩星以上', '牠在空中定住的時候最好拍', 30, (p) => is(p, 'black-winged-kite') && slot(p) === 'flight' && p.score.stars >= 2),
     ],
-    durationS: 540, cardCapacity: 60, intervalMul: 1.0,
+    durationS: 540, cardCapacity: 60, intervalMul: 0.85,
   },
   {
     id: 'wetland-dusk', chapter: 3, title: '濕地 · 黃昏', subtitle: '晴，逆光、剪影與邊光',
@@ -76,7 +76,7 @@ export const LEVELS: LevelDef[] = [
       q('w2-kite', '用 1/2000 以上拍到黑翅鳶，三星以上', '懸停時翅膀還是在動，快門不能省', 35, (p) => is(p, 'black-winged-kite') && p.settings.shutterS <= 1 / 2000 && p.score.stars >= 3),
       q('w2-iso', 'ISO 1600 以下拍到三星', '黃昏光弱，光圈開到底、穩住再拍', 30, (p) => inFrame(p) && p.settings.iso <= 1600 && p.score.stars >= 3),
     ],
-    durationS: 540, cardCapacity: 60, intervalMul: 1.0,
+    durationS: 540, cardCapacity: 60, intervalMul: 0.85,
   },
   {
     id: 'field-morning', chapter: 4, title: '田野草叢 · 上午', subtitle: '晴，前景的草與背後的樹籬',
@@ -84,7 +84,7 @@ export const LEVELS: LevelDef[] = [
     species: { 'plain-prinia': 0.35, 'scaly-breasted-munia': 0.3, 'long-tailed-shrike': 0.25, 'golden-headed-cisticola': 0.1 },
     quests: [
       q('f1-prinia', '拍到褐頭鷦鶯，沒被草擋住（遮擋 10% 以下），三星以上', '牠停的草穗一直在晃，等牠晃到空隙裡', 25, (p) => is(p, 'plain-prinia') && (p.metrics.stats?.occlusion ?? 1) <= 0.1 && p.score.stars >= 3),
-      q('f1-munia', 'f/5.6 以下拍斑文鳥，背景分離 0.8 以上', '竹竿背後是整片田，開大光圈就化開了', 25, (p) => is(p, 'scaly-breasted-munia') && p.settings.fNumber <= 5.6 && (p.metrics.stats?.bgSep ?? 0) >= 0.8),
+      q('f1-munia', 'f/6.3 以下拍斑文鳥，背景分離 0.8 以上', '竹竿背後是整片田，光圈開到底就化開了；變焦鏡要退一點焦距光圈才開得大', 25, (p) => is(p, 'scaly-breasted-munia') && p.settings.fNumber <= 6.3 && (p.metrics.stats?.bgSep ?? 0) >= 0.8),
       q('f1-shrike', '拍到棕背伯勞，構圖 17 分以上', '電線後面的樹籬很近，想辦法讓背景乾淨', 30, (p) => is(p, 'long-tailed-shrike') && p.score.composition >= 17),
     ],
     durationS: 540, cardCapacity: 60, intervalMul: 0.9,

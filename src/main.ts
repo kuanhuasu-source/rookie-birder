@@ -9,7 +9,7 @@ import { Shooting } from './camera/body'
 import { Autofocus, AF_LABEL, type AfTier } from './camera/autofocus'
 import { AlertModel } from './birds/alert'
 import { exposureMultiplier, noiseSigma, overStops } from './camera/exposure'
-import { verticalFovDeg, cocPx, shakeBlurPx, lensSoftPx, totalBlurPx, mmToPx } from './camera/optics'
+import { verticalFovDeg, cocPx, shakeBlurPx, lensSoftPx, totalBlurPx, mmToPx, motionBlurPx } from './camera/optics'
 import { Input, isTouchDevice } from './core/input'
 import { TouchControls, TOUCH_COLUMN_PX } from './ui/touch'
 import { loadSave, storeSave } from './progress/save'
@@ -32,6 +32,7 @@ import { BIRD_LAYER, THIN_LAYER, FX_LAYER } from './render/mask'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
+import { FIDGET_MS } from './birds/types'
 import { playCall, playBeep, unlockAudio } from './audio/call'
 import { coinsFor, starString } from './photo/score'
 import { TutorialRunner } from './tutorial/runner'
@@ -358,7 +359,8 @@ function measureBird(dt: number): PhotoMetrics {
   const pitchDeg = (Math.asin(-toCam.y) * 180) / Math.PI
 
   const coc = cocPx(o.focalMm, o.fNumber, s.focusM, dist, sensor, PHOTO_W)
-  const motion = birdVelPx.length() * s.shutterS
+  // 動態模糊取「量到的移動」與「微動下限」較大者
+  const motion = Math.max(birdVelPx.length() * s.shutterS, motionBlurPx(o.focalMm, FIDGET_MS[bird.state], dist, s.shutterS, sensor, PHOTO_W))
   const total = totalBlurPx({ coc, motion, shake: base.shakePx, soft: base.softPx })
   const focalPx = mmToPx(o.focalMm, sensor, PHOTO_W)
   const birdHeightPx = (bird.species.bodyHeightM / dist) * focalPx
