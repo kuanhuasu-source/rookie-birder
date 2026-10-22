@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import type { BirdState, SpeciesDef, SpriteDef, Range } from './types'
-import { BIRD_LAYER } from '../render/mask'
+import { BIRD_LAYER, COMPANION_LAYER } from '../render/mask'
 
 export interface Perch {
   position: THREE.Vector3
@@ -108,10 +108,15 @@ export class Bird {
     return this.perchPos().add(new THREE.Vector3(0, this.species.hoverHeightM ?? 7, 0))
   }
 
-  /** 從 from 飛進來停到 perch（懸停型則飛到上空）。 */
-  enter(perch: Perch, from: THREE.Vector3): void {
+  /** 伴鳥：換到伴鳥圖層，遮罩與評分不看牠。 */
+  isCompanion = false
+  markCompanion(): void { this.isCompanion = true; this.paper.layers.set(COMPANION_LAYER) }
+  get perchOffsetM(): number { return this.perchOffset }
+
+  /** 從 from 飛進來停到 perch（懸停型則飛到上空）；offset 給群體排位置用。 */
+  enter(perch: Perch, from: THREE.Vector3, offset?: number): void {
     this.perch = perch
-    this.perchOffset = (this.rng() - 0.5) * perch.range
+    this.perchOffset = offset ?? (this.rng() - 0.5) * perch.range
     const to = this.species.hovers ? this.hoverPos() : this.perchPos()
     this.inScene = true
     this.leaving = false

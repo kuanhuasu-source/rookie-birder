@@ -41,6 +41,7 @@ export class TouchControls {
         <button data-key="KeyU">裝備與扭蛋</button>
         <button data-key="KeyI">攝影知識</button>
         <button data-key="KeyV">減少畫面晃動</button>
+        <button data-key="KeyY">畫質 高 / 低</button>
         <button data-key="KeyT">重上第零課</button>
         <button data-key="KeyH">顯示 / 隱藏數據</button>
         ${dev ? '<button data-key="Digit0">測試：+100 代幣</button>' : ''}

@@ -193,3 +193,32 @@ describe('perch preferences', () => {
     for (let i = 0; i < 6; i++) { sp.next = shrike; sp.spawnNow(); expect(shrike.currentPerch).toBe(wire); shrike.inScene = false; sp.current = null }
   })
 })
+
+describe('flocks', () => {
+  it('companions land on the same perch spaced out, and leave when the leader leaves', () => {
+    const munia = { ...spottedDove, id: 'munia-test', flock: { min: 3, max: 4, spacingM: 0.2 }, dwell: { min: 100, max: 100 }, flightSpeedMs: 20 }
+    const leader = new Bird(munia, seeded(1))
+    const comps = [new Bird(munia, seeded(2)), new Bird(munia, seeded(3)), new Bird(munia, seeded(4))]
+    for (const c of comps) c.markCompanion()
+    const bamboo: Perch = { position: new THREE.Vector3(0, 2, -12), along: new THREE.Vector3(1, 0, 0), range: 1.0, tags: ['bamboo'] }
+    const sp = new Spawner([leader], [bamboo], seeded(9))
+    sp.companions = { 'munia-test': comps }
+    sp.spawnNow()
+    const inScene = comps.filter((c) => c.inScene)
+    expect(inScene.length).toBeGreaterThanOrEqual(2)
+    expect(inScene.length).toBeLessThanOrEqual(3)
+    const offs = [leader.perchOffsetM, ...inScene.map((c) => c.perchOffsetM)].sort((a, b) => a - b)
+    for (let i = 1; i < offs.length; i++) expect(offs[i] - offs[i - 1]).toBeGreaterThanOrEqual(0.19)
+    expect(sp.activeCompanions().length).toBe(inScene.length)
+    // 大家飛進來
+    let t = 0
+    while (t < 10 && [leader, ...inScene].some((b) => b.state === 'S5' || b.state === 'S4')) { for (const b of [leader, ...inScene]) b.update(1 / 30, camPos); t += 1 / 30 }
+    expect(leader.state).toBe('S1')
+    leader.forceTakeoff()
+    t = 0
+    while (t < 20 && [leader, ...inScene].some((b) => b.inScene)) { for (const b of [leader, ...inScene]) b.update(1 / 30, camPos); t += 1 / 30 }
+    expect(leader.inScene).toBe(false)
+    expect(inScene.every((c) => !c.inScene)).toBe(true)
+    expect(sp.current).toBeNull()
+  })
+})

@@ -58,6 +58,7 @@ export const treeSparrow: SpeciesDef = {
   flightSpeedMs: 9, hopDistM: 0.4,
   call: { baseHz: 3000, notes: 3, noteS: 0.1, gapS: 0.06 },
   perchTags: ['branch', 'rock', 'ground', 'grass', 'wire', 'post', 'bamboo'],
+  flock: { min: 2, max: 4, spacingM: 0.25 },
   rarity: 'common',
   skittish: 1.0, flushDistM: 5,
 }
@@ -73,6 +74,7 @@ export const swinhoesWhiteEye: SpeciesDef = {
   flightSpeedMs: 9, hopDistM: 0.35,
   call: { baseHz: 4000, notes: 5, noteS: 0.08, gapS: 0.05 },
   perchTags: ['branch', 'grass'],
+  flock: { min: 2, max: 4, spacingM: 0.3 },
   rarity: 'common',
   skittish: 1.2, flushDistM: 5,
 }
@@ -163,6 +165,7 @@ export const blackWingedStilt: SpeciesDef = {
   flightSpeedMs: 9, hopDistM: 1.2,
   call: { baseHz: 2400, notes: 3, noteS: 0.08, gapS: 0.06 },
   perchTags: ['mud', 'ground', 'water'],
+  flock: { min: 2, max: 3, spacingM: 1.5 },
   rarity: 'common',
   skittish: 1.2, flushDistM: 12,
 }
@@ -224,6 +227,7 @@ export const scalyBreastedMunia: SpeciesDef = {
   flightSpeedMs: 7, hopDistM: 0.3,
   call: { baseHz: 3000, notes: 2, noteS: 0.08, gapS: 0.1 },
   perchTags: ['bamboo', 'grass', 'wire'],
+  flock: { min: 3, max: 5, spacingM: 0.22 },
   rarity: 'common',
   skittish: 0.9, flushDistM: 5,
 }
@@ -284,6 +288,7 @@ export const taiwanBlueMagpie: SpeciesDef = {
   flightSpeedMs: 8, hopDistM: 1.0,
   call: { baseHz: 1400, notes: 3, noteS: 0.1, gapS: 0.06 },
   perchTags: ['branch', 'log'],
+  flock: { min: 2, max: 3, spacingM: 0.9 },
   rarity: 'rare',
   skittish: 1.0, flushDistM: 9,
 }
@@ -314,6 +319,7 @@ export const taiwanYuhina: SpeciesDef = {
   flightSpeedMs: 7, hopDistM: 0.4,
   call: { baseHz: 2600, notes: 3, noteS: 0.08, gapS: 0.05 },
   perchTags: ['branch', 'grass'],
+  flock: { min: 2, max: 4, spacingM: 0.35 },
   rarity: 'common',
   skittish: 1.0, flushDistM: 5,
 }

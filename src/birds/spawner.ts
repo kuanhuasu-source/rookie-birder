@@ -12,6 +12,9 @@ export class Spawner {
   current: Bird | null = null
   onCall: ((bird: Bird) => void) | null = null
 
+  /** 群體的伴鳥池：species id → 幾隻備用的 Bird */
+  companions: Record<string, Bird[]> = {}
+
   constructor(private birds: Bird[], private perches: Perch[], private rng: Rng = Math.random, private weights?: Record<string, number>, public intervalMul = 1) {
     if (birds.length === 0) throw new Error('spawner needs at least one bird')
     this.next = this.pick()
@@ -19,8 +22,19 @@ export class Spawner {
     for (const b of birds) b.onLeft = () => this.onBirdLeft(b)
   }
 
+  /** 目前在場的伴鳥。 */
+  activeCompanions(): Bird[] {
+    if (!this.current) return []
+    return (this.companions[this.current.species.id] ?? []).filter((c) => c.inScene)
+  }
+
+  /** 伴鳥一起離開（領頭走了或被嚇到）。 */
+  flushCompanions(): void {
+    for (const c of this.activeCompanions()) c.forceTakeoff()
+  }
+
   private onBirdLeft(b: Bird): void {
-    if (this.current === b) this.current = null
+    if (this.current === b) { this.flushCompanions(); this.current = null }
     this.next = this.pick()
     this.timer = this.nextInterval()
     this.called = false
@@ -66,6 +80,27 @@ export class Spawner {
     this.current = this.next
     this.current.enter(perch, from)
     this.called = false
+    // 群體：伴鳥排在領頭兩側，從稍遠的地方跟進來
+    const flock = this.current.species.flock
+    const pool2 = this.companions[this.current.species.id] ?? []
+    if (flock && pool2.length) {
+      const fitN = Math.floor(perch.range / flock.spacingM) + 1
+      const n = Math.min(fitN, flock.min + Math.floor(this.rng() * (flock.max - flock.min + 1)))
+      const lead = this.current.perchOffsetM
+      // 兩側輪流往外排，排到停棲點邊緣就跳過，不要疊在一起
+      const offsets: number[] = []
+      const kMax = Math.ceil(perch.range / flock.spacingM) + 1
+      for (let k = 1; k <= kMax && offsets.length < n - 1; k++) {
+        for (const dir of [1, -1]) {
+          const off = lead + dir * k * flock.spacingM
+          if (Math.abs(off) <= perch.range / 2 + 1e-6 && offsets.length < n - 1) offsets.push(off)
+        }
+      }
+      offsets.forEach((off, i) => {
+        const c = pool2[i]
+        if (c) c.enter(perch, from.clone().add(new THREE.Vector3(side * (2 + i), 0.5 + this.rng(), -1 - this.rng() * 2)), off)
+      })
+    }
   }
 
   /** 教學結束等情境：重新開始等待。 */

@@ -29,6 +29,8 @@ export interface FrameParams {
 export class Pipeline {
   /** 除錯：'on' 正常；'noCompose' 不疊紗幕；'off' 不分層 */
   static debugVeil: 'on' | 'noCompose' | 'off' | 'noFar' | 'noVeilScene' = 'on'
+  /** 低畫質：不畫紗幕、景深取樣減半（照片不受影響） */
+  static lowQuality = false
   private rtScene: THREE.WebGLRenderTarget
   private rtA: THREE.WebGLRenderTarget
   private rtB: THREE.WebGLRenderTarget
@@ -71,7 +73,7 @@ export class Pipeline {
     const K = (p.focalMm / p.fNumber) * (p.focalMm / Math.max(1, sMm - p.focalMm))
     const C = (FG_BLUR_START_PX / FG_REF_WIDTH_PX) * p.sensorWmm
     const veilNearM = p.dofEnabled ? (sMm / (1 + C / K)) / 1000 : 0
-    const useVeil = Pipeline.debugVeil !== 'off' && veilNearM > camera.near * 1.5
+    const useVeil = Pipeline.debugVeil !== 'off' && !(Pipeline.lowQuality && p.quality === 'live') && veilNearM > camera.near * 1.5
     const prevLayers = camera.layers.mask
 
     r.setRenderTarget(this.rtScene)
@@ -112,7 +114,7 @@ export class Pipeline {
     du.focusM.value = p.focusM
     du.sensorWmm.value = p.sensorWmm
     du.enabled.value = p.dofEnabled ? 1 : 0
-    du.samples.value = p.quality === 'photo' ? 48 : 16
+    du.samples.value = p.quality === 'photo' ? 48 : Pipeline.lowQuality ? 8 : 16
     du.maxCocPx.value = Math.max(8, this.rtScene.width * (p.quality === 'photo' ? 0.04 : 0.03))
     // 景深要用場景深度，但顏色用風格化後的
     du.tDepth.value = this.rtScene.depthTexture

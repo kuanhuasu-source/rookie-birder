@@ -56,4 +56,6 @@ export interface SpeciesDef {
   hoverHeightM?: number
   /** 會停的停棲點類型；沒給就什麼都停 */
   perchTags?: import('./Bird').PerchTag[]
+  /** 群體：一次來幾隻（含領頭），在同一個停棲點上隔 spacingM 排開 */
+  flock?: { min: number; max: number; spacingM: number }
 }

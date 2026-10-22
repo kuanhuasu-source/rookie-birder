@@ -5,6 +5,8 @@ const BIRD_LAYER = 1
 const THIN_LAYER = 2
 /** 純視覺特效（光束等）：只有主相機畫，遮罩、評分、對焦都看不到。 */
 const FX_LAYER = 3
+/** 群體裡的伴鳥：主相機看得到，但遮罩、評分、對焦只看領頭那隻。 */
+const COMPANION_LAYER = 4
 
 /** 把物件（含子物件）標成細長前景。 */
 export function markThin(obj: THREE.Object3D): void {
@@ -75,4 +77,4 @@ export class BirdMask {
   }
 }
 
-export { BIRD_LAYER, THIN_LAYER, FX_LAYER }
+export { BIRD_LAYER, THIN_LAYER, FX_LAYER, COMPANION_LAYER }

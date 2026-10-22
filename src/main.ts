@@ -29,7 +29,8 @@ import { AlbumView } from './ui/album'
 import { PhotoCapture, PHOTO_W } from './photo/capture'
 import type { PhotoMetrics } from './photo/types'
 import { Bird } from './birds/Bird'
-import { BIRD_LAYER, THIN_LAYER, FX_LAYER } from './render/mask'
+import { BIRD_LAYER, THIN_LAYER, FX_LAYER, COMPANION_LAYER } from './render/mask'
+import { loadQuality, storeQuality, type Quality } from './render/quality'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
@@ -59,18 +60,24 @@ camera.position.set(...world.hides[0].position)
 camera.layers.enable(BIRD_LAYER)
 camera.layers.enable(THIN_LAYER)
 camera.layers.enable(FX_LAYER)
+camera.layers.enable(COMPANION_LAYER)
 
 // 鳥：每種一隻，同時只有一隻在場
 const birds: Bird[] = SPECIES.map((sp) => new Bird(sp))
-for (const b of birds) world.scene.add(b.group)
+// 群體的伴鳥：每種成群的鳥多幾隻備用
+const companions: Record<string, Bird[]> = {}
+for (const sp of SPECIES) if (sp.flock) companions[sp.id] = Array.from({ length: sp.flock.max - 1 }, () => { const b = new Bird(sp); b.markCompanion(); return b })
+const allBirds: Bird[] = [...birds, ...Object.values(companions).flat()]
+for (const b of allBirds) world.scene.add(b.group)
 const dove = birds.find((b) => b.species === spottedDove)!
 const loader = new THREE.TextureLoader()
-for (const b of birds) {
+for (const b of allBirds) {
   for (const key of ['side', '3q', 'takeoff'] as const) {
     loader.load(import.meta.env.BASE_URL + b.species.sprites[key].file, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; b.setTexture(key, t) })
   }
 }
 let spawner = new Spawner(birds, world.perches, Math.random, PARK_WEIGHTS)
+spawner.companions = companions
 let callFlashT = 0
 let callName = ''
 function wireSpawner(sp: Spawner): void { sp.onCall = (b) => { playCall(b.species); callFlashT = 1.5; callName = b.species.nameZh } }
@@ -188,10 +195,10 @@ function aimAtPerch(): void {
 function startLevel(level: LevelDef, hide: HideDef): void {
   currentLevel = level
   currentHide = hide
-  for (const b of birds) { if (b.inScene) { b.inScene = false; b.group.visible = false }; world.scene.remove(b.group) }
+  for (const b of allBirds) { if (b.inScene) { b.inScene = false; b.group.visible = false }; world.scene.remove(b.group) }
   world.dispose()
   world = buildScene(level.sceneId)
-  for (const b of birds) world.scene.add(b.group)
+  for (const b of allBirds) world.scene.add(b.group)
   time = level.time
   weather = level.weather
   setLighting()
@@ -200,6 +207,7 @@ function startLevel(level: LevelDef, hide: HideDef): void {
   rig.pitch = 0
   const roster = birds.filter((b) => (level.species[b.species.id] ?? 0) > 0)
   spawner = new Spawner(roster.length ? roster : birds, world.perches, Math.random, level.species, level.intervalMul)
+  spawner.companions = companions
   wireSpawner(spawner)
   shooting = new Shooting(cam.body, level.cardCapacity)
   session = new LevelSession(level, questsDone)
@@ -215,7 +223,7 @@ function endLevel(): void {
   const sum = session.end()
   session = null
   document.exitPointerLock()
-  for (const b of birds) if (b.inScene) b.forceTakeoff()
+  for (const b of allBirds) if (b.inScene) b.forceTakeoff()
   void summaryView.show(sum)
 }
 function aimAtBird(): void {
@@ -236,6 +244,9 @@ let hint = ''
 let shutterDown = false
 let halfPress = false
 let flashT = 0
+let quality: Quality = loadQuality(TOUCH ? 'low' : 'high')
+Pipeline.lowQuality = quality === 'low'
+function setQuality(q: Quality): void { quality = q; Pipeline.lowQuality = q === 'low'; storeQuality(q); toast = q === 'low' ? '畫質：低（關掉前景紗幕、景深取樣減半，照片不受影響）' : '畫質：高'; toastT = 2.5 }
 const REDUCE_KEY = 'rookie-birder.reduceShake'
 let reduceShake = false
 try { reduceShake = localStorage.getItem(REDUCE_KEY) === '1' } catch { /* 私密視窗 */ }
@@ -276,6 +287,7 @@ function handleKey(code: string): void {
       case 'KeyC': if (allowed('iso')) cam.stepIso(1); break
       case 'Tab': if (allowed('overview')) { overview = !overview; touchUi?.setOverview(overview) } break
       case 'KeyH': helpVisible = !helpVisible; break
+      case 'KeyY': setQuality(quality === 'low' ? 'high' : 'low'); break
       case 'KeyV': reduceShake = !reduceShake; try { localStorage.setItem(REDUCE_KEY, reduceShake ? '1' : '0') } catch { /* 私密視窗 */ } break
       case 'KeyB': if (!tutorial.active) spawner.current?.forceTakeoff(); break
       case 'KeyN': if (!tutorial.active) spawner.spawnNow(); break
@@ -406,7 +418,7 @@ function takePhoto(m: PhotoMetrics): void {
       save.questsDone = [...questsDone]
       const unlocked = checkAchievements(save)
       storeSave(save)
-      if (unlocked.length) { toast = `成就解鎖：「${unlocked[0].title}」${unlocked[0].desc}`; toastT = 4; return }
+      if (unlocked.length) { toast = `成就解鎖：「${unlocked[0].title}」${unlocked[0].desc} +${unlocked[0].reward} 代幣`; toastT = 4; return }
       if (fresh.length) { toast = `任務完成：${fresh[0].title} +${fresh[0].reward} 代幣`; toastT = 3.5; return }
       if (gu?.bonus) { toast = `圖鑑：${speciesName(gu.species)}${gu.newSpecies ? '新鳥種' : '新格子'} +${gu.bonus} 代幣`; toastT = 3; return }
       const who = p.metrics.birdInFrame ? `${speciesName(p.metrics.species)}  ` : ''
@@ -446,7 +458,7 @@ function startTutorial(): void {
   overview = false
   helpVisible = false
   // 把場上的鳥清掉，教學只用斑鳩
-  for (const b of birds) if (b.inScene) { b.inScene = false; b.group.visible = false }
+  for (const b of allBirds) if (b.inScene) { b.inScene = false; b.group.visible = false }
   spawner.current = null
   tutorialCtx.settings = cam.settings
   tutorial.start(tutorialCtx)
@@ -493,11 +505,11 @@ startLoop((dt) => {
     session.update(dt)
     if (session.timeUp) { endLevel(); return }
   }
-  for (const b of birds) b.update(dt, camera.position)
+  for (const b of allBirds) b.update(dt, camera.position)
   const bird = activeBird()
   // 光斑：停棲點被照到時鳥亮兩格
   world.update?.(dt)
-  for (const b of birds) if (b.inScene) b.setLightMul(world.sunlit?.(b.currentPerch) ? 4 : 1)
+  for (const b of allBirds) if (b.inScene) b.setLightMul(world.sunlit?.(b.currentPerch) ? 4 : 1)
 
   // 自動對焦：教學中一律手動
   const tier: AfTier = tutorial.active ? 0 : cam.body.afTier
@@ -539,6 +551,7 @@ startLoop((dt) => {
     if (ev === 'wary') { bird.startle(); toast = `${bird.species.nameZh}在警戒，別動、別連拍`; toastT = 2.5 }
     if (ev === 'flush') {
       alertFlushes++
+      spawner.flushCompanions()
       const next = alertFlushes % 2 === 1 ? spawner.fartherPerch(bird.currentPerch, camera.position) : null
       if (next) { bird.relocate(next); toast = `${bird.species.nameZh}被嚇到，飛遠了`; }
       else { bird.forceTakeoff(); toast = `${bird.species.nameZh}被你嚇走了`; }
