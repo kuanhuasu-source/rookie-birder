@@ -28,7 +28,7 @@ import { AlbumView } from './ui/album'
 import { PhotoCapture, PHOTO_W } from './photo/capture'
 import type { PhotoMetrics } from './photo/types'
 import { Bird } from './birds/Bird'
-import { BIRD_LAYER, THIN_LAYER } from './render/mask'
+import { BIRD_LAYER, THIN_LAYER, FX_LAYER } from './render/mask'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
 import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
@@ -56,6 +56,7 @@ const camera = new THREE.PerspectiveCamera(10, 1.5, 0.3, 600)
 camera.position.set(...world.hides[0].position)
 camera.layers.enable(BIRD_LAYER)
 camera.layers.enable(THIN_LAYER)
+camera.layers.enable(FX_LAYER)
 
 // 鳥：每種一隻，同時只有一隻在場
 const birds: Bird[] = SPECIES.map((sp) => new Bird(sp))
@@ -103,7 +104,7 @@ const rig = new Rig(camera)
 let shooting = new Shooting(cam.body, CARD_CAPACITY)
 const af = new Autofocus()
 const afRay = new THREE.Raycaster()
-afRay.layers.enableAll()   // 鳥的紙片在獨立圖層，也要打得到
+afRay.layers.set(0); afRay.layers.enable(BIRD_LAYER); afRay.layers.enable(THIN_LAYER)   // 鳥與細長層都要打得到，特效層不算
 const afCenter = new THREE.Vector2(0, 0)
 /** 畫面中心打到的距離；沒打到東西回 null。 */
 function centerDistance(): number | null {
@@ -239,7 +240,7 @@ try { reduceShake = localStorage.getItem(REDUCE_KEY) === '1' } catch { /* 私密
 let bracing = false
 
 function setLighting(): void {
-  lighting = lightingPreset(time, weather, currentLevel?.sunAzDeg)
+  lighting = lightingPreset(time, weather, { sunAzDeg: currentLevel?.sunAzDeg, shadeEv: currentLevel?.shadeEv })
   applyLighting(world.scene, world.sun, world.hemi, lighting)
 }
 
@@ -366,6 +367,7 @@ function measureBird(dt: number): PhotoMetrics {
     birdInFrame: inFrame, distM: dist, cocPx: coc, motionPx: motion, totalBlurPx: total,
     eyeX: ex, eyeY: ey, birdHeightFrac: birdHeightPx / (PHOTO_W / 1.5),
     birdState: bird.state, viewAngleDeg: bird.viewAngleDeg, albedo: bird.albedo, facing: bird.facing,
+    sunlit: bird.lightMul > 1,
     lightAngleDeg, pitchDeg,
   }
 }
@@ -488,6 +490,9 @@ startLoop((dt) => {
   }
   for (const b of birds) b.update(dt, camera.position)
   const bird = activeBird()
+  // 光斑：停棲點被照到時鳥亮兩格
+  world.update?.(dt)
+  for (const b of birds) if (b.inScene) b.setLightMul(world.sunlit?.(b.currentPerch) ? 4 : 1)
 
   // 自動對焦：教學中一律手動
   const tier: AfTier = tutorial.active ? 0 : cam.body.afTier

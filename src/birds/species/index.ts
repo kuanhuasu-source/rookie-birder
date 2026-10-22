@@ -15,6 +15,11 @@ import priniaGen from './generated/plain-prinia.json'
 import muniaGen from './generated/scaly-breasted-munia.json'
 import cisticolaGen from './generated/golden-headed-cisticola.json'
 import shrikeGen from './generated/long-tailed-shrike.json'
+import barbetGen from './generated/taiwan-barbet.json'
+import magpieGen from './generated/taiwan-blue-magpie.json'
+import monarchGen from './generated/black-naped-monarch.json'
+import yuhinaGen from './generated/taiwan-yuhina.json'
+import pittaGen from './generated/fairy-pitta.json'
 
 interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number }
 interface Generated { id: string; nameZh: string; nameEn: string; bodyLengthM: number; sprites: Record<'side' | '3q' | 'takeoff', GeneratedSprite> }
@@ -238,7 +243,77 @@ export const longTailedShrike: SpeciesDef = {
   skittish: 0.8, flushDistM: 7,
 }
 
-export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen, plainPrinia, scalyBreastedMunia, goldenHeadedCisticola, longTailedShrike]
+/** 五色鳥：在果樹上慢慢吃果子，顏色多，紅斑是對焦目標。 */
+export const taiwanBarbet: SpeciesDef = {
+  id: 'taiwan-barbet', nameZh: '五色鳥', nameEn: 'Taiwan Barbet',
+  bodyHeightM: 0.12, albedo: barbetGen.sprites.side.albedo,
+  sprites: sprites(barbetGen as Generated),
+  dwell: { min: 20, max: 40 }, interval: { min: 14, max: 30 },
+  stateDurations: { S1: { min: 2.5, max: 6 }, S2: { min: 1.5, max: 3 }, S3: { min: 0.5, max: 0.8 } },
+  transitions: { S1: { S2: 0.55, S3: 0.35, S4: 0.1 }, S2: { S1: 0.6, S3: 0.3, S4: 0.1 }, S3: { S1: 0.6, S2: 0.4 } },
+  flightSpeedMs: 7, hopDistM: 0.5,
+  call: { baseHz: 900, notes: 4, noteS: 0.12, gapS: 0.1 },
+  rarity: 'common',
+  skittish: 0.9, flushDistM: 7,
+}
+
+/** 台灣藍鵲：大、尾巴長、成群，停在枯枝上。 */
+export const taiwanBlueMagpie: SpeciesDef = {
+  id: 'taiwan-blue-magpie', nameZh: '台灣藍鵲', nameEn: 'Taiwan Blue Magpie',
+  bodyHeightM: 0.22, albedo: magpieGen.sprites.side.albedo,
+  sprites: sprites(magpieGen as Generated),
+  dwell: { min: 14, max: 28 }, interval: { min: 18, max: 40 },
+  stateDurations: { S1: { min: 1.5, max: 4 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.6, max: 1.0 } },
+  transitions: { S1: { S2: 0.45, S3: 0.4, S4: 0.15 }, S2: { S1: 0.5, S3: 0.35, S4: 0.15 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 8, hopDistM: 1.0,
+  call: { baseHz: 1400, notes: 3, noteS: 0.1, gapS: 0.06 },
+  rarity: 'rare',
+  skittish: 1.0, flushDistM: 9,
+}
+
+/** 黑枕藍鶲：小、藍、不停地在枝間撲蟲再回到枝上。 */
+export const blackNapedMonarch: SpeciesDef = {
+  id: 'black-naped-monarch', nameZh: '黑枕藍鶲', nameEn: 'Black-naped Monarch',
+  bodyHeightM: 0.08, albedo: monarchGen.sprites.side.albedo,
+  sprites: sprites(monarchGen as Generated),
+  dwell: { min: 10, max: 22 }, interval: { min: 12, max: 26 },
+  stateDurations: { S1: { min: 0.8, max: 2.2 }, S2: { min: 0.6, max: 1.5 }, S3: { min: 0.3, max: 0.5 } },
+  transitions: { S1: { S2: 0.35, S3: 0.55, S4: 0.1 }, S2: { S1: 0.35, S3: 0.55, S4: 0.1 }, S3: { S1: 0.5, S2: 0.3, S3: 0.2 } },
+  flightSpeedMs: 7, hopDistM: 0.5,
+  call: { baseHz: 3200, notes: 5, noteS: 0.06, gapS: 0.04 },
+  rarity: 'common',
+  skittish: 1.1, flushDistM: 6,
+}
+
+/** 冠羽畫眉：成群、吵、很忙，在枝葉間跳。 */
+export const taiwanYuhina: SpeciesDef = {
+  id: 'taiwan-yuhina', nameZh: '冠羽畫眉', nameEn: 'Taiwan Yuhina',
+  bodyHeightM: 0.07, albedo: yuhinaGen.sprites.side.albedo,
+  sprites: sprites(yuhinaGen as Generated),
+  dwell: { min: 8, max: 18 }, interval: { min: 10, max: 22 },
+  stateDurations: { S1: { min: 0.8, max: 2 }, S2: { min: 0.8, max: 1.8 }, S3: { min: 0.3, max: 0.5 } },
+  transitions: { S1: { S2: 0.4, S3: 0.5, S4: 0.1 }, S2: { S1: 0.4, S3: 0.5, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 7, hopDistM: 0.4,
+  call: { baseHz: 2600, notes: 3, noteS: 0.08, gapS: 0.05 },
+  rarity: 'common',
+  skittish: 1.0, flushDistM: 5,
+}
+
+/** 八色鳥：傳說級，在地面的倒木旁跳，很少出現、停留不久。 */
+export const fairyPitta: SpeciesDef = {
+  id: 'fairy-pitta', nameZh: '八色鳥', nameEn: 'Fairy Pitta',
+  bodyHeightM: 0.12, albedo: pittaGen.sprites.side.albedo,
+  sprites: sprites(pittaGen as Generated),
+  dwell: { min: 12, max: 22 }, interval: { min: 40, max: 80 },
+  stateDurations: { S1: { min: 1.5, max: 4 }, S2: { min: 1, max: 2.5 }, S3: { min: 0.4, max: 0.7 } },
+  transitions: { S1: { S2: 0.4, S3: 0.5, S4: 0.1 }, S2: { S1: 0.5, S3: 0.4, S4: 0.1 }, S3: { S1: 0.5, S2: 0.5 } },
+  flightSpeedMs: 7, hopDistM: 0.6,
+  call: { baseHz: 2000, notes: 2, noteS: 0.18, gapS: 0.12 },
+  rarity: 'legendary',
+  skittish: 1.4, flushDistM: 8,
+}
+
+export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen, plainPrinia, scalyBreastedMunia, goldenHeadedCisticola, longTailedShrike, taiwanBarbet, taiwanBlueMagpie, blackNapedMonarch, taiwanYuhina, fairyPitta]
 export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries(SPECIES.map((s) => [s.id, s]))
 
 /** 第一章公園草地的出現權重。 */

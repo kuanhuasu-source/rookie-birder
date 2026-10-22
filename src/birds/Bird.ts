@@ -9,6 +9,15 @@ export interface Perch {
   range: number
   /** 草莖搖晃幅度（m）：停在上面的鳥會跟著晃，對焦與構圖都更難 */
   swayM?: number
+  /** 光斑：樹冠縫隙的陽光週期性照到這個停棲點（秒） */
+  sunSpot?: { periodS: number; onS: number; phaseS: number }
+}
+
+/** 這個停棲點在時間 t 是否被光斑照到。 */
+export function perchSunlit(p: Perch, t: number): boolean {
+  if (!p.sunSpot) return false
+  const u = (((t + p.sunSpot.phaseS) % p.sunSpot.periodS) + p.sunSpot.periodS) % p.sunSpot.periodS
+  return u < p.sunSpot.onS
 }
 
 export type Rng = () => number
@@ -160,6 +169,15 @@ export class Bird {
   }
 
   get isHovering(): boolean { return this.hovering }
+
+  /** 光斑裡的鳥比周圍亮：紙片顏色乘上倍率（HalfFloat 緩衝可以超過 1）。 */
+  private lightMulValue = 1
+  setLightMul(mul: number): void {
+    if (mul === this.lightMulValue) return
+    this.lightMulValue = mul
+    this.paper.material.color.setScalar(mul)
+  }
+  get lightMul(): number { return this.lightMulValue }
 
   private swayT = 0
 

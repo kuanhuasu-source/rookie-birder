@@ -152,3 +152,24 @@ describe('lore', () => {
     }
   })
 })
+
+describe('sun spots', () => {
+  it('a perch with a sun spot is lit for onS seconds of every period, offset by its phase', async () => {
+    const { perchSunlit } = await import('../src/birds/Bird')
+    const p: Perch = { position: new THREE.Vector3(), along: new THREE.Vector3(1, 0, 0), range: 1, sunSpot: { periodS: 60, onS: 20, phaseS: 10 } }
+    expect(perchSunlit(p, 0)).toBe(true)      // (0+10) % 60 = 10 < 20
+    expect(perchSunlit(p, 9)).toBe(true)
+    expect(perchSunlit(p, 11)).toBe(false)    // 21
+    expect(perchSunlit(p, 55)).toBe(true)     // 65 % 60 = 5
+    expect(perchSunlit({ ...p, sunSpot: undefined }, 0)).toBe(false)
+  })
+  it('setLightMul scales the paper colour and reports back', () => {
+    const b = new Bird(spottedDove, seeded(1))
+    expect(b.lightMul).toBe(1)
+    b.setLightMul(4)
+    expect(b.paper.material.color.r).toBe(4)
+    expect(b.lightMul).toBe(4)
+    b.setLightMul(1)
+    expect(b.paper.material.color.g).toBe(1)
+  })
+})

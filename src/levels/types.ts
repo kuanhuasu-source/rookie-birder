@@ -1,7 +1,7 @@
 import type { PhotoRecord } from '../photo/types'
 import type { TimeOfDay, Weather } from '../world/lighting'
 
-export type SceneId = 'park' | 'stream' | 'wetland' | 'field'
+export type SceneId = 'park' | 'stream' | 'wetland' | 'field' | 'forest'
 
 export interface HideDef {
   id: string
@@ -38,4 +38,6 @@ export interface LevelDef {
   intervalMul: number
   /** 覆寫太陽方位角（度，0 = 正前方 −z 方向、180 = 相機背後）；不給就用時段預設 */
   sunAzDeg?: number
+  /** 樹冠下：直接指定場景 EV（低光） */
+  shadeEv?: number
 }

@@ -72,6 +72,32 @@ describe('levels', () => {
     expect(iso.check(photo({}, { stars: 4 }, { iso: 3200 }))).toBe(true)
     expect(iso.check(photo({}, { stars: 3 }, { iso: 3200 }))).toBe(false)
   })
+  it('chapter 5 forest quests check sun spots, high ISO and the rare pitta', () => {
+    const morning = LEVELS.find((l) => l.id === 'forest-morning')!
+    const dusk = LEVELS.find((l) => l.id === 'forest-dusk')!
+    expect(morning.shadeEv).toBe(9)
+    expect(dusk.shadeEv).toBeLessThan(morning.shadeEv!)
+    const [barbet, spot, iso] = morning.quests
+    expect(barbet.check(photo({ species: 'taiwan-barbet', birdState: 'S1' }, { stars: 3 }))).toBe(true)
+    expect(spot.check(photo({ sunlit: true }, { exposure: 21 }))).toBe(true)
+    expect(spot.check(photo({ sunlit: false }, { exposure: 21 }))).toBe(false)
+    expect(spot.check(photo({ sunlit: true }, { exposure: 15 }))).toBe(false)
+    expect(iso.check(photo({}, { stars: 3 }, { iso: 6400 }))).toBe(true)
+    expect(iso.check(photo({}, { stars: 3 }, { iso: 3200 }))).toBe(false)
+    const [magpie, monarch, pitta] = dusk.quests
+    expect(magpie.check(photo({ species: 'taiwan-blue-magpie' }, { stars: 3 }))).toBe(true)
+    expect(monarch.check(photo({ species: 'black-naped-monarch', birdState: 'S3' }, { stars: 2 }))).toBe(true)
+    expect(pitta.check(photo({ species: 'fairy-pitta' }, { stars: 1 }))).toBe(true)
+    expect(pitta.reward).toBe(60)
+  })
+  it('shade lighting keeps the scene EV it is given and uses mostly ambient light', async () => {
+    const { lightingPreset } = await import('../src/world/lighting')
+    const shade = lightingPreset('morning', 'sunny', { shadeEv: 9 })
+    expect(shade.evScene).toBe(9)
+    expect(shade.sunIntensity).toBeLessThan(1)
+    expect(shade.hemiIntensity).toBeGreaterThan(2)
+    expect(lightingPreset('morning', 'sunny').evScene).toBe(13)
+  })
   it('a level can override the sun azimuth to put the sun in front of the camera', async () => {
     const { lightingPreset } = await import('../src/world/lighting')
     const def = lightingPreset('dusk', 'sunny')

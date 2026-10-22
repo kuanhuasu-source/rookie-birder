@@ -1,0 +1,41 @@
+{
+  "id": "black-naped-monarch",
+  "nameZh": "黑枕藍鶲",
+  "nameEn": "Black-naped Monarch",
+  "bodyLengthM": 0.16,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8211,
+        0.6645
+      ],
+      "contentW": 0.965,
+      "contentH": 0.518,
+      "albedo": 0.343,
+      "file": "birds/black-naped-monarch-side.png",
+      "sizeM": 0.166
+    },
+    "3q": {
+      "eyeUv": [
+        0.8156,
+        0.6797
+      ],
+      "contentW": 0.961,
+      "contentH": 0.592,
+      "albedo": 0.336,
+      "file": "birds/black-naped-monarch-3q.png",
+      "sizeM": 0.158
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.831,
+        0.5343
+      ],
+      "contentW": 0.958,
+      "contentH": 0.702,
+      "albedo": 0.403,
+      "file": "birds/black-naped-monarch-takeoff.png",
+      "sizeM": 0.242
+    }
+  }
+}

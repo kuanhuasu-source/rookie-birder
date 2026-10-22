@@ -1,0 +1,41 @@
+{
+  "id": "taiwan-yuhina",
+  "nameZh": "冠羽畫眉",
+  "nameEn": "Taiwan Yuhina",
+  "bodyLengthM": 0.13,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.796,
+        0.637
+      ],
+      "contentW": 0.959,
+      "contentH": 0.708,
+      "albedo": 0.46,
+      "file": "birds/taiwan-yuhina-side.png",
+      "sizeM": 0.136
+    },
+    "3q": {
+      "eyeUv": [
+        0.884,
+        0.689
+      ],
+      "contentW": 0.954,
+      "contentH": 0.804,
+      "albedo": 0.45,
+      "file": "birds/taiwan-yuhina-3q.png",
+      "sizeM": 0.129
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8287,
+        0.5436
+      ],
+      "contentW": 0.955,
+      "contentH": 0.792,
+      "albedo": 0.443,
+      "file": "birds/taiwan-yuhina-takeoff.png",
+      "sizeM": 0.197
+    }
+  }
+}

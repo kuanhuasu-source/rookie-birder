@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Pipeline } from '../render/pipeline'
-import { BirdMask, BIRD_LAYER, THIN_LAYER } from '../render/mask'
+import { BirdMask, BIRD_LAYER, THIN_LAYER, FX_LAYER } from '../render/mask'
 import type { PhotoRecord, PhotoMetrics } from './types'
 import { savePhoto } from './album'
 import { PhotoStats } from './stats'
@@ -59,6 +59,7 @@ export class PhotoCapture {
     cam.aspect = PHOTO_W / PHOTO_H
     cam.layers.enable(BIRD_LAYER)
     cam.layers.enable(THIN_LAYER)
+    cam.layers.enable(FX_LAYER)
     cam.updateProjectionMatrix()
     cam.position.copy(input.camera.position)
     cam.quaternion.copy(input.camera.quaternion)

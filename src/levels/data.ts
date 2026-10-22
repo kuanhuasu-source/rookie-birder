@@ -100,10 +100,32 @@ export const LEVELS: LevelDef[] = [
     ],
     durationS: 540, cardCapacity: 60, intervalMul: 0.9,
   },
+  {
+    id: 'forest-morning', chapter: 5, title: '林地 · 上午', subtitle: '樹冠下很暗，光斑會輪流照到停棲點',
+    sceneId: 'forest', time: 'morning', weather: 'sunny', shadeEv: 9,
+    species: { 'taiwan-barbet': 0.32, 'taiwan-yuhina': 0.3, 'black-naped-monarch': 0.22, 'taiwan-blue-magpie': 0.13, 'fairy-pitta': 0.03 },
+    quests: [
+      q('l1-barbet', '拍到五色鳥停棲，三星以上', '牠在果樹上，顏色很多，眼睛周圍的紅斑是對焦目標', 25, (p) => is(p, 'taiwan-barbet') && slot(p) === 'perched' && p.score.stars >= 3),
+      q('l1-spot', '在光斑裡拍到任何鳥，曝光 20 分以上', '光斑裡的鳥比周圍亮兩格，要替牠減曝光，背景暗沒關係', 30, (p) => inFrame(p) && !!p.metrics.sunlit && p.score.exposure >= 20),
+      q('l1-iso', 'ISO 6400 以上拍到三星', '樹冠下光很少，高 ISO 的噪點是必要的代價，穩住就好', 30, (p) => inFrame(p) && p.settings.iso >= 6400 && p.score.stars >= 3),
+    ],
+    durationS: 600, cardCapacity: 60, intervalMul: 1.1,
+  },
+  {
+    id: 'forest-dusk', chapter: 5, title: '林地 · 黃昏', subtitle: '更暗，稀有的鳥要等',
+    sceneId: 'forest', time: 'dusk', weather: 'sunny', shadeEv: 7,
+    species: { 'taiwan-barbet': 0.22, 'taiwan-yuhina': 0.25, 'black-naped-monarch': 0.22, 'taiwan-blue-magpie': 0.23, 'fairy-pitta': 0.08 },
+    quests: [
+      q('l2-magpie', '拍到台灣藍鵲，三星以上', '尾巴很長，構圖要留位置給牠的尾巴', 30, (p) => is(p, 'taiwan-blue-magpie') && p.score.stars >= 3),
+      q('l2-monarch', '黑枕藍鶲的動作格，兩星以上', '牠在枝間飛來飛去抓蟲，等牠回到枯枝的瞬間', 30, (p) => is(p, 'black-naped-monarch') && slot(p) === 'action' && p.score.stars >= 2),
+      q('l2-pitta', '拍到八色鳥', '傳說中的鳥，先聽到聲音才會出現；牠在倒木旁的地面，耐心等', 60, (p) => is(p, 'fairy-pitta')),
+    ],
+    durationS: 600, cardCapacity: 60, intervalMul: 1.1,
+  },
 ]
 
 /** 章節名稱 */
-export const CHAPTER_NAME: Record<number, string> = { 1: '公園草地', 2: '溪流', 3: '濕地', 4: '田野草叢' }
+export const CHAPTER_NAME: Record<number, string> = { 1: '公園草地', 2: '溪流', 3: '濕地', 4: '田野草叢', 5: '林地' }
 
 /** 這種鳥會出現在哪些章節。 */
 export function chaptersOf(speciesId: string): number[] {

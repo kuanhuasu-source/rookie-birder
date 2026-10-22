@@ -3,6 +3,8 @@ import * as THREE from 'three'
 const BIRD_LAYER = 1
 /** 細長的前景物（草莖、蘆葦、葉片）：失焦時會變半透明，獨立圖層另外畫。 */
 const THIN_LAYER = 2
+/** 純視覺特效（光束等）：只有主相機畫，遮罩、評分、對焦都看不到。 */
+const FX_LAYER = 3
 
 /** 把物件（含子物件）標成細長前景。 */
 export function markThin(obj: THREE.Object3D): void {
@@ -73,4 +75,4 @@ export class BirdMask {
   }
 }
 
-export { BIRD_LAYER, THIN_LAYER }
+export { BIRD_LAYER, THIN_LAYER, FX_LAYER }

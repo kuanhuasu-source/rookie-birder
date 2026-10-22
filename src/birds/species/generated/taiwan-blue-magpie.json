@@ -1,0 +1,41 @@
+{
+  "id": "taiwan-blue-magpie",
+  "nameZh": "台灣藍鵲",
+  "nameEn": "Taiwan Blue Magpie",
+  "bodyLengthM": 0.64,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.8517,
+        0.6877
+      ],
+      "contentW": 0.97,
+      "contentH": 0.488,
+      "albedo": 0.254,
+      "file": "birds/taiwan-blue-magpie-side.png",
+      "sizeM": 0.66
+    },
+    "3q": {
+      "eyeUv": [
+        0.4702,
+        0.7334
+      ],
+      "contentW": 0.964,
+      "contentH": 0.614,
+      "albedo": 0.228,
+      "file": "birds/taiwan-blue-magpie-3q.png",
+      "sizeM": 0.631
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.8815,
+        0.5194
+      ],
+      "contentW": 0.969,
+      "contentH": 0.527,
+      "albedo": 0.225,
+      "file": "birds/taiwan-blue-magpie-takeoff.png",
+      "sizeM": 0.958
+    }
+  }
+}

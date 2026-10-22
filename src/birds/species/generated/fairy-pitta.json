@@ -1,0 +1,41 @@
+{
+  "id": "fairy-pitta",
+  "nameZh": "八色鳥",
+  "nameEn": "Fairy Pitta",
+  "bodyLengthM": 0.18,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.7519,
+        0.7759
+      ],
+      "contentW": 0.952,
+      "contentH": 0.774,
+      "albedo": 0.43,
+      "file": "birds/fairy-pitta-side.png",
+      "sizeM": 0.189
+    },
+    "3q": {
+      "eyeUv": [
+        0.937,
+        0.853
+      ],
+      "contentW": 0.944,
+      "contentH": 0.912,
+      "albedo": 0.433,
+      "file": "birds/fairy-pitta-3q.png",
+      "sizeM": 0.181
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.773,
+        0.4831
+      ],
+      "contentW": 0.948,
+      "contentH": 0.89,
+      "albedo": 0.332,
+      "file": "birds/fairy-pitta-takeoff.png",
+      "sizeM": 0.275
+    }
+  }
+}

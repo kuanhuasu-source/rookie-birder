@@ -21,6 +21,8 @@ export interface PhotoMetrics {
   facing?: 1 | -1
   /** 太陽方向與「鳥到相機」方向的夾角：0 順光、180 逆光 */
   lightAngleDeg?: number
+  /** 鳥在光斑裡（比周圍亮兩格） */
+  sunlit?: boolean
   /** 相機看鳥眼的俯仰角（度），0 代表平視 */
   pitchDeg?: number
   /** 影像統計（拍照時由小尺寸遮罩算出） */

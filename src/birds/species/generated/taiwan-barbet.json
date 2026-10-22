@@ -1,0 +1,41 @@
+{
+  "id": "taiwan-barbet",
+  "nameZh": "五色鳥",
+  "nameEn": "Taiwan Barbet",
+  "bodyLengthM": 0.2,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.7715,
+        0.6251
+      ],
+      "contentW": 0.97,
+      "contentH": 0.478,
+      "albedo": 0.331,
+      "file": "birds/taiwan-barbet-side.png",
+      "sizeM": 0.206
+    },
+    "3q": {
+      "eyeUv": [
+        0.7984,
+        0.6678
+      ],
+      "contentW": 0.965,
+      "contentH": 0.581,
+      "albedo": 0.316,
+      "file": "birds/taiwan-barbet-3q.png",
+      "sizeM": 0.197
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.6542,
+        0.529
+      ],
+      "contentW": 0.97,
+      "contentH": 0.504,
+      "albedo": 0.269,
+      "file": "birds/taiwan-barbet-takeoff.png",
+      "sizeM": 0.299
+    }
+  }
+}
