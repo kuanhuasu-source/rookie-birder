@@ -42,4 +42,6 @@ export interface LevelDef {
   shadeEv?: number
   /** 隱藏關：解鎖前主畫面完全不顯示 */
   hidden?: boolean
+  /** 不受「前一關任一任務」的解鎖規則限制，一開始就開著（測試期間先這樣） */
+  alwaysUnlocked?: boolean
 }

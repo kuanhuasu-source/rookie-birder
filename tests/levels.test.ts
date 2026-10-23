@@ -102,10 +102,10 @@ describe('levels', () => {
     const rail = LEVELS[LEVELS.length - 1]
     expect(rail.id).toBe('rail-dusk')
     expect(rail.hidden).toBe(true)
+    // 測試期間預設打開：不需要林地的任務
     const done = new Set<string>()
-    expect(isLevelUnlocked(rail, done)).toBe(false)
-    done.add(LEVELS[LEVELS.length - 2].quests[0].id)
     expect(isLevelUnlocked(rail, done)).toBe(true)
+    expect(rail.alwaysUnlocked).toBe(true)
     const [first, lead, freeze] = rail.quests
     expect(first.check(photo({ species: 'local-train', birdState: 'S5' }, { stars: 3 }))).toBe(true)
     expect(first.check(photo({ species: 'spotted-dove', birdState: 'S5' }, { stars: 3 }))).toBe(false)

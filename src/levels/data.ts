@@ -128,7 +128,7 @@ export const LEVELS: LevelDef[] = [
     durationS: 600, cardCapacity: 60, intervalMul: 1.1,
   },
   {
-    id: 'rail-dusk', chapter: 6, title: '鐵道 · 黃昏', subtitle: '隱藏關：火車橫向通過，考的是準備與按下快門的時機', hidden: true,
+    id: 'rail-dusk', chapter: 6, title: '鐵道 · 黃昏', subtitle: '隱藏關：火車橫向通過，考的是準備與按下快門的時機', hidden: true, alwaysUnlocked: true,
     sceneId: 'rail', time: 'dusk', weather: 'sunny', sunAzDeg: 300,
     species: { 'local-train': 0.35, 'classic-express': 0.25, 'blue-ordinary': 0.2, 'tilting-express': 0.2 },
     quests: [
@@ -153,6 +153,7 @@ export const LEVEL_BY_ID: Record<string, LevelDef> = Object.fromEntries(LEVELS.m
 
 /** 第一關永遠開；之後的關卡要前一關至少完成一個任務。 */
 export function isLevelUnlocked(level: LevelDef, questsDone: Set<string>): boolean {
+  if (level.alwaysUnlocked) return true
   const idx = LEVELS.indexOf(level)
   if (idx <= 0) return true
   const prev = LEVELS[idx - 1]
