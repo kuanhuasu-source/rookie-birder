@@ -1,0 +1,44 @@
+{
+  "id": "classic-express",
+  "nameZh": "橘白快車",
+  "nameEn": "classic Taiwanese express train: an orange electric locomotive pulling 3 orange-and-white passenger coaches",
+  "bodyLengthM": 34.8,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.9647,
+        0.5456
+      ],
+      "contentW": 0.971,
+      "contentH": 0.176,
+      "albedo": 0.405,
+      "file": "birds/classic-express-side.png",
+      "sizeM": 23.864,
+      "aspect": 1.5
+    },
+    "3q": {
+      "eyeUv": [
+        0.9647,
+        0.5456
+      ],
+      "contentW": 0.971,
+      "contentH": 0.176,
+      "albedo": 0.405,
+      "file": "birds/classic-express-side.png",
+      "sizeM": 23.864,
+      "aspect": 1.5
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.9647,
+        0.5456
+      ],
+      "contentW": 0.971,
+      "contentH": 0.176,
+      "albedo": 0.405,
+      "file": "birds/classic-express-side.png",
+      "sizeM": 23.864,
+      "aspect": 1.5
+    }
+  }
+}

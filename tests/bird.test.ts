@@ -250,3 +250,30 @@ describe('soaring and diving', () => {
     expect(b.inScene).toBe(true)
   })
 })
+
+describe('passing train', () => {
+  it('crosses the track at constant speed in S5 without arcing or flapping, then leaves', () => {
+    const train = { ...spottedDove, id: 'train-test', passes: { speedMs: 14, spanM: 140 } }
+    const b = new Bird(train, seeded(2))
+    const track: Perch = { position: new THREE.Vector3(0, 1.4, -45), along: new THREE.Vector3(1, 0, 0), range: 0, tags: ['rail'] }
+    let left = false
+    b.onLeft = () => { left = true }
+    b.enter(track, new THREE.Vector3())
+    expect(b.state).toBe('S5')
+    expect(Math.abs(b.group.position.x)).toBeCloseTo(70, 0)
+    const dir = Math.sign(-b.group.position.x)
+    const y0 = b.group.position.y
+    let t = 0, prevX = b.group.position.x
+    while (!left && t < 20) {
+      b.update(1 / 30, camPos); t += 1 / 30
+      if (!left) {
+        expect(b.group.position.y).toBeCloseTo(y0, 5)                       // 不畫弧
+        expect(Math.sign(b.group.position.x - prevX) || dir).toBe(dir)      // 一直同方向
+        expect(b.paper.scale.y).toBeCloseTo(b.paper.scale.y, 5)
+        prevX = b.group.position.x
+      }
+    }
+    expect(left).toBe(true)
+    expect(t).toBeGreaterThan(9); expect(t).toBeLessThan(11)                // 140 m / 14 m/s = 10 s
+  })
+})

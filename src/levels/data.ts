@@ -1,10 +1,12 @@
 import type { LevelDef, QuestDef } from './types'
 import type { PhotoRecord } from '../photo/types'
 import { slotForState } from '../progress/guide'
+import { TRAIN_IDS } from '../birds/species'
 
 const inFrame = (p: PhotoRecord) => p.metrics.birdInFrame
 const is = (p: PhotoRecord, id: string) => inFrame(p) && p.metrics.species === id
 const slot = (p: PhotoRecord) => slotForState(p.metrics.birdState)
+const isTrain = (p: PhotoRecord) => p.metrics.birdInFrame && !!p.metrics.species && TRAIN_IDS.has(p.metrics.species)
 
 function q(id: string, title: string, hint: string, reward: number, check: (p: PhotoRecord) => boolean): QuestDef {
   return { id, title, hint, reward, check }
@@ -125,10 +127,22 @@ export const LEVELS: LevelDef[] = [
     ],
     durationS: 600, cardCapacity: 60, intervalMul: 1.1,
   },
+  {
+    id: 'rail-dusk', chapter: 6, title: '鐵道 · 黃昏', subtitle: '隱藏關：火車橫向通過，考的是準備與按下快門的時機', hidden: true,
+    sceneId: 'rail', time: 'dusk', weather: 'sunny', sunAzDeg: 300,
+    species: { 'local-train': 0.35, 'classic-express': 0.25, 'blue-ordinary': 0.2, 'tilting-express': 0.2 },
+    quests: [
+      q('r-first', '拍到任何一列火車，三星以上', '先聽到汽笛，車在畫面裡只有一兩秒：焦距退到裝得下車高，焦點預先放在鐵軌上', 40, (p) => isTrain(p) && p.score.stars >= 3),
+      q('r-lead', '車頭前面留行進空間，構圖 20 分以上', '車頭放在後三分之一，前面留空讓它「開進畫面」', 40, (p) => isTrain(p) && p.score.composition >= 20),
+      q('r-freeze', '1/2000 以上凍結車身，對焦 27 分以上', '每秒十幾二十公尺的車，快門不夠快就是一道色塊', 50, (p) => isTrain(p) && p.settings.shutterS <= 1 / 2000 && p.score.focus >= 27),
+      q('r-express', '拍到傾斜式快車，三星以上', '時速一百二，從汽笛到車頭進畫面不到三秒；一切都要先準備好', 60, (p) => p.metrics.species === 'tilting-express' && p.score.stars >= 3),
+    ],
+    durationS: 420, cardCapacity: 60, intervalMul: 1.0,
+  },
 ]
 
 /** 章節名稱 */
-export const CHAPTER_NAME: Record<number, string> = { 1: '公園草地', 2: '溪流', 3: '濕地', 4: '田野草叢', 5: '林地' }
+export const CHAPTER_NAME: Record<number, string> = { 1: '公園草地', 2: '溪流', 3: '濕地', 4: '田野草叢', 5: '林地', 6: '鐵道（隱藏關）' }
 
 /** 這種鳥會出現在哪些章節。 */
 export function chaptersOf(speciesId: string): number[] {

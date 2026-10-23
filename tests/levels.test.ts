@@ -98,6 +98,21 @@ describe('levels', () => {
     expect(shade.hemiIntensity).toBeGreaterThan(2)
     expect(lightingPreset('morning', 'sunny').evScene).toBe(13)
   })
+  it('the hidden rail level sits last, unlocks after the forest, and its quests target the train', () => {
+    const rail = LEVELS[LEVELS.length - 1]
+    expect(rail.id).toBe('rail-dusk')
+    expect(rail.hidden).toBe(true)
+    const done = new Set<string>()
+    expect(isLevelUnlocked(rail, done)).toBe(false)
+    done.add(LEVELS[LEVELS.length - 2].quests[0].id)
+    expect(isLevelUnlocked(rail, done)).toBe(true)
+    const [first, lead, freeze] = rail.quests
+    expect(first.check(photo({ species: 'local-train', birdState: 'S5' }, { stars: 3 }))).toBe(true)
+    expect(first.check(photo({ species: 'spotted-dove', birdState: 'S5' }, { stars: 3 }))).toBe(false)
+    expect(lead.check(photo({ species: 'local-train' }, { composition: 20 }))).toBe(true)
+    expect(freeze.check(photo({ species: 'local-train' }, { focus: 27 }, { shutterS: 1 / 2000 }))).toBe(true)
+    expect(freeze.check(photo({ species: 'local-train' }, { focus: 27 }, { shutterS: 1 / 1000 }))).toBe(false)
+  })
   it('a level can override the sun azimuth to put the sun in front of the camera', async () => {
     const { lightingPreset } = await import('../src/world/lighting')
     const def = lightingPreset('dusk', 'sunny')

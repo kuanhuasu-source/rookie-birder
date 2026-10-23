@@ -15,7 +15,7 @@ export interface Perch {
   tags?: PerchTag[]
 }
 
-export type PerchTag = 'branch' | 'rock' | 'ground' | 'mud' | 'water' | 'post' | 'wire' | 'grass' | 'bamboo' | 'log'
+export type PerchTag = 'branch' | 'rock' | 'ground' | 'mud' | 'water' | 'post' | 'wire' | 'grass' | 'bamboo' | 'log' | 'rail'
 
 /** 這隻鳥能不能停這個停棲點：鳥沒有偏好或停棲點沒有標籤就都可以。 */
 export function perchFits(perch: Perch, prefs?: PerchTag[]): boolean {
@@ -90,10 +90,11 @@ export class Bird {
     const key = (Object.keys(this.species.sprites) as ('side' | '3q' | 'takeoff')[]).find((k) => this.species.sprites[k] === s)!
     const tex = this.textures[key] ?? null
     if (this.paper.material.map !== tex) { this.paper.material.map = tex; this.paper.material.needsUpdate = true }
-    this.paper.scale.set(s.sizeM * this.facing, s.sizeM, 1)
+    const w = s.sizeM * (s.aspect ?? 1)
+    this.paper.scale.set(w * this.facing, s.sizeM, 1)
     // 內容在畫布中垂直置中，讓腳底落在群組原點
     this.paper.position.y = (s.contentH * s.sizeM) / 2
-    this.eye.position.set((s.eyeUv[0] - 0.5) * s.sizeM * this.facing, (s.eyeUv[1] - 0.5) * s.sizeM + this.paper.position.y, 0.003)
+    this.eye.position.set((s.eyeUv[0] - 0.5) * w * this.facing, (s.eyeUv[1] - 0.5) * s.sizeM + this.paper.position.y, 0.003)
     this.viewAngleDeg = s.viewAngleDeg
     this.albedo = s.albedo
   }
@@ -128,6 +129,26 @@ export class Bird {
   enter(perch: Perch, from: THREE.Vector3, offset?: number): void {
     this.perch = perch
     this.perchOffset = offset ?? (this.rng() - 0.5) * perch.range
+    if (this.species.passes) {
+      // 橫向通過：從停棲點方向的一端直線開到另一端，方向隨機；圖片是朝右的，往左開就鏡射
+      const dir = this.rng() < 0.5 ? 1 : -1
+      const half = perch.along.clone().multiplyScalar(this.species.passes.spanM / 2)
+      const a = perch.position.clone().sub(half.clone().multiplyScalar(dir))
+      const b = perch.position.clone().add(half.clone().multiplyScalar(dir))
+      this.perchOffset = 0
+      this.inScene = true
+      this.leaving = true
+      this.hovering = false
+      this.submerged = false
+      this.paper.visible = true
+      this.group.visible = true
+      this.group.position.copy(a)
+      this.setFacing(dir * perch.along.x >= 0 ? 1 : -1)
+      this.flight = { from: a, to: b, dur: this.species.passes.spanM / this.species.passes.speedMs, leaving: true }
+      this.dwellLeft = Infinity
+      this.setState('S5')
+      return
+    }
     const to = this.species.hovers || this.species.soars ? this.hoverPos() : this.perchPos()
     this.inScene = true
     this.leaving = false
@@ -197,6 +218,7 @@ export class Bird {
   forceTakeoff(): void {
     if (!this.inScene) return
     if (this.hovering) { this.dwellLeft = 0; return }
+    if (this.species.passes) { this.inScene = false; this.group.visible = false; this.onLeft?.(); return }
     if (this.state !== 'S4' && this.state !== 'S5') this.beginTakeoff()
   }
 
@@ -343,9 +365,11 @@ export class Bird {
         const u = Math.min(1, this.stateT / f.dur)
         // 飛行弧線：中段略高
         this.group.position.lerpVectors(f.from, f.to, u)
-        this.group.position.y += Math.sin(u * Math.PI) * (f.leaving ? 1.2 : 0.8)
-        const flap = 0.78 + 0.22 * Math.abs(Math.sin(this.stateT * Math.PI * 7))
-        this.paper.scale.y = this.sprite.sizeM * flap
+        if (!sp.passes) {
+          this.group.position.y += Math.sin(u * Math.PI) * (f.leaving ? 1.2 : 0.8)
+          const flap = 0.78 + 0.22 * Math.abs(Math.sin(this.stateT * Math.PI * 7))
+          this.paper.scale.y = this.sprite.sizeM * flap
+        }
         if (u >= 1) {
           if (f.leaving) { this.inScene = false; this.group.visible = false; this.onLeft?.() }
           else if (this.species.hovers || this.species.soars) { this.group.position.copy(f.to); this.hovering = true; this.hoverT = 0; this.flight = null }

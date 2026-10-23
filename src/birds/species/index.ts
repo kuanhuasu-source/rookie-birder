@@ -23,14 +23,18 @@ import pittaGen from './generated/fairy-pitta.json'
 import eagleGen from './generated/crested-serpent-eagle.json'
 import grebeGen from './generated/little-grebe.json'
 import whistlingGen from './generated/taiwan-whistling-thrush.json'
+import trainGen from './generated/local-train.json'
+import tiltingGen from './generated/tilting-express.json'
+import classicGen from './generated/classic-express.json'
+import blueGen from './generated/blue-ordinary.json'
 
-interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number }
+interface GeneratedSprite { file: string; eyeUv: number[]; contentW: number; contentH: number; albedo: number; sizeM: number; aspect?: number }
 interface Generated { id: string; nameZh: string; nameEn: string; bodyLengthM: number; sprites: Record<'side' | '3q' | 'takeoff', GeneratedSprite> }
 
 /** 把產圖腳本的 JSON 轉成 SpriteDef，角度由視角決定。 */
 function sprites(g: Generated): SpeciesDef['sprites'] {
   const mk = (s: GeneratedSprite, view: SpriteDef['view'], angle: number): SpriteDef => ({
-    file: s.file, view, eyeUv: [s.eyeUv[0], s.eyeUv[1]], contentW: s.contentW, contentH: s.contentH, sizeM: s.sizeM, viewAngleDeg: angle, albedo: s.albedo,
+    file: s.file, view, eyeUv: [s.eyeUv[0], s.eyeUv[1]], contentW: s.contentW, contentH: s.contentH, sizeM: s.sizeM, aspect: s.aspect, viewAngleDeg: angle, albedo: s.albedo,
   })
   return { side: mk(g.sprites.side, 'side', 90), '3q': mk(g.sprites['3q'], '3q', 45), takeoff: mk(g.sprites.takeoff, 'takeoff', 90) }
 }
@@ -390,7 +394,32 @@ export const taiwanWhistlingThrush: SpeciesDef = {
 }
 
 export const SPECIES: SpeciesDef[] = [spottedDove, lightVentedBulbul, treeSparrow, swinhoesWhiteEye, blackBulbul, commonKingfisher, whiteWagtail, littleEgret, nightHeron, blackWingedStilt, blackWingedKite, commonMoorhen, plainPrinia, scalyBreastedMunia, goldenHeadedCisticola, longTailedShrike, taiwanBarbet, taiwanBlueMagpie, blackNapedMonarch, taiwanYuhina, fairyPitta, crestedSerpentEagle, littleGrebe, taiwanWhistlingThrush]
-export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries(SPECIES.map((s) => [s.id, s]))
+/** 隱藏關的「鳥」：火車。橫向通過，不進圖鑑與成就，只考準備與快門時機。 */
+function train(id: string, nameZh: string, nameEn: string, gen: Generated, speedMs: number, rarity: SpeciesDef['rarity'], hornHz: number): SpeciesDef {
+  return {
+    id, nameZh, nameEn,
+    bodyHeightM: 4.2, albedo: gen.sprites.side.albedo,
+    sprites: sprites(gen),
+    dwell: { min: 1, max: 1 }, interval: { min: 35, max: 60 },
+    stateDurations: { S1: { min: 1, max: 1 }, S2: { min: 1, max: 1 }, S3: { min: 1, max: 1 } },
+    transitions: { S1: { S4: 1 }, S2: { S4: 1 }, S3: { S1: 1 } },
+    flightSpeedMs: speedMs, hopDistM: 0,
+    call: { baseHz: hornHz, notes: 1, noteS: 0.9, gapS: 0.1 },
+    perchTags: ['rail'],
+    rarity,
+    skittish: 0, flushDistM: 0,
+    passes: { speedMs, spanM: 220 },
+  }
+}
+export const localTrain = train('local-train', '區間車', 'Commuter EMU', trainGen as Generated, 16, 'common', 330)
+export const tiltingExpress = train('tilting-express', '傾斜式快車', 'Tilting Express', tiltingGen as Generated, 33, 'rare', 440)
+export const classicExpress = train('classic-express', '橘白快車', 'Classic Express', classicGen as Generated, 24, 'common', 290)
+export const blueOrdinary = train('blue-ordinary', '藍皮普快', 'Blue Ordinary Train', blueGen as Generated, 15, 'common', 250)
+/** 不列在圖鑑裡、只在特別關卡出現的「鳥」。 */
+export const SPECIAL_SPECIES: SpeciesDef[] = [localTrain, tiltingExpress, classicExpress, blueOrdinary]
+export const TRAIN_IDS = new Set(SPECIAL_SPECIES.map((s) => s.id))
+
+export const SPECIES_BY_ID: Record<string, SpeciesDef> = Object.fromEntries([...SPECIES, ...SPECIAL_SPECIES].map((s) => [s.id, s]))
 
 /** 第一章公園草地的出現權重。 */
 export const PARK_WEIGHTS: Record<string, number> = {

@@ -33,7 +33,7 @@ import { BIRD_LAYER, THIN_LAYER, FX_LAYER, COMPANION_LAYER } from './render/mask
 import { loadQuality, storeQuality, type Quality } from './render/quality'
 import { Spawner } from './birds/spawner'
 import { spottedDove } from './birds/species/spotted-dove'
-import { SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
+import { SPECIES, SPECIAL_SPECIES, PARK_WEIGHTS, speciesName } from './birds/species'
 import { FIDGET_MS } from './birds/types'
 import { playCall, playBeep, unlockAudio } from './audio/call'
 import { coinsFor, starString } from './photo/score'
@@ -63,7 +63,7 @@ camera.layers.enable(FX_LAYER)
 camera.layers.enable(COMPANION_LAYER)
 
 // 鳥：每種一隻，同時只有一隻在場
-const birds: Bird[] = SPECIES.map((sp) => new Bird(sp))
+const birds: Bird[] = [...SPECIES, ...SPECIAL_SPECIES].map((sp) => new Bird(sp))
 // 群體的伴鳥：每種成群的鳥多幾隻備用
 const companions: Record<string, Bird[]> = {}
 for (const sp of SPECIES) if (sp.flock) companions[sp.id] = Array.from({ length: sp.flock.max - 1 }, () => { const b = new Bird(sp); b.markCompanion(); return b })

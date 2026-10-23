@@ -1,0 +1,44 @@
+{
+  "id": "tilting-express",
+  "nameZh": "傾斜式快車",
+  "nameEn": "Taiwanese tilting express electric train, 4 cars",
+  "bodyLengthM": 24.7,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.9752,
+        0.5419
+      ],
+      "contentW": 0.97,
+      "contentH": 0.247,
+      "albedo": 0.54,
+      "file": "birds/tilting-express-side.png",
+      "sizeM": 17.004,
+      "aspect": 1.5
+    },
+    "3q": {
+      "eyeUv": [
+        0.9752,
+        0.5419
+      ],
+      "contentW": 0.97,
+      "contentH": 0.247,
+      "albedo": 0.54,
+      "file": "birds/tilting-express-side.png",
+      "sizeM": 17.004,
+      "aspect": 1.5
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.9752,
+        0.5419
+      ],
+      "contentW": 0.97,
+      "contentH": 0.247,
+      "albedo": 0.54,
+      "file": "birds/tilting-express-side.png",
+      "sizeM": 17.004,
+      "aspect": 1.5
+    }
+  }
+}

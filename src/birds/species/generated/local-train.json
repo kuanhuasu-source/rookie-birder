@@ -1,0 +1,44 @@
+{
+  "id": "local-train",
+  "nameZh": "區間車",
+  "nameEn": "Commuter Train",
+  "bodyLengthM": 22.2,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.9721,
+        0.5354
+      ],
+      "contentW": 0.97,
+      "contentH": 0.275,
+      "albedo": 0.597,
+      "file": "birds/local-train-side.png",
+      "sizeM": 15.273,
+      "aspect": 1.5
+    },
+    "3q": {
+      "eyeUv": [
+        0.9721,
+        0.5354
+      ],
+      "contentW": 0.97,
+      "contentH": 0.275,
+      "albedo": 0.597,
+      "file": "birds/local-train-side.png",
+      "sizeM": 15.273,
+      "aspect": 1.5
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.9721,
+        0.5354
+      ],
+      "contentW": 0.97,
+      "contentH": 0.275,
+      "albedo": 0.597,
+      "file": "birds/local-train-side.png",
+      "sizeM": 15.273,
+      "aspect": 1.5
+    }
+  }
+}

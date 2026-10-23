@@ -6,6 +6,7 @@ import { buildStream } from './scenes/stream'
 import { buildWetland } from './scenes/wetland'
 import { buildField } from './scenes/field'
 import { buildForest } from './scenes/forest'
+import { buildRail } from './scenes/rail'
 import { THIN_LAYER } from '../render/mask'
 
 export interface World {
@@ -22,7 +23,7 @@ export interface World {
 }
 
 export function buildScene(id: SceneId): World {
-  const w = id === 'stream' ? buildStream() : id === 'wetland' ? buildWetland() : id === 'field' ? buildField() : id === 'forest' ? buildForest() : buildPark()
+  const w = id === 'stream' ? buildStream() : id === 'wetland' ? buildWetland() : id === 'field' ? buildField() : id === 'forest' ? buildForest() : id === 'rail' ? buildRail() : buildPark()
   // 燈光也有圖層：細長層單獨畫的時候也要被照到
   w.scene.traverse((o) => { if ((o as THREE.Light).isLight) o.layers.enable(THIN_LAYER) })
   return w

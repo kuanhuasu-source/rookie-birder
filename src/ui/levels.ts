@@ -41,10 +41,11 @@ export class LevelView {
       back.classList.add('hidden')
       title.textContent = '小白打鳥'
       sub.textContent = '選一關出發。完成前一關的任何一個任務就能解鎖下一關'
-      const chapters = [...new Set(LEVELS.map((l) => l.chapter))]
+      const visible = LEVELS.filter((l) => !l.hidden || isLevelUnlocked(l, done))
+      const chapters = [...new Set(visible.map((l) => l.chapter))]
       body.innerHTML = chapters.map((c) => `
         <div class="chapter"><div class="chapter-title">第 ${c} 章 ${CHAPTER_NAME[c] ?? ''}</div>
-        <div class="level-grid">${LEVELS.filter((l) => l.chapter === c).map((l) => {
+        <div class="level-grid">${visible.filter((l) => l.chapter === c).map((l) => {
           const unlocked = isLevelUnlocked(l, done)
           const qd = l.quests.filter((q) => done.has(q.id)).length
           return `<button class="level-card ${unlocked ? '' : 'locked'}" data-id="${l.id}" ${unlocked ? '' : 'disabled'}>

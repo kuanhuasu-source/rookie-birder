@@ -16,8 +16,10 @@ export interface SpriteDef {
   /** 內容在正方形畫布中的寬高佔比 */
   contentW: number
   contentH: number
-  /** 紙片在世界裡的邊長（m） */
+  /** 紙片在世界裡的高（m）；寬 = sizeM × aspect */
   sizeM: number
+  /** 貼圖寬高比，沒給就是正方形 */
+  aspect?: number
   /** 頭部方向與相機視線的夾角（度）：側面 90、四分之三 45、正面 0 */
   viewAngleDeg: number
   /** 這張貼圖不透明區域的平均線性亮度，曝光評分的目標 */
@@ -58,6 +60,8 @@ export interface SpeciesDef {
   soars?: { heightM: number; radiusM: number; periodS: number }
   /** 潛水型（小鸊鷉）：停在水面時週期性潛下去再浮上來 */
   dives?: { everyS: [number, number]; underS: [number, number] }
+  /** 橫向通過（火車）：沿停棲點方向直線等速穿過，從不停下 */
+  passes?: { speedMs: number; spanM: number }
   /** 會停的停棲點類型；沒給就什麼都停 */
   perchTags?: import('./Bird').PerchTag[]
   /** 群體：一次來幾隻（含領頭），在同一個停棲點上隔 spacingM 排開 */

@@ -1,0 +1,44 @@
+{
+  "id": "blue-ordinary",
+  "nameZh": "藍皮普快",
+  "nameEn": "nostalgic Taiwanese ordinary train: an orange diesel locomotive pulling 3 navy-blue passenger coaches",
+  "bodyLengthM": 43.7,
+  "sprites": {
+    "side": {
+      "eyeUv": [
+        0.9595,
+        0.5481
+      ],
+      "contentW": 0.971,
+      "contentH": 0.14,
+      "albedo": 0.159,
+      "file": "birds/blue-ordinary-side.png",
+      "sizeM": 30.0,
+      "aspect": 1.5
+    },
+    "3q": {
+      "eyeUv": [
+        0.9595,
+        0.5481
+      ],
+      "contentW": 0.971,
+      "contentH": 0.14,
+      "albedo": 0.159,
+      "file": "birds/blue-ordinary-side.png",
+      "sizeM": 30.0,
+      "aspect": 1.5
+    },
+    "takeoff": {
+      "eyeUv": [
+        0.9595,
+        0.5481
+      ],
+      "contentW": 0.971,
+      "contentH": 0.14,
+      "albedo": 0.159,
+      "file": "birds/blue-ordinary-side.png",
+      "sizeM": 30.0,
+      "aspect": 1.5
+    }
+  }
+}
