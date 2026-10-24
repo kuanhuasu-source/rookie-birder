@@ -111,12 +111,18 @@ export function buildRail(): World {
     scene.add(m)
   }
 
+  // 對面的小山坡（遠機位站的地方）
+  const knoll = new THREE.Mesh(new THREE.SphereGeometry(30, 12, 8), makeToon('#9aa870'))
+  knoll.position.set(0, -22, 104)
+  scene.add(knoll)
+
   const perches: Perch[] = [
     { position: new THREE.Vector3(0, 1.42, TRACK_Z), along: new THREE.Vector3(1, 0, 0), range: 0, tags: ['rail'] },
   ]
   const hides: HideDef[] = [
     { id: 'platform', name: '月台末端', description: '離軌道三十公尺，正側面；車頭會從左邊或右邊進來，先聽汽笛', position: [0, 1.65, -15], yawDeg: 0 },
-    { id: 'field', name: '田埂遠望', description: '退到六十公尺外，整列車都裝得下，背景是遠山', position: [0, 1.5, 15], yawDeg: 0 },
+    { id: 'field', name: '田埂遠望', description: '退到六十公尺外，焦距退到底時短的列車裝得下，背景是遠山', position: [0, 1.5, 15], yawDeg: 0 },
+    { id: 'slope', name: '對面山坡', description: '一百五十公尺外的小山坡，略高於路堤；焦距退到底，整列車連同田野都裝得下', position: [0, 9, 100], yawDeg: 0 },
     { id: 'bridge', name: '天橋上', description: '六公尺高俯視軌道，車頂與架空線都看得到', position: [-16, 7.9, -30], yawDeg: 40 },
   ]
   return { scene, sun, hemi, perches, hides, dispose: () => disposeScene(scene) }
