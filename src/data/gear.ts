@@ -82,3 +82,31 @@ export function maxApertureAt(lens: LensDef, focalMm: number): number {
   const stop = stopMin + (stopMax - stopMin) * tc
   return Math.sqrt(Math.pow(2, stop))
 }
+
+/** 裝備頁上的一行規格說明。 */
+export function gearSpec(kind: 'lens' | 'body' | 'support' | 'accessory', id: string): string {
+  if (kind === 'lens') {
+    const l = lensById(id)
+    const af = l.afSpeed <= 0.3 ? '極快' : l.afSpeed <= 0.4 ? '快' : l.afSpeed <= 0.7 ? '中等' : '慢'
+    const prime = l.focalMax === l.focalMin
+    return `${prime ? '定焦' : '變焦'} · 最近 ${l.minFocusM} m · 防手震 ${l.isStops ? `${l.isStops} 格` : '無'} · 對焦${af} · 全開${l.softWideOpenPx >= 1 ? '偏鬆' : l.softWideOpenPx >= 0.5 ? '尚可' : '銳利'}`
+  }
+  if (kind === 'body') {
+    const b = bodyById(id)
+    const af = ['手動對焦', 'AF-S 單點', 'AF-C 追焦', '鳥眼 AF'][b.afTier] ?? ''
+    return `${b.sensor === 'FF' ? '全幅' : 'APS-C ×1.6'} · ISO 上限 ${b.isoMax} · 噪點 ${b.kNoise} · ${b.fps} fps · 緩衝 ${b.bufferFrames} 張 · ${af}${b.blackout ? ' · 連拍黑屏' : ''}${b.evfLagFrames ? ` · 延遲 ${b.evfLagFrames} 幀` : ''}`
+  }
+  if (kind === 'support') {
+    const s = supportById(id)
+    return `手震 ×${s.shakeMul}${s.panDamping ? ` · 雲台阻尼 ${s.panDamping}` : ''}${s.panMaxRadS ? ` · 轉速上限 ${s.panMaxRadS} rad/s` : ''}`
+  }
+  const a = accessoryById(id)
+  const parts: string[] = []
+  if (a.focalMul) parts.push(`焦距 ×${a.focalMul}`)
+  if (a.apertureStops) parts.push(`光圈少 ${a.apertureStops} 格`)
+  if (a.afSpeedMul) parts.push(`對焦慢 ${a.afSpeedMul} 倍`)
+  if (a.softPx) parts.push(`柔化 +${a.softPx} px`)
+  if (a.alertMul) parts.push(`警戒 ×${a.alertMul}`)
+  if (a.intervalMul) parts.push(`鳥更常來 ×${a.intervalMul}`)
+  return parts.join(' · ')
+}

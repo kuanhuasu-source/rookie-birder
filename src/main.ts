@@ -258,8 +258,8 @@ function setLighting(): void {
 }
 
 function setGear(lens: string, body: string, support: string): void {
-  const n = new CameraState(lens, body, support)
-  cam.lens = n.lens; cam.body = n.body; cam.support = n.support; cam.settings = n.settings
+  // 保留快門、ISO、對焦距離與焦距（夾進新鏡頭範圍），不要每次換器材就把設定歸零
+  cam.swapGear(lens, body, support)
   cam.setAccessories(save.equipped.accessories)
   shooting = new Shooting(cam.body, shooting.cardLeft)
   rig.shake.sigma = effectiveSigma(cam.support.shakeMul, cam.lens.isStops)
@@ -312,7 +312,7 @@ function handleKey(code: string): void {
 const input = new Input(canvas, {
   onLook: (dx, dy) => { if (!overlayOpen()) rig.addMouse(dx, dy, renderer.domElement.clientHeight) },
   onFocusRing: (d) => { if (allowed('focus')) cam.focusBy(d) },
-  onZoom: (steps) => { if (allowed('zoom')) cam.zoom(steps) },
+  onZoom: (steps) => { if (!allowed('zoom')) return; if (cam.isPrime) { if (toastT <= 0) { toast = `${cam.lens.name} 是定焦鏡，滾輪不會變焦；要改構圖請換機位或裝增距鏡`; toastT = 2.5 }; return }; cam.zoom(steps) },
   onShutter: (down) => { shutterDown = down && !overview && allowed('shoot'); unlockAudio() },
   onHalfPress: (down) => { halfPress = down },
   onKey: handleKey,

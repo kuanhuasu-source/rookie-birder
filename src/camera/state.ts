@@ -32,6 +32,29 @@ export class CameraState {
     this.clampAperture()
   }
 
+  /**
+   * 換器材但保留玩家的設定：快門與 ISO 不動（ISO 夾到新機身上限），
+   * 焦距夾進新鏡頭的範圍（定焦就是那個焦距），光圈不能大於新鏡頭在該焦距的最大光圈，
+   * 對焦距離夾到新鏡頭的最近對焦距離以上。
+   */
+  swapGear(lensId: string, bodyId: string, supportId: string): void {
+    this.lens = lensById(lensId)
+    this.body = bodyById(bodyId)
+    this.support = supportById(supportId)
+    const s = this.settings
+    s.focalMm = Math.min(this.lens.focalMax, Math.max(this.lens.focalMin, s.focalMm))
+    s.iso = Math.min(this.body.isoMax, s.iso)
+    s.focusM = Math.min(FOCUS_INFINITY_M, Math.max(this.lens.minFocusM, s.focusM))
+    this.clampAperture()
+  }
+
+  get isPrime(): boolean { return this.lens.focalMax === this.lens.focalMin }
+
+  /** 35mm 等效焦距（含增距鏡）：APS-C 要乘裁切係數。 */
+  get equivalentFocalMm(): number {
+    return this.optics.focalMm * (36 / this.sensor.widthMm)
+  }
+
   setAccessories(ids: string[]): void {
     this.accessories = ids.map((id) => accessoryById(id))
   }

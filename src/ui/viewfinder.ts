@@ -111,7 +111,8 @@ export class Viewfinder {
 
   update(cam: CameraState, extra: HudExtra): void {
     const s = cam.settings
-    this.focal.textContent = `${Math.round(cam.optics.focalMm)}mm`
+    const eq = Math.round(cam.equivalentFocalMm)
+    this.focal.textContent = `${Math.round(cam.optics.focalMm)}mm${eq !== Math.round(cam.optics.focalMm) ? ` (等效 ${eq})` : ''}`
     const fn = cam.optics.fNumber
     this.aperture.textContent = `f/${fn < 10 ? fn.toFixed(1).replace(/\.0$/, '') : Math.round(fn)}`
     this.shutter.textContent = formatShutter(s.shutterS)

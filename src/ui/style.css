@@ -220,11 +220,14 @@ body.touch .album-photo img { max-height: 42vh; }
 .r-legendary { border-color: #d4a017 !important; background: #fff8dc; }
 .gear-lists { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .gear-title { font-size: 22px; margin-bottom: 6px; }
-.gear-item { font-family: var(--font); display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; width: 100%; text-align: left; font-size: 15px; padding: 6px 8px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
-.gear-img { grid-row: 1 / span 2; width: 56px; height: 56px; object-fit: contain; }
+.gear-item { font-family: var(--font); display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto auto; column-gap: 8px; align-items: center; width: 100%; text-align: left; font-size: 15px; padding: 6px 8px; margin-bottom: 6px; background: #fff; border: 2px solid var(--pencil); border-radius: 6px; color: var(--pencil); cursor: pointer; }
+.gear-img { grid-row: 1 / span 3; width: 56px; height: 56px; object-fit: contain; }
 .gear-item.locked .gear-img { filter: brightness(0) opacity(0.25); }
 .gear-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gear-tag { font-size: 12px; opacity: 0.8; }
+.gear-spec { font-size: 12px; line-height: 1.3; opacity: 0.85; white-space: normal; }
+.gear-item.equipped .gear-spec { color: #fff; }
+.gear-note { font-size: 14px; opacity: 0.75; margin: 6px 0 10px; }
 .gacha-img { width: 160px; height: 160px; object-fit: contain; display: block; margin: 0 auto 6px; }
 .gear-item.locked { opacity: 0.5; cursor: default; background: #f1ebdc; }
 .gear-item.equipped { background: var(--blue); color: #fff; }

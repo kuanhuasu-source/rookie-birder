@@ -1,4 +1,5 @@
 import { gear } from '../data/gear'
+import { gearSpec } from '../data/gear'
 import type { SaveData } from '../progress/save'
 import { pull, pool, rarityOf, RARITY_LABEL, PULL_COST, PITY_RARE_AT, type GearKind } from '../progress/gacha'
 
@@ -21,6 +22,7 @@ export class GearView {
           <div class="gacha-note">${PITY_RARE_AT} 次內必出稀有以上 · 重複會退代幣</div>
           <div class="gacha-result hidden"></div>
         </div>
+        <div class="gear-note"></div>
         <div class="gear-lists"></div>
       </div>
     `
@@ -53,6 +55,8 @@ export class GearView {
       { kind: 'support', title: '支撐', items: gear.supports },
       { kind: 'accessory', title: '配件（可多選）', items: gear.accessories },
     ]
+    const note = this.root.querySelector('.gear-note') as HTMLElement | null
+    if (note) note.textContent = '換器材時快門、ISO、對焦距離都會保留；焦距與光圈夾進新鏡頭的範圍。定焦鏡滾輪不變焦。APS-C 機身的視角等於焦距 ×1.6。增距鏡只能裝一個。'
     const poolIds = new Set(pool().map((i) => i.id))
     lists.innerHTML = kinds.map((k) => `
       <div class="gear-col"><div class="gear-title">${k.title}</div>${k.items.map((it) => {
@@ -60,7 +64,7 @@ export class GearView {
         const eq = k.kind === 'accessory' ? save.equipped.accessories.includes(it.id) : save.equipped[k.kind] === it.id
         const r = rarityOf(it.id)
         const name = owned ? it.name : (poolIds.has(it.id) ? '？？？' : it.name)
-        return `<button class="gear-item r-${r} ${owned ? 'owned' : 'locked'} ${eq ? 'equipped' : ''}" data-kind="${k.kind}" data-id="${it.id}" ${owned ? '' : 'disabled'}><img class="gear-img" src="${gearImage(it.id)}" alt=""><span class="gear-name">${name}</span><span class="gear-tag">${eq ? (k.kind === 'accessory' ? '已裝（點一下卸下）' : '使用中') : owned ? (k.kind === 'accessory' ? '裝上' : '換上') : RARITY_LABEL[r]}</span></button>`
+        return `<button class="gear-item r-${r} ${owned ? 'owned' : 'locked'} ${eq ? 'equipped' : ''}" data-kind="${k.kind}" data-id="${it.id}" ${owned ? '' : 'disabled'}><img class="gear-img" src="${gearImage(it.id)}" alt=""><span class="gear-name">${name}</span><span class="gear-spec">${owned ? gearSpec(k.kind, it.id) : ''}</span><span class="gear-tag">${eq ? (k.kind === 'accessory' ? '已裝（點一下卸下）' : '使用中') : owned ? (k.kind === 'accessory' ? '裝上' : '換上') : RARITY_LABEL[r]}</span></button>`
       }).join('')}</div>`).join('')
     for (const b of lists.querySelectorAll<HTMLButtonElement>('.gear-item.owned')) {
       b.addEventListener('click', () => {
